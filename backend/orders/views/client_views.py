@@ -357,24 +357,32 @@ def my_orders_view(request):
 
 
 # ============================================================
-# DOWNLOAD ORDER FILE VIEW
+# DOWNLOAD ORDER FILE VIEW (FIXED)
 # ============================================================
 @login_required
 def download_order_file_view(request, order_id):
+    """
+    FIX: Redirects directly to the Cloudinary URL instead of streaming
+    through the server. This bypasses the 401 Unauthorized error and 
+    saves Render server bandwidth. ?fl_attachment=true forces download.
+    """
     if not str(order_id).isdigit():
         return HttpResponseForbidden('Invalid order ID.')
+        
     order = get_object_or_404(Order, id=int(order_id))
     user = request.user
+    
     if _user_role(user) not in ('admin', 'agent') and order.client != user:
         return HttpResponseForbidden('You do not have permission to download this file.')
+        
     if not order.file:
         messages.error(request, 'File not found.')
         return redirect('dashboard')
-    import mimetypes
-    content_type, _ = mimetypes.guess_type(order.file_name)
-    response = FileResponse(order.file.open('rb'), content_type=content_type or 'application/octet-stream')
-    response['Content-Disposition'] = f'attachment; filename="{order.file_name}"'
-    return response
+        
+    # 🛡️ Redirect directly to Cloudinary URL to avoid 401 errors
+    download_url = f"{order.file.url}?fl_attachment=true"
+    
+    return redirect(download_url)
 
 
 # ============================================================
