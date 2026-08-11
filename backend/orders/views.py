@@ -744,20 +744,28 @@ def update_order_status_view(request, order_id):
 
 @login_required
 def download_order_file_view(request, order_id):
+    """
+    FIX: Uses redirect instead of FileResponse with .open('rb') to bypass 
+    Cloudinary 401 Unauthorized errors and save Render server bandwidth.
+    """
     if not str(order_id).isdigit():
         return HttpResponseForbidden('Invalid order ID.')
+    
     order = get_object_or_404(Order, id=int(order_id))
     user = request.user
+    
     if _user_role(user) not in ('admin', 'agent') and order.client != user:
         return HttpResponseForbidden('You do not have permission to download this file.')
+        
     if not order.file:
         messages.error(request, 'File not found.')
         return redirect('dashboard')
-    content_type, _ = mimetypes.guess_type(order.file_name)
-    response = FileResponse(order.file.open('rb'), content_type=content_type or 'application/octet-stream')
-    response['Content-Disposition'] = f'attachment; filename="{order.file_name}"'
-    response['X-Content-Type-Options'] = 'nosniff'
-    return response
+        
+    # Redirect directly to Cloudinary URL
+    # Adding ?fl_attachment=true forces the browser to download instead of preview
+    download_url = f"{order.file.url}?fl_attachment=true"
+    
+    return redirect(download_url)
 
 def _get_tracked_orders(order_id=None, email=None):
     qs = Order.objects.select_related('station', 'client', 'delivery_zone')
