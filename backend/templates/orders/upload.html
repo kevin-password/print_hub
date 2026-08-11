@@ -40,8 +40,6 @@
 
     <input type="hidden" id="order_type" name="order_type" value="document">
     <input type="hidden" id="paper_size" name="paper_size" value="A4">
-    <!-- 🆕 This hidden input will be set by JavaScript -->
-    <input type="hidden" id="copies" name="copies" value="6">
     <input type="hidden" id="calculated_price" name="calculated_price" value="0">
 
     <div class="bg-slate-800 border border-slate-700 rounded p-6 sm:p-8">
@@ -93,65 +91,82 @@
 
             <!-- PASSPORT MODE -->
             <div id="passport-mode" style="display:none;">
-                <!-- Removed the dropdown for passport photo selection -->
-                <!-- Always defaulting to 6 copies -->
                 <input type="hidden" id="passport-copies" value="6">
                 
-                <div class="mb-4">
-                    <label class="block text-sm font-bold text-gray-300 mb-2">Photo Size</label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <label class="flex items-center justify-center p-3 border-2 border-slate-600 rounded cursor-pointer hover:border-indigo-500 has-[:checked]:bg-indigo-500/10 has-[:checked]:border-indigo-500">
-                            <input type="radio" name="passport_size" value="2x2" class="hidden" onchange="document.getElementById('paper_size').value='2x2'; calculatePrice();">
-                            <span class="text-sm font-semibold text-gray-300">2x2 (Visa)</span>
-                        </label>
-                        <label class="flex items-center justify-center p-3 border-2 border-slate-600 rounded cursor-pointer hover:border-indigo-500 has-[:checked]:bg-indigo-500/10 has-[:checked]:border-indigo-500">
-                            <input type="radio" name="passport_size" value="4x6" checked class="hidden" onchange="document.getElementById('paper_size').value='4x6'; calculatePrice();">
-                            <span class="text-sm font-semibold text-gray-300">4x6 (Standard)</span>
-                        </label>
-                    </div>
+                <!-- NEW: Upload vs Camera Toggle -->
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <button type="button" id="btn-passport-upload" onclick="switchPassportInput('upload')" class="passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-indigo-600 text-white transition-all">📁 Upload Photo</button>
+                    <button type="button" id="btn-passport-camera" onclick="switchPassportInput('camera')" class="passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-slate-700 text-gray-400 transition-all">📸 Take Photo</button>
                 </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-bold text-gray-300 mb-2">Background Color</label>
-                    <div class="grid grid-cols-4 gap-2">
-                        <button type="button" onclick="setBgColor('#ffffff', this)" class="bg-white h-10 rounded border-2 border-indigo-400 ring-2 ring-indigo-300" title="White"></button>
-                        <button type="button" onclick="setBgColor('#3b82f6', this)" class="bg-blue-500 h-10 rounded border-2 border-slate-600" title="Blue"></button>
-                        <button type="button" onclick="setBgColor('#ef4444', this)" class="bg-red-500 h-10 rounded border-2 border-slate-600" title="Red"></button>
-                        <button type="button" onclick="setBgColor('#cccccc', this)" class="bg-gray-400 h-10 rounded border-2 border-slate-600" title="Gray"></button>
-                    </div>
-                    <input type="hidden" id="bg-color" value="#ffffff">
+
+                <!-- NEW: Upload Container -->
+                <div id="passport-upload-container" class="mb-4">
+                    <label id="passport-dropzone" class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-600 rounded cursor-pointer bg-slate-700/30 hover:bg-slate-700/50 transition-all">
+                        <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        <span class="text-sm text-gray-300 font-semibold mt-1" id="passport-file-name">Click to upload existing passport photo</span>
+                        <input type="file" class="hidden" id="passport-file-input" accept="image/*" onchange="handlePassportUpload(this)">
+                    </label>
+                    <img id="passport-upload-preview" class="hidden max-h-40 mx-auto mt-3 rounded border border-slate-600">
                 </div>
-                <div class="relative bg-black rounded-lg overflow-hidden mb-4" style="min-height:300px;">
-                    <video id="passport-video" autoplay playsinline class="w-full" style="display:none;"></video>
-                    <canvas id="passport-canvas" class="w-full" style="display:none;"></canvas>
-                    <div id="passport-placeholder" class="flex items-center justify-center h-64 text-gray-500">
-                        <div class="text-center">
-                            <svg class="w-16 h-16 mx-auto mb-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><circle cx="12" cy="13" r="3" stroke="currentColor" stroke-width="1.5"></circle></svg>
-                            <p>Click "Start Camera" to begin</p>
+
+                <!-- EXISTING: Camera Container (Wrapped to toggle) -->
+                <div id="passport-camera-container" style="display:none;">
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold text-gray-300 mb-2">Photo Size</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="flex items-center justify-center p-3 border-2 border-slate-600 rounded cursor-pointer hover:border-indigo-500 has-[:checked]:bg-indigo-500/10 has-[:checked]:border-indigo-500">
+                                <input type="radio" name="passport_size" value="2x2" class="hidden" onchange="document.getElementById('paper_size').value='2x2'; calculatePrice();">
+                                <span class="text-sm font-semibold text-gray-300">2x2 (Visa)</span>
+                            </label>
+                            <label class="flex items-center justify-center p-3 border-2 border-slate-600 rounded cursor-pointer hover:border-indigo-500 has-[:checked]:bg-indigo-500/10 has-[:checked]:border-indigo-500">
+                                <input type="radio" name="passport_size" value="4x6" checked class="hidden" onchange="document.getElementById('paper_size').value='4x6'; calculatePrice();">
+                                <span class="text-sm font-semibold text-gray-300">4x6 (Standard)</span>
+                            </label>
                         </div>
                     </div>
-                    <div id="face-guide" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:200px; height:250px; border:3px dashed #22c55e; border-radius:50%; pointer-events:none;"></div>
-                </div>
-                <div id="passport-analysis" class="bg-slate-700/50 border border-slate-600 rounded-lg p-3 mb-4" style="display:none;">
-                    <p class="text-xs font-bold text-gray-400 uppercase mb-2">Photo Analysis (Server)</p>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div class="flex justify-between"><span class="text-gray-400">Face Position</span><span id="check-position" class="text-yellow-400">-</span></div>
-                        <div class="flex justify-between"><span class="text-gray-400">Brightness</span><span id="check-brightness" class="text-yellow-400">-</span></div>
-                        <div class="flex justify-between"><span class="text-gray-400">Expression</span><span id="check-expression" class="text-yellow-400">-</span></div>
-                        <div class="flex justify-between"><span class="text-gray-400">Eyes Visible</span><span id="check-eyes" class="text-yellow-400">-</span></div>
-                        <div class="flex justify-between"><span class="text-gray-400">Background</span><span id="check-background" class="text-yellow-400">-</span></div>
-                        <div class="flex justify-between"><span class="text-gray-400">Overall</span><span id="check-overall" class="text-yellow-400">-</span></div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold text-gray-300 mb-2">Background Color</label>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button type="button" onclick="setBgColor('#ffffff', this)" class="bg-white h-10 rounded border-2 border-indigo-400 ring-2 ring-indigo-300" title="White"></button>
+                            <button type="button" onclick="setBgColor('#3b82f6', this)" class="bg-blue-500 h-10 rounded border-2 border-slate-600" title="Blue"></button>
+                            <button type="button" onclick="setBgColor('#ef4444', this)" class="bg-red-500 h-10 rounded border-2 border-slate-600" title="Red"></button>
+                            <button type="button" onclick="setBgColor('#cccccc', this)" class="bg-gray-400 h-10 rounded border-2 border-slate-600" title="Gray"></button>
+                        </div>
+                        <input type="hidden" id="bg-color" value="#ffffff">
                     </div>
+                    <div class="relative bg-black rounded-lg overflow-hidden mb-4" style="min-height:300px;">
+                        <video id="passport-video" autoplay playsinline class="w-full" style="display:none;"></video>
+                        <canvas id="passport-canvas" class="w-full" style="display:none;"></canvas>
+                        <div id="passport-placeholder" class="flex items-center justify-center h-64 text-gray-500">
+                            <div class="text-center">
+                                <svg class="w-16 h-16 mx-auto mb-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><circle cx="12" cy="13" r="3" stroke="currentColor" stroke-width="1.5"></circle></svg>
+                                <p>Click "Start Camera" to begin</p>
+                            </div>
+                        </div>
+                        <div id="face-guide" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:200px; height:250px; border:3px dashed #22c55e; border-radius:50%; pointer-events:none;"></div>
+                    </div>
+                    <div id="passport-analysis" class="bg-slate-700/50 border border-slate-600 rounded-lg p-3 mb-4" style="display:none;">
+                        <p class="text-xs font-bold text-gray-400 uppercase mb-2">Photo Analysis (Server)</p>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="flex justify-between"><span class="text-gray-400">Face Position</span><span id="check-position" class="text-yellow-400">-</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">Brightness</span><span id="check-brightness" class="text-yellow-400">-</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">Expression</span><span id="check-expression" class="text-yellow-400">-</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">Eyes Visible</span><span id="check-eyes" class="text-yellow-400">-</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">Background</span><span id="check-background" class="text-yellow-400">-</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">Overall</span><span id="check-overall" class="text-yellow-400">-</span></div>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 mb-4">
+                        <button type="button" id="start-passport-camera" onclick="startPassportCamera()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded transition-all">Start Camera</button>
+                        <button type="button" id="capture-passport" onclick="capturePassport()" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded transition-all" style="display:none;">Capture & Process</button>
+                    </div>
+                    <div id="passport-processing" class="text-center py-4 hidden">
+                        <div class="animate-spin w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+                        <p class="text-gray-400 text-sm">Processing photo...</p>
+                    </div>
+                    <button type="button" id="retake-passport" onclick="retakePassport()" class="w-full bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 rounded transition-all mb-4" style="display:none;">Retake</button>
+                    <input type="hidden" id="passport-data" name="passport_data">
                 </div>
-                <div class="flex gap-3 mb-4">
-                    <button type="button" id="start-passport-camera" onclick="startPassportCamera()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded transition-all">Start Camera</button>
-                    <button type="button" id="capture-passport" onclick="capturePassport()" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded transition-all" style="display:none;">Capture & Process</button>
-                </div>
-                <div id="passport-processing" class="text-center py-4 hidden">
-                    <div class="animate-spin w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto mb-2"></div>
-                    <p class="text-gray-400 text-sm">Processing photo...</p>
-                </div>
-                <button type="button" id="retake-passport" onclick="retakePassport()" class="w-full bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 rounded transition-all mb-4" style="display:none;">Retake</button>
-                <input type="hidden" id="passport-data" name="passport_data">
             </div>
 
             <!-- SCANNER MODE -->
@@ -190,9 +205,22 @@
 
             <!-- COMMON FIELDS -->
             <div id="common-fields">
+                
+                <!-- NEW: COPIES STEPPER -->
+                <div class="mb-6 bg-slate-700/30 rounded p-5 border border-slate-600">
+                    <label class="block text-sm font-bold text-gray-300 mb-3 text-center">Number of Copies</label>
+                    <div class="flex items-center justify-center space-x-6">
+                        <button type="button" onclick="adjustCopies(-1)" class="w-12 h-12 flex items-center justify-center rounded-full bg-slate-600 text-white hover:bg-red-500/80 transition-colors text-2xl font-bold shadow-lg">-</button>
+                        <input type="number" id="copies" name="copies" value="1" min="1" max="100" 
+                               class="w-24 text-center bg-slate-800 text-white text-3xl font-extrabold border-2 border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 price-trigger" onchange="calculatePrice()">
+                        <button type="button" onclick="adjustCopies(1)" class="w-12 h-12 flex items-center justify-center rounded-full bg-slate-600 text-white hover:bg-green-500/80 transition-colors text-2xl font-bold shadow-lg">+</button>
+                    </div>
+                    <p class="text-xs text-gray-500 text-center mt-3">Adjust the number of physical copies you need.</p>
+                </div>
+
                 <div class="mb-6" id="page-count-container">
                     <label for="page_count" class="block text-sm font-bold text-gray-300 mb-2"><span id="page-count-label">Number of Pages</span></label>
-                    <input type="number" class="w-full bg-slate-700 border border-slate-600 rounded px-4 py-3 text-white" id="page_count" name="page_count" min="1" value="1" required>
+                    <input type="number" class="w-full bg-slate-700 border border-slate-600 rounded px-4 py-3 text-white price-trigger" id="page_count" name="page_count" min="1" value="1" required>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -318,7 +346,7 @@ const BASE_PRICE_BW = {{ base_price_bw|default:200 }},
 let currentMode='document', bgColor='#ffffff', passportStream=null, analysisTimer=null, scannerStream=null, scannedPages=[];
 const infoTexts={
     document:'<strong>Upload your file</strong> - PDF, Word, PowerPoint, or images', 
-    passport:'<strong>Take a passport photo</strong> - 6 photos (1,000 UGX each)', 
+    passport:'<strong>Take or Upload a passport photo</strong>', 
     scanner:'<strong>Scan documents</strong> - Server-powered enhancement'
 };
 
@@ -327,9 +355,8 @@ const infoTexts={
 // ============================================================
 function syncPassportValues() {
     if (currentMode === 'passport') {
-        let copies = 6; // Always 6 copies since dropdown is removed
+        let copies = parseInt(document.getElementById('copies').value) || 6;
         document.getElementById('page_count').value = copies;
-        document.getElementById('copies').value = copies;
         document.getElementById('passport-copies').value = copies;
     }
 }
@@ -343,6 +370,68 @@ function setBgColor(c,btn){
     });
     btn.classList.remove('border-slate-600');
     btn.classList.add('border-indigo-400','ring-2','ring-indigo-300');
+}
+
+// ============================================================
+// NEW: Passport Upload vs Camera Toggle
+// ============================================================
+function switchPassportInput(mode) {
+    const uploadContainer = document.getElementById('passport-upload-container');
+    const cameraContainer = document.getElementById('passport-camera-container');
+    const btnUpload = document.getElementById('btn-passport-upload');
+    const btnCamera = document.getElementById('btn-passport-camera');
+
+    stopPassportCamera(); // Always stop camera when switching
+
+    if (mode === 'upload') {
+        uploadContainer.style.display = 'block';
+        cameraContainer.style.display = 'none';
+        btnUpload.className = "passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-indigo-600 text-white transition-all";
+        btnCamera.className = "passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-slate-700 text-gray-400 transition-all";
+    } else {
+        uploadContainer.style.display = 'none';
+        cameraContainer.style.display = 'block';
+        btnCamera.className = "passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-indigo-600 text-white transition-all";
+        btnUpload.className = "passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-slate-700 text-gray-400 transition-all";
+    }
+}
+
+function handlePassportUpload(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        document.getElementById('passport-file-name').innerText = file.name;
+        
+        // Preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('passport-upload-preview').src = e.target.result;
+            document.getElementById('passport-upload-preview').classList.remove('hidden');
+        }
+        reader.readAsDataURL(file);
+
+        // Sync to the main hidden file input so Django receives it
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        document.getElementById('file').files = dt.files;
+        
+        // Clear any camera base64 data
+        document.getElementById('passport-data').value = ''; 
+        
+        calculatePrice();
+    }
+}
+
+// ============================================================
+// NEW: Copies Stepper
+// ============================================================
+function adjustCopies(amount) {
+    const input = document.getElementById('copies');
+    let val = parseInt(input.value) || 1;
+    val += amount;
+    if (val < 1) val = 1;
+    if (val > 100) val = 100;
+    input.value = val;
+    calculatePrice();
 }
 
 function switchMode(mode){
@@ -374,10 +463,13 @@ function switchMode(mode){
         document.getElementById('double-sided-option').style.opacity='0.4';
         document.getElementById('double-sided-option').style.pointerEvents='none';
         
-        syncPassportValues();
+        document.getElementById('copies').value = 6; // Default to 6 for passport
         
         document.getElementById('page-count-label').innerText='Number of Photos';
         document.getElementById('page-count-container').style.display='none';
+        
+        switchPassportInput('upload'); // Default to upload mode
+        
     } else if(mode==='scanner'){
         document.getElementById('paper_size').value='A4';
         document.getElementById('binding-option').style.opacity='1';
@@ -388,6 +480,9 @@ function switchMode(mode){
         document.getElementById('page_count').step=1;
         document.getElementById('page-count-label').innerText='Number of Pages';
         document.getElementById('page-count-container').style.display='block';
+        
+        document.getElementById('copies').value = 1; // Default to 1 for scanner
+        
     } else {
         document.getElementById('paper_size').value='A4';
         document.getElementById('binding-option').style.opacity='1';
@@ -398,6 +493,8 @@ function switchMode(mode){
         document.getElementById('page_count').step=1;
         document.getElementById('page-count-label').innerText='Number of Pages';
         document.getElementById('page-count-container').style.display='block';
+        
+        document.getElementById('copies').value = 1; // Default to 1 for document
     }
     calculatePrice();
 }
@@ -409,6 +506,12 @@ document.getElementById('file').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
     
+    // Skip UI updates if it was triggered by passport upload or scanner finish
+    if (currentMode === 'passport' || currentMode === 'scanner') {
+        calculatePrice();
+        return;
+    }
+
     document.getElementById('dropzone-text').innerText = file.name;
     document.getElementById('dropzone-text').classList.add('font-bold');
     const ext = file.name.split('.').pop().toLowerCase();
@@ -684,8 +787,8 @@ function createPassportFile(dataUrl){
         const dt=new DataTransfer();
         dt.items.add(f);
         document.getElementById('file').files=dt.files;
-        document.getElementById('dropzone-text').innerText='passport-photo.jpg';
-        document.getElementById('dropzone-text').classList.add('font-bold')
+        document.getElementById('passport-file-name').innerText='passport-photo.jpg (Captured)';
+        document.getElementById('passport-upload-preview').classList.add('hidden');
     })
 }
 
@@ -818,6 +921,7 @@ document.querySelectorAll('.delivery-trigger').forEach(t => t.addEventListener('
 
 function calculatePrice() {
     let p = parseInt(pageCountInput.value) || 0;
+    let copies = parseInt(document.getElementById('copies').value) || 1;
     let c = document.querySelector('input[name="is_color"]:checked')?.value === 'True';
     let d = document.getElementById('double_sided').checked;
     let b = document.getElementById('binding').value;
@@ -829,33 +933,19 @@ function calculatePrice() {
         if (o) df = parseInt(o.getAttribute('data-fee')) || 0;
     }
 
-    if (currentMode === 'document') {
+    if (currentMode === 'document' || currentMode === 'scanner') {
         let effectivePages = d ? Math.ceil(p / 2) : p;
         let pricePerPage = BASE_PRICE_BW + (c ? COLOR_SURCHARGE : 0);
-        t = effectivePages * pricePerPage;
-        if (b === 'spiral') t += SPIRAL_FEE;
+        t = effectivePages * pricePerPage * copies;
+        if (b === 'spiral') t += SPIRAL_FEE * copies;
     } else if (currentMode === 'passport') {
-        let copies = 6; // Always 6 copies
-        
-        document.getElementById('page_count').value = copies;
-        document.getElementById('copies').value = copies;
-        document.getElementById('passport-copies').value = copies;
-        
-        // ✅ SHOW ESTIMATED PRICE on frontend (for display only)
         t = copies * PASSPORT_PRICE_PER_COPY;
-        console.log('📸 Passport estimated price:', t);
-    } else if (currentMode === 'scanner') {
-        let effectivePages = d ? Math.ceil(p / 2) : p;
-        let pricePerPage = BASE_PRICE_BW + (c ? COLOR_SURCHARGE : 0);
-        t = effectivePages * pricePerPage;
-        if (b === 'spiral') t += SPIRAL_FEE;
     }
     
     t += df;
     
     if (discountApplied) t = Math.max(0, t - discountValue);
     
-    // ✅ Show price on frontend
     calculatedPriceInput.value = t;
     livePrice.innerText = t.toLocaleString() + ' UGX';
     submitPrice.innerText = t.toLocaleString() + ' UGX';
@@ -883,14 +973,14 @@ applyDiscountBtn.addEventListener('click', function() {
 
 function calculateRawTotal() {
     let p = parseInt(pageCountInput.value) || 0;
+    let copies = parseInt(document.getElementById('copies').value) || 1;
     let c = document.querySelector('input[name="is_color"]:checked')?.value === 'True';
     let d = document.getElementById('double_sided').checked;
     let b = document.getElementById('binding').value;
     if (currentMode === 'passport') {
-        // ✅ Return 0 so model calculates
         return 0;
     }
-    return Math.ceil(p / (d ? 2 : 1)) * (BASE_PRICE_BW + (c ? COLOR_SURCHARGE : 0)) + (b === 'spiral' ? SPIRAL_FEE : 0);
+    return (Math.ceil(p / (d ? 2 : 1)) * (BASE_PRICE_BW + (c ? COLOR_SURCHARGE : 0)) + (b === 'spiral' ? SPIRAL_FEE : 0)) * copies;
 }
 
 function showDiscountMsg(m, t) {
@@ -904,42 +994,18 @@ priceTriggers.forEach(t => t.addEventListener('change', calculatePrice));
 calculatePrice();
 
 // ============================================================
-// 🆕 FORM SUBMIT - FORCES THE CORRECT COPIES VALUE
+// FORM SUBMIT
 // ============================================================
 document.getElementById('upload-form').addEventListener('submit', function(e) {
-    console.log('🚀 FORM SUBMITTED');
-    console.log('  Current Mode:', currentMode);
-    
-    // Force correct order_type based on mode
     if (currentMode === 'passport') {
         document.getElementById('order_type').value = 'passport';
-        console.log('  📸 Forcing order_type = passport');
-        
-        // 🆕 FORCE the copies value to 6
-        var copiesVal = 6;
-        console.log('  📸 Passport copies fixed to:', copiesVal);
-        
-        // ✅ Update ALL relevant fields
-        document.getElementById('page_count').value = copiesVal;
-        document.getElementById('copies').value = copiesVal;
-        document.getElementById('passport-copies').value = copiesVal;
-        document.querySelector('input[name="copies"]').value = copiesVal;  // Force the hidden input
         document.querySelector('input[name="is_color"][value="True"]').checked = true;
-        
-        // ✅ Send 0 to backend so model calculates the final price
         document.getElementById('calculated_price').value = '0';
-        console.log('  💰 Passport: Sending copies=' + copiesVal + ', price=0 to backend');
-        
     } else if (currentMode === 'scanner') {
         document.getElementById('order_type').value = 'scanned';
-        document.getElementById('copies').value = '1';
     } else {
         document.getElementById('order_type').value = 'document';
-        document.getElementById('copies').value = '1';
     }
-    
-    console.log('  ✅ Final order_type:', document.getElementById('order_type').value);
-    console.log('  ✅ Final copies:', document.getElementById('copies').value);
 });
 </script>
 {% endblock %}
