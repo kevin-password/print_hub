@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'payments',
     'finances',
     'notifications',
-    'whatsapp_bot',
+    #'whatsapp_bot',
     'referrals',
     'assistant',
     
