@@ -59,7 +59,7 @@ def dashboard_view(request):
 
 
 # ============================================================
-# UPLOAD VIEW - WITH FILE PROCESSOR DISABLED
+# UPLOAD VIEW - WITH MULTIPLE FILE SUPPORT
 # ============================================================
 @transaction.atomic
 def upload_view(request):
@@ -72,7 +72,9 @@ def upload_view(request):
             messages.info(request, 'Please log in or create an account to complete your upload.')
             return redirect('/auth/login/?next=/upload/')
             
-        file = request.FILES.get('file')
+        # 🆕 GET MULTIPLE FILES INSTEAD OF ONE
+        files = request.FILES.getlist('files')
+        
         page_count = request.POST.get('page_count', 1)
         is_color = request.POST.get('is_color', 'False') == 'True'
         is_double_sided = request.POST.get('is_double_sided') == 'on'
@@ -100,23 +102,20 @@ def upload_view(request):
             order_type = 'scanned'
             logger.info(f"📄 FORCED order_type to 'scanned' because scanner_data exists")
         
-        if not file and (passport_data or scanner_data):
+        # Handle passport/scanner single file generation
+        if not files and (passport_data or scanner_data):
             try:
                 if passport_data:
                     format, imgstr = passport_data.split(';base64,')
                     ext = format.split('/')[-1]
-                    file = ContentFile(
-                        base64.b64decode(imgstr),
-                        name=f'passport_photo.{ext}'
-                    )
+                    file = ContentFile(base64.b64decode(imgstr), name=f'passport_photo.{ext}')
+                    files = [file]
             except Exception as e:
                 logger.error(f"Error processing camera/scanner data: {e}")
                 upload_error = 'Error processing captured image.'
                 
-        if not file:
-            upload_error = 'Please select a file.'
-        else:
-            upload_error = validate_upload_file(file)
+        if not files:
+            upload_error = 'Please select at least one file.'
             
         if upload_error:
             return render(request, 'orders/upload.html', {
@@ -128,8 +127,6 @@ def upload_view(request):
         # ============================================================
         # 🚫 FILE PROCESSING - SKIPPED (FileProcessor is disabled)
         # ============================================================
-        processing_result = None
-        # FileProcessor is disabled - skipping file processing
         logger.info("📄 File processing skipped (FileProcessor disabled)")
             
         station = None
@@ -141,7 +138,7 @@ def upload_view(request):
             delivery_zone = DeliveryZone.objects.filter(id=int(delivery_zone_id)).first()
             
         try:
-            page_count_int = int(page_count)
+            total_page_count_int = int(page_count)
             copies_int = int(copies)
             
             # ============================================================
@@ -152,18 +149,15 @@ def upload_view(request):
                     copies_int = 6
                     logger.warning(f"📸 FORCED passport copies from {copies} to 6")
             
-            if page_count_int < 1:
-                raise ValueError("Page count must be at least 1")
+            if total_page_count_int < 1:
+                total_page_count_int = len(files) # Fallback
             if copies_int < 1:
                 copies_int = 1
                 
             order_type_display = dict(Order.ORDER_TYPE_CHOICES).get(order_type, 'Document Print')
             paper_size_display = dict(Order.PAPER_SIZE_CHOICES).get(paper_size, 'A4')
             
-            extra_notes = f"Order Type: {order_type_display}\n"
-            extra_notes += f"Paper Size: {paper_size_display}\n"
-            extra_notes += f"Copies: {copies_int}"
-            
+            extra_notes = f"Order Type: {order_type_display}\nPaper Size: {paper_size_display}\nCopies: {copies_int}"
             if notes:
                 notes = f"{notes}\n{extra_notes}"
             else:
@@ -176,62 +170,87 @@ def upload_view(request):
                 is_color = True
                 binding = 'none'
                 is_double_sided = False
-                page_count_int = copies_int
+                total_page_count_int = copies_int
                 calculated_price = '0'
-                logger.info(f"📸 PASSPORT ORDER: copies={copies_int}, page_count={page_count_int}")
+                logger.info(f"📸 PASSPORT ORDER: copies={copies_int}, page_count={total_page_count_int}")
                 
             elif order_type == 'scanned':
                 binding = 'none'
                 is_double_sided = False
-                page_count_int = copies_int if copies_int > page_count_int else page_count_int
+                total_page_count_int = copies_int if copies_int > total_page_count_int else total_page_count_int
 
-            order = Order(
-                client=request.user,
-                station=station,
-                file=file,
-                file_name=file.name,
-                page_count=page_count_int,
-                is_color=is_color,
-                is_double_sided=is_double_sided,
-                binding=binding,
-                delivery_type=delivery_type,
-                delivery_zone=delivery_zone,
-                notes=notes,
-                status='pending',
-                order_type=order_type,
-                paper_size=paper_size,
-                copies=copies_int,
-            )
+            created_orders = []
             
-            # Skip file metadata processing (FileProcessor disabled)
-            # order.file_metadata, order.file_preview, order.file_thumbnail remain empty
+            # 🆕 Distribute pages evenly among files
+            pages_per_file = max(1, total_page_count_int // len(files))
             
-            # Only set total_price if calculated_price is NOT 0
-            if calculated_price and calculated_price != '0':
-                try:
-                    js_price = Decimal(str(calculated_price))
-                    if js_price > 0:
-                        order.total_price = js_price
-                except Exception:
-                    pass
-                    
-            order.save()
-            
-            logger.info(f"✅ ORDER SAVED: order #{order.id}, copies={order.copies}, page_count={order.page_count}, total_price={order.total_price}")
-            
-            try:
-                send_order_confirmation_email(order)
-            except Exception as e:
-                logger.error(f"Failed to send confirmation email for order #{order.id}: {e}", exc_info=True)
+            for idx, current_file in enumerate(files):
+                # Validate each file
+                if hasattr(current_file, 'name'): 
+                    err = validate_upload_file(current_file)
+                    if err:
+                        upload_error = f"Error in {current_file.name}: {err}"
+                        return render(request, 'orders/upload.html', {
+                            'stations': stations, 'delivery_zones': delivery_zones, 'upload_error': upload_error,
+                        })
                 
-            messages.success(request, f'Order #{order.id} submitted! Total: {order.total_price:,.0f} UGX')
+                # Calculate price per file
+                file_calculated_price = '0'
+                if calculated_price and calculated_price != '0':
+                    try:
+                        # Split the total calculated price evenly across files
+                        js_price = Decimal(str(calculated_price)) / len(files)
+                        if js_price > 0:
+                            file_calculated_price = str(js_price)
+                    except Exception:
+                        pass
+
+                file_notes = f"{notes}\n(File {idx+1} of {len(files)})" if len(files) > 1 else notes
+
+                order = Order(
+                    client=request.user,
+                    station=station,
+                    file=current_file,
+                    file_name=current_file.name if hasattr(current_file, 'name') else f'file_{idx+1}',
+                    page_count=pages_per_file, # Distribute pages
+                    is_color=is_color,
+                    is_double_sided=is_double_sided,
+                    binding=binding,
+                    delivery_type=delivery_type,
+                    delivery_zone=delivery_zone,
+                    notes=file_notes,
+                    status='pending',
+                    order_type=order_type,
+                    paper_size=paper_size,
+                    copies=copies_int,
+                )
+                
+                if file_calculated_price != '0':
+                    try:
+                        order.total_price = Decimal(file_calculated_price)
+                    except Exception:
+                        pass
+                        
+                order.save()
+                created_orders.append(order)
+                logger.info(f"✅ ORDER SAVED: order #{order.id}, file={order.file_name}")
+                
+                try:
+                    send_order_confirmation_email(order)
+                except Exception as e:
+                    logger.error(f"Failed to send confirmation email for order #{order.id}: {e}", exc_info=True)
             
-            # Redirect based on order type
-            if order.order_type == 'passport':
-                return redirect('passport_receipt', order_id=order.id)
+            # Success Message & Redirect
+            if len(created_orders) == 1:
+                messages.success(request, f'Order #{created_orders[0].id} submitted! Total: {created_orders[0].total_price:,.0f} UGX')
+                if created_orders[0].order_type == 'passport':
+                    return redirect('passport_receipt', order_id=created_orders[0].id)
+                else:
+                    return redirect('order_receipt', order_id=created_orders[0].id)
             else:
-                return redirect('order_receipt', order_id=order.id)
-            
+                messages.success(request, f'🎉 Successfully placed {len(created_orders)} separate orders! Check your dashboard.')
+                return redirect('dashboard')
+                
         except ValueError as e:
             upload_error = f'Invalid input: {str(e)}'
         except Exception as e:
