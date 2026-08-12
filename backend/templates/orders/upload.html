@@ -855,7 +855,19 @@ pageCountInput.addEventListener('input', calculatePrice);
 priceTriggers.forEach(t => t.addEventListener('change', calculatePrice));
 calculatePrice();
 
+// ============================================================
+// 🛠️ FIX: FORM SUBMIT (Re-attaches files to DOM)
+// ============================================================
 document.getElementById('upload-form').addEventListener('submit', function(e) {
+    // Re-attach files from JS memory back to the DOM input before submitting!
+    if (selectedFiles.length > 0) {
+        const dt = new DataTransfer();
+        selectedFiles.forEach(file => dt.items.add(file));
+        const fileInput = document.getElementById('file-input');
+        fileInput.files = dt.files;
+        fileInput.name = 'files'; // Ensure backend receives it as 'files'
+    }
+
     if (currentMode === 'passport') {
         document.getElementById('order_type').value = 'passport';
         document.querySelector('input[name="is_color"][value="True"]').checked = true;
@@ -864,6 +876,12 @@ document.getElementById('upload-form').addEventListener('submit', function(e) {
         document.getElementById('order_type').value = 'scanned';
     } else {
         document.getElementById('order_type').value = 'document';
+    }
+    
+    // Final safety check to prevent empty submissions
+    if (currentMode === 'document' && selectedFiles.length === 0) {
+        e.preventDefault();
+        alert('Please select at least one document to upload.');
     }
 });
 </script>
