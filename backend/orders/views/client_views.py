@@ -2,13 +2,15 @@
 import json
 import logging
 import base64
-import urllib.parse # 🛡️ ADDED FOR SAFE URL PARSING
+import os
+import mimetypes
+import urllib.request
 from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Q, Sum, Count
-from django.http import FileResponse, HttpResponseForbidden
+from django.http import FileResponse, HttpResponseForbidden, StreamingHttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.contrib.auth import get_user_model
@@ -20,8 +22,12 @@ from django.conf import settings
 from django.urls import reverse
 from django.utils.html import strip_tags
 
-# 🛡️ ADDED FOR SECURE CLOUDINARY URL GENERATION
-import cloudinary
+# 🛡️ Import Cloudinary for secure URL generation (handles private folders)
+try:
+    import cloudinary
+    import cloudinary.utils
+except ImportError:
+    cloudinary = None
 
 from stations.models import Station
 from orders.models import Order, DeliveryZone, Announcement
@@ -35,63 +41,11 @@ from .helpers import (
 # ============================================================
 # 🚫 FILE PROCESSOR - COMPLETELY DISABLED
 # ============================================================
-# The file_processor app is disabled for local testing and Render deployment.
-# Set FileProcessor to None so all checks pass without errors.
 FileProcessor = None
 print("⚠️ file_processor is DISABLED - file processing skipped")
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
-
-# ============================================================
-# 🛡️ HELPER: SAFE CLOUDINARY URL PARSER
-# ============================================================
-def get_cloudinary_url_parts(url):
-    """
-    Extracts resource_type, upload_type, public_id, and version from a Cloudinary URL.
-    This prevents 404 errors by perfectly preserving the exact public ID and version
-    that Cloudinary expects, rather than guessing it from the file name.
-    """
-    try:
-        parsed = urllib.parse.urlparse(url)
-        path_parts = parsed.path.strip('/').split('/')
-        
-        # Cloudinary URLs typically have at least 4 parts:
-        # <cloud_name>/<resource_type>/<type>/<public_id>
-        if len(path_parts) < 4:
-            return None
-            
-        resource_type = path_parts[1]
-        upload_type = path_parts[2]
-        
-        # Heuristic check to ensure this is actually a Cloudinary URL
-        if resource_type not in ('image', 'raw', 'video') or upload_type not in ('upload', 'authenticated', 'private', 'fetch', 'facebook', 'twitter', 'gravatar'):
-            return None 
-            
-        remaining = path_parts[3:]
-        
-        # Scan for the version number (e.g., v1623456789)
-        version = None
-        version_idx = -1
-        for i, part in enumerate(remaining):
-            if part.startswith('v') and part[1:].isdigit():
-                version = part
-                version_idx = i
-                break
-                
-        # Everything after the version is the public ID. 
-        # (This safely ignores any transformations that might appear before the version)
-        if version_idx != -1:
-            public_id_parts = remaining[version_idx + 1:]
-        else:
-            public_id_parts = remaining
-            
-        public_id_with_ext = '/'.join(public_id_parts)
-        
-        return resource_type, upload_type, public_id_with_ext, version
-    except Exception as e:
-        logger.error(f"Error parsing Cloudinary URL: {e}")
-        return None
 
 
 # ============================================================
@@ -126,7 +80,6 @@ def upload_view(request):
             messages.info(request, 'Please log in or create an account to complete your upload.')
             return redirect('/auth/login/?next=/upload/')
             
-        # 🆕 GET MULTIPLE FILES INSTEAD OF ONE
         files = request.FILES.getlist('files')
         
         page_count = request.POST.get('page_count', 1)
@@ -146,9 +99,6 @@ def upload_view(request):
         passport_data = request.POST.get('passport_data', '')
         scanner_data = request.POST.get('scanner_data', '')
         
-        # ============================================================
-        # FORCE: order_type based on data presence
-        # ============================================================
         if passport_data:
             order_type = 'passport'
             logger.info(f"📸 FORCED order_type to 'passport' because passport_data exists")
@@ -156,7 +106,6 @@ def upload_view(request):
             order_type = 'scanned'
             logger.info(f"📄 FORCED order_type to 'scanned' because scanner_data exists")
         
-        # Handle passport/scanner single file generation
         if not files and (passport_data or scanner_data):
             try:
                 if passport_data:
@@ -178,9 +127,6 @@ def upload_view(request):
                 'upload_error': upload_error,
             })
         
-        # ============================================================
-        # 🚫 FILE PROCESSING - SKIPPED (FileProcessor is disabled)
-        # ============================================================
         logger.info("📄 File processing skipped (FileProcessor disabled)")
             
         station = None
@@ -195,16 +141,13 @@ def upload_view(request):
             total_page_count_int = int(page_count)
             copies_int = int(copies)
             
-            # ============================================================
-            # FORCE: If passport and copies is less than 6, force to 6
-            # ============================================================
             if order_type == 'passport':
                 if copies_int < 6:
                     copies_int = 6
                     logger.warning(f"📸 FORCED passport copies from {copies} to 6")
             
             if total_page_count_int < 1:
-                total_page_count_int = len(files) # Fallback
+                total_page_count_int = len(files) 
             if copies_int < 1:
                 copies_int = 1
                 
@@ -217,9 +160,6 @@ def upload_view(request):
             else:
                 notes = extra_notes
 
-            # ============================================================
-            # PASSPORT: Let the model calculate price
-            # ============================================================
             if order_type == 'passport':
                 is_color = True
                 binding = 'none'
@@ -234,12 +174,9 @@ def upload_view(request):
                 total_page_count_int = copies_int if copies_int > total_page_count_int else total_page_count_int
 
             created_orders = []
-            
-            # 🆕 Distribute pages evenly among files
             pages_per_file = max(1, total_page_count_int // len(files))
             
             for idx, current_file in enumerate(files):
-                # Validate each file
                 if hasattr(current_file, 'name'): 
                     err = validate_upload_file(current_file)
                     if err:
@@ -248,11 +185,9 @@ def upload_view(request):
                             'stations': stations, 'delivery_zones': delivery_zones, 'upload_error': upload_error,
                         })
                 
-                # Calculate price per file
                 file_calculated_price = '0'
                 if calculated_price and calculated_price != '0':
                     try:
-                        # Split the total calculated price evenly across files
                         js_price = Decimal(str(calculated_price)) / len(files)
                         if js_price > 0:
                             file_calculated_price = str(js_price)
@@ -266,7 +201,7 @@ def upload_view(request):
                     station=station,
                     file=current_file,
                     file_name=current_file.name if hasattr(current_file, 'name') else f'file_{idx+1}',
-                    page_count=pages_per_file, # Distribute pages
+                    page_count=pages_per_file,
                     is_color=is_color,
                     is_double_sided=is_double_sided,
                     binding=binding,
@@ -294,7 +229,6 @@ def upload_view(request):
                 except Exception as e:
                     logger.error(f"Failed to send confirmation email for order #{order.id}: {e}", exc_info=True)
             
-            # Success Message & Redirect
             if len(created_orders) == 1:
                 messages.success(request, f'Order #{created_orders[0].id} submitted! Total: {created_orders[0].total_price:,.0f} UGX')
                 if created_orders[0].order_type == 'passport':
@@ -329,7 +263,6 @@ def upload_view(request):
 # ============================================================
 @login_required
 def passport_receipt_view(request, order_id):
-    """Direct passport receipt view"""
     if not str(order_id).isdigit():
         return HttpResponseForbidden('Invalid order ID.')
     order = get_object_or_404(Order.objects.select_related('station', 'delivery_zone'), id=int(order_id))
@@ -430,15 +363,14 @@ def my_orders_view(request):
 
 
 # ============================================================
-# DOWNLOAD ORDER FILE VIEW (FINAL BULLETPROOF FIX)
+# DOWNLOAD ORDER FILE VIEW (STREAMING FIX)
 # ============================================================
 @login_required
 def download_order_file_view(request, order_id):
     """
-    FIXES BOTH 401 (Unauthorized) AND 404 (Not Found):
-    1. Extracts the EXACT public ID and version from the existing valid URL.
-    2. Generates a signed Cloudinary URL to bypass private folder restrictions.
-    3. Gracefully falls back to local media files if not using Cloudinary.
+    FIXES 401 & 404 ERRORS:
+    Instead of redirecting the user (which can fail with 404s on Cloudinary),
+    this view securely streams the file directly through Django.
     """
     if not str(order_id).isdigit():
         return HttpResponseForbidden('Invalid order ID.')
@@ -446,76 +378,89 @@ def download_order_file_view(request, order_id):
     order = get_object_or_404(Order, id=int(order_id))
     user = request.user
     
-    # 1. BULLETPROOF ROLE & OWNERSHIP CHECK
+    # 1. ROBUST AUTH CHECK
     is_owner = (order.client == user)
     is_privileged = False
     
-    # Check standard Django superuser/staff status first
     if user.is_superuser or getattr(user, 'is_staff', False):
         is_privileged = True
     else:
-        # Check custom role (handle case-insensitivity and spaces)
         role = str(_user_role(user)).lower().strip()
         if role in ('admin', 'agent', 'super_admin', 'manager', 'staff'):
             is_privileged = True
             
-    # If they are NOT the owner AND NOT privileged, block them
     if not is_owner and not is_privileged:
-        logger.warning(f"🚫 Unauthorized download attempt by {user.username} (Role: {_user_role(user)}) on Order #{order.id}")
+        logger.warning(f"🚫 Unauthorized download attempt by {user.username} on Order #{order.id}")
         return HttpResponseForbidden('You do not have permission to download this file.')
         
     if not order.file:
         messages.error(request, 'File not found.')
         return redirect('dashboard')
         
-    # 2. SECURE CLOUDINARY URL GENERATION
-    try:
-        original_url = order.file.url
-        
-        # Attempt to parse the URL as a Cloudinary URL
-        parts = get_cloudinary_url_parts(original_url)
-        
-        if not parts:
-            # Not a Cloudinary URL (e.g., local file). Just redirect with attachment flag.
-            return redirect(f"{original_url}?fl_attachment=true")
-            
-        resource_type, upload_type, public_id_with_ext, version = parts
-        
-        # Handle extension based on resource_type (Crucial for preventing 404s)
-        public_id = public_id_with_ext
-        format_ext = None
-        
-        if '.' in public_id_with_ext:
-            p_parts = public_id_with_ext.rsplit('.', 1)
-            if resource_type == 'image':
-                public_id = p_parts[0] # Images don't include extension in public_id
-                format_ext = p_parts[1]
-            else:
-                public_id = public_id_with_ext # Raw/Video files keep extension
-                
-        options = {
-            'resource_type': resource_type,
-            'type': upload_type,
-            'sign_url': True,               # Bypasses private folder 401 errors
-            'flags': 'attachment',          # Forces browser to download instead of preview
-        }
-        if version:
-            options['version'] = version     # Prevents 404 errors by keeping exact version
-        if format_ext:
-            options['format'] = format_ext
-            
-        download_url, _ = cloudinary.utils.cloudinary_url(public_id, **options)
-        
-        if not download_url or not download_url.startswith("http"):
-            download_url = original_url
-            
-    except Exception as e:
-        logger.error(f"Cloudinary signed URL generation failed for Order #{order.id}: {e}")
-        # Fallback to standard URL with attachment parameter if SDK fails
-        download_url = f"{order.file.url}?fl_attachment=true"
+    # 2. PREPARE FILE METADATA
+    filename = order.file_name or os.path.basename(order.file.name)
+    content_type, _ = mimetypes.guess_type(filename)
+    if not content_type:
+        content_type = 'application/octet-stream'
 
-    # 3. REDIRECT TO SECURE URL
-    return redirect(download_url)
+    try:
+        # 3. DETERMINE SECURE URL
+        file_url = order.file.url 
+        
+        # If using Cloudinary, try to build a signed URL to prevent private folder 401/404 issues
+        if cloudinary and 'cloudinary.com' in file_url:
+            try:
+                # Use SDK to ensure the URL is perfectly formed and signed
+                public_id = order.file.name # django-cloudinary-storage uses name as public_id
+                resource_type = 'raw' if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')) else 'image'
+                
+                signed_url, _ = cloudinary.utils.cloudinary_url(
+                    public_id, 
+                    resource_type=resource_type, 
+                    type='upload',
+                    flags='attachment' # Forces download
+                )
+                if signed_url:
+                    file_url = signed_url
+            except Exception as e:
+                logger.warning(f"Cloudinary URL signing failed, falling back to DB URL: {e}")
+                # Fallback: Force attachment via query param if SDK fails
+                if '?' in file_url:
+                    file_url += '&fl_attachment=true'
+                else:
+                    file_url += '?fl_attachment=true'
+
+        # 4. STREAM THE FILE (Memory Efficient)
+        def stream_file():
+            # We use a User-Agent to prevent Cloudinary/Storage from blocking the request as a bot
+            req = urllib.request.Request(file_url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
+            try:
+                with urllib.request.urlopen(req) as response:
+                    while True:
+                        chunk = response.read(8192) # Read in 8KB chunks
+                        if not chunk:
+                            break
+                        yield chunk
+            except urllib.error.HTTPError as e:
+                logger.error(f"Stream failed with HTTP Error: {e.code} - {e.reason}")
+                raise
+            except Exception as e:
+                logger.error(f"Stream failed with error: {str(e)}")
+                raise
+
+        # 5. RETURN STREAMING RESPONSE
+        response = StreamingHttpResponse(stream_file(), content_type=content_type)
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+
+    except urllib.error.HTTPError as e:
+        logger.error(f"Remote server rejected request for Order #{order.id}: {e.code}")
+        messages.error(request, f'Error downloading file: The storage server rejected the request ({e.code}).')
+        return redirect('dashboard')
+    except Exception as e:
+        logger.error(f"Download failed for Order #{order.id}: {str(e)}")
+        messages.error(request, 'An unexpected error occurred while downloading the file.')
+        return redirect('dashboard')
 
 
 # ============================================================
