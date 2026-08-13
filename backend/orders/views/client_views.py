@@ -96,12 +96,15 @@ def upload_view(request):
         passport_data = request.POST.get('passport_data', '')
         scanner_data = request.POST.get('scanner_data', '')
         
-        if passport_data:
-            order_type = 'passport'
-            logger.info(f"📸 FORCED order_type to 'passport' because passport_data exists")
-        elif scanner_data:
-            order_type = 'scanned'
-            logger.info(f"📄 FORCED order_type to 'scanned' because scanner_data exists")
+        # 🛡️ FIX: Only force passport/scanned if NO regular files were uploaded!
+        # This prevents "ghost data" from previous tests overriding document uploads.
+        if not files:
+            if passport_data:
+                order_type = 'passport'
+                logger.info(f"📸 FORCED order_type to 'passport' because passport_data exists")
+            elif scanner_data:
+                order_type = 'scanned'
+                logger.info(f"📄 FORCED order_type to 'scanned' because scanner_data exists")
         
         if not files and (passport_data or scanner_data):
             try:
@@ -537,6 +540,19 @@ def home_view(request):
     return render(request, 'home.html', {
         'total_orders': total_orders,
         'total_stations': stations
+    })
+
+
+# ============================================================
+# LIVE BOARD VIEW (FIXED WITH ANNOUNCEMENT)
+# ============================================================
+@login_required
+def live_board_view(request):
+    # 🛠️ FIX: Pass the active announcement to the template so it actually shows up
+    active_announcement = Announcement.get_active()
+    
+    return render(request, 'orders/live_board.html', {
+        'announcement': active_announcement
     })
 
 
