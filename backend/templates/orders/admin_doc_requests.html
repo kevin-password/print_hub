@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Document Requests - Admin - PrintHub{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+    <div class="flex flex-wrap justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-white">📝 Document Creation Requests</h1>
+        <a href="{% url 'create_document_request' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold">
+            + New Request
+        </a>
+    </div>
+
+    <!-- Status Filter -->
+    <div class="flex flex-wrap gap-2 mb-6">
+        <a href="{% url 'admin_doc_requests' %}" class="px-3 py-1 rounded text-sm {% if not current_filter %}bg-blue-600 text-white{% else %}bg-slate-700 text-gray-300{% endif %}">All</a>
+        {% for value, label in status_choices %}
+            <a href="?status={{ value }}" class="px-3 py-1 rounded text-sm {% if current_filter == value %}bg-blue-600 text-white{% else %}bg-slate-700 text-gray-300{% endif %}">{{ label }}</a>
+        {% endfor %}
+    </div>
+
+    <!-- Requests List -->
+    {% if requests %}
+    <div class="space-y-4">
+        {% for req in requests %}
+        <div class="bg-slate-800 border border-slate-700 rounded-lg p-4 hover:border-slate-600 transition-colors">
+            <div class="flex flex-wrap justify-between items-start gap-4">
+                <div class="flex-1">
+                    <a href="{% url 'doc_request_detail' req.id %}" class="text-white font-bold hover:text-blue-400">{{ req.title }}</a>
+                    <p class="text-gray-400 text-sm mt-1">
+                        {{ req.get_document_type_display }} • {{ req.word_count_target }} words • 
+                        Client: {{ req.client.username }}
+                    </p>
+                    <p class="text-gray-500 text-xs mt-1">Submitted: {{ req.created_at|date:"M d, Y H:i" }}</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-700 {{ req.get_status_color }}">
+                        {{ req.get_status_display }}
+                    </span>
+                    {% if not req.assigned_team_member %}
+                    <form method="post" class="inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="request_id" value="{{ req.id }}">
+                        <button type="submit" name="action" value="assign_to_me" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1 rounded">
+                            Assign to Me
+                        </button>
+                    </form>
+                    {% else %}
+                    <span class="text-gray-500 text-xs">👤 {{ req.assigned_team_member.username }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center text-gray-500 py-12">No document requests found.</div>
+    {% endif %}
+</div>
+{% endblock %}
