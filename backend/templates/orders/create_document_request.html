@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Request Document Creation - PrintHub{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-white mb-2">📝 Document Creation Service</h1>
+        <p class="text-gray-400">Get professional documents created using AI + Human expertise. Free research assistance included!</p>
+    </div>
+
+    <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 sm:p-8">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Document Type -->
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-gray-300 mb-2">Document Type *</label>
+                <select name="document_type" required class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white">
+                    <option value="" disabled selected>Select document type...</option>
+                    {% for value, label in document_types %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Title -->
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-gray-300 mb-2">Document Title *</label>
+                <input type="text" name="title" required maxlength="300" 
+                       class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white"
+                       placeholder="e.g., Research Proposal on Climate Change">
+            </div>
+
+            <!-- Description -->
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-gray-300 mb-2">What do you need? *</label>
+                <textarea name="description" rows="4" required 
+                          class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white"
+                          placeholder="Describe what you want the document to cover..."></textarea>
+            </div>
+
+            <!-- Instructions -->
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-gray-300 mb-2">Specific Instructions *</label>
+                <textarea name="instructions" rows="4" required 
+                          class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white"
+                          placeholder="Formatting requirements, style guides, specific sections needed, references..."></textarea>
+            </div>
+
+            <!-- Word Count -->
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-gray-300 mb-2">Target Word Count</label>
+                <input type="number" name="word_count_target" min="100" max="50000" value="1000"
+                       class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white">
+            </div>
+
+            <!-- Deadline -->
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-gray-300 mb-2">Deadline *</label>
+                <input type="datetime-local" name="deadline" required 
+                       class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white">
+            </div>
+
+            <!-- Source Files -->
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-gray-300 mb-2">Source Materials (Optional)</label>
+                <div class="border-2 border-dashed border-slate-600 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+                    <svg class="w-10 h-10 mx-auto text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                    <p class="text-gray-400 text-sm">Upload reference documents (PDFs, images, etc.)</p>
+                    <p class="text-gray-500 text-xs mt-1">These will be analyzed with NotebookLM for research</p>
+                    <input type="file" name="source_files" multiple accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" 
+                           class="mt-3 w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:cursor-pointer hover:file:bg-blue-700">
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div class="mb-6 bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                <h3 class="text-blue-400 font-bold text-sm mb-2">ℹ️ How it works:</h3>
+                <ol class="text-gray-300 text-sm space-y-1 list-decimal list-inside">
+                    <li>Submit your request with instructions</li>
+                    <li>Our team researches your sources using NotebookLM</li>
+                    <li>AI generates a professional draft</li>
+                    <li>Formatted to LaTeX and shared via Overleaf</li>
+                    <li>You review and request revisions (up to 3 free)</li>
+                    <li>Final approval → Print and deliver!</li>
+                </ol>
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-lg transition-all text-lg">
+                📤 Submit Document Request
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
