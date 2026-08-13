@@ -3,14 +3,12 @@ import json
 import logging
 import base64
 import os
-import mimetypes
-import urllib.request
 from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Q, Sum, Count
-from django.http import FileResponse, HttpResponseForbidden, StreamingHttpResponse
+from django.http import FileResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.contrib.auth import get_user_model
@@ -22,10 +20,9 @@ from django.conf import settings
 from django.urls import reverse
 from django.utils.html import strip_tags
 
-# 🛡️ Import Cloudinary for secure URL generation (handles private folders)
+# 🛡️ Import Cloudinary for secure URL generation
 try:
     import cloudinary
-    import cloudinary.utils
 except ImportError:
     cloudinary = None
 
@@ -363,14 +360,15 @@ def my_orders_view(request):
 
 
 # ============================================================
-# DOWNLOAD ORDER FILE VIEW (STREAMING FIX)
+# DOWNLOAD ORDER FILE VIEW (FINAL FIX: REDIRECT + SDK)
 # ============================================================
 @login_required
 def download_order_file_view(request, order_id):
     """
-    FIXES 401 & 404 ERRORS:
-    Instead of redirecting the user (which can fail with 404s on Cloudinary),
-    this view securely streams the file directly through Django.
+    FIXES 403 (Auth), 404 (Cloudinary), and 502 (Render Timeout):
+    1. Checks Role accurately (Case-insensitive).
+    2. Uses Cloudinary SDK to build a mathematically perfect URL (fixes 404s).
+    3. Uses a fast Redirect instead of Streaming (fixes 502 Bad Gateway).
     """
     if not str(order_id).isdigit():
         return HttpResponseForbidden('Invalid order ID.')
@@ -397,70 +395,39 @@ def download_order_file_view(request, order_id):
         messages.error(request, 'File not found.')
         return redirect('dashboard')
         
-    # 2. PREPARE FILE METADATA
-    filename = order.file_name or os.path.basename(order.file.name)
-    content_type, _ = mimetypes.guess_type(filename)
-    if not content_type:
-        content_type = 'application/octet-stream'
-
+    # 2. GET DOWNLOAD URL
     try:
-        # 3. DETERMINE SECURE URL
-        file_url = order.file.url 
-        
-        # If using Cloudinary, try to build a signed URL to prevent private folder 401/404 issues
-        if cloudinary and 'cloudinary.com' in file_url:
-            try:
-                # Use SDK to ensure the URL is perfectly formed and signed
-                public_id = order.file.name # django-cloudinary-storage uses name as public_id
-                resource_type = 'raw' if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')) else 'image'
+        if 'cloudinary.com' in str(order.file.url) and cloudinary:
+            # Get the exact public ID stored by django-cloudinary-storage
+            public_id = order.file.name 
+            
+            # Cloudinary strips extensions for images, but keeps them for raw files (PDFs, Docs)
+            resource_type = "raw"
+            if public_id.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.gif')):
+                resource_type = "image"
                 
-                signed_url, _ = cloudinary.utils.cloudinary_url(
-                    public_id, 
-                    resource_type=resource_type, 
-                    type='upload',
-                    flags='attachment' # Forces download
-                )
-                if signed_url:
-                    file_url = signed_url
-            except Exception as e:
-                logger.warning(f"Cloudinary URL signing failed, falling back to DB URL: {e}")
-                # Fallback: Force attachment via query param if SDK fails
-                if '?' in file_url:
-                    file_url += '&fl_attachment=true'
-                else:
-                    file_url += '?fl_attachment=true'
-
-        # 4. STREAM THE FILE (Memory Efficient)
-        def stream_file():
-            # We use a User-Agent to prevent Cloudinary/Storage from blocking the request as a bot
-            req = urllib.request.Request(file_url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
-            try:
-                with urllib.request.urlopen(req) as response:
-                    while True:
-                        chunk = response.read(8192) # Read in 8KB chunks
-                        if not chunk:
-                            break
-                        yield chunk
-            except urllib.error.HTTPError as e:
-                logger.error(f"Stream failed with HTTP Error: {e.code} - {e.reason}")
-                raise
-            except Exception as e:
-                logger.error(f"Stream failed with error: {str(e)}")
-                raise
-
-        # 5. RETURN STREAMING RESPONSE
-        response = StreamingHttpResponse(stream_file(), content_type=content_type)
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        return response
-
-    except urllib.error.HTTPError as e:
-        logger.error(f"Remote server rejected request for Order #{order.id}: {e.code}")
-        messages.error(request, f'Error downloading file: The storage server rejected the request ({e.code}).')
-        return redirect('dashboard')
+            # Generate a clean, working URL using the official SDK
+            clean_url, _ = cloudinary.utils.cloudinary_url(
+                public_id, 
+                resource_type=resource_type, 
+                type="upload",
+                flags="attachment" # Forces browser to download instead of previewing
+            )
+            download_url = clean_url or order.file.url
+        else:
+            # Fallback for local files or non-Cloudinary storage
+            download_url = order.file.url
+            if '?' in download_url:
+                download_url += '&fl_attachment=true'
+            else:
+                download_url += '?fl_attachment=true'
+                
     except Exception as e:
-        logger.error(f"Download failed for Order #{order.id}: {str(e)}")
-        messages.error(request, 'An unexpected error occurred while downloading the file.')
-        return redirect('dashboard')
+        logger.error(f"Failed to get file URL for Order #{order.id}: {e}")
+        download_url = order.file.url # Absolute last resort fallback
+
+    # 3. FAST REDIRECT (No 502 Bad Gateway)
+    return redirect(download_url)
 
 
 # ============================================================
