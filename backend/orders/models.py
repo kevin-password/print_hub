@@ -471,5 +471,115 @@ class SupportSettings(models.Model):
         return obj
 
 
+# orders/models.py (add to existing file)
+
+class DocumentCreationRequest(models.Model):
+    DOCUMENT_TYPES = [
+        ('research_proposal', 'Research Proposal'),
+        ('essay', 'Essay/Assignment'),
+        ('report', 'Technical Report'),
+        ('cv_resume', 'CV/Resume'),
+        ('business_plan', 'Business Plan'),
+        ('presentation', 'Presentation Slides'),
+        ('thesis_chapter', 'Thesis Chapter'),
+        ('other', 'Other'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('pending', 'Pending Review'),
+        ('research', 'Research Phase (NotebookLM)'),
+        ('generating', 'AI Generating Draft'),
+        ('formatting', 'Formatting to LaTeX'),
+        ('human_review', 'Team Review'),
+        ('client_review', 'Awaiting Client Review'),
+        ('revision', 'Revisions Requested'),
+        ('approved', 'Final Approval'),
+        ('printing', 'Ready to Print'),
+        ('completed', 'Completed'),
+        ('rejected', 'Rejected'),
+    ]
+    
+    client = models.ForeignKey(User, on_delete=models.CASCADE, related_name='doc_requests')
+    document_type = models.CharField(max_length=50, choices=DOCUMENT_TYPES)
+    title = models.CharField(max_length=300)
+    
+    # Client's instructions
+    description = models.TextField(help_text="What do you need?")
+    instructions = models.TextField(help_text="Specific requirements (formatting, style, etc.)")
+    word_count_target = models.IntegerField(default=1000)
+    deadline = models.DateTimeField()
+    
+    # Pricing (free service, but track for analytics)
+    estimated_hours = models.DecimalField(max_digits=4, decimal_places=1, default=0)
+    
+    # Source materials
+    notebooklm_link = models.URLField(blank=True, help_text="Link to NotebookLM project")
+    research_notes = models.TextField(blank=True, help_text="Extracted notes from NotebookLM")
+    
+    # AI Generation tracking
+    ai_model_used = models.CharField(max_length=50, blank=True)
+    ai_draft_text = models.TextField(blank=True)
+    ai_draft_tokens = models.IntegerField(default=0)
+    
+    # LaTeX & Overleaf
+    latex_code = models.TextField(blank=True)
+    overleaf_project_url = models.URLField(blank=True)
+    
+    # Final document
+    final_pdf = models.FileField(upload_to='final_documents/%Y/%m/', blank=True)
+    
+    # Workflow
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    assigned_team_member = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='assigned_doc_requests'
+    )
+    
+    # Revisions
+    revision_count = models.IntegerField(default=0)
+    max_revisions = models.IntegerField(default=3)
+    
+    # Connection to printing system
+    linked_order = models.OneToOneField('Order', on_delete=models.SET_NULL, null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.title} - {self.client.username}"
+    
+    def can_request_revision(self):
+        return self.revision_count < self.max_revisions and self.status in ['client_review', 'revision']
+
+
+class DocumentSourceFile(models.Model):
+    request = models.ForeignKey(DocumentCreationRequest, on_delete=models.CASCADE, related_name='source_files')
+    file = models.FileField(upload_to='doc_sources/%Y/%m/')
+    file_name = models.CharField(max_length=255)
+    file_size = models.IntegerField(default=0)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.file_name
+
+
+class DocumentRevision(models.Model):
+    request = models.ForeignKey(DocumentCreationRequest, on_delete=models.CASCADE, related_name='revisions')
+    client_notes = models.TextField()
+    team_response = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    resolved = models.BooleanField(default=False)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+
+
 
 
