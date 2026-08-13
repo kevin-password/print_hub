@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ doc_request.title }} - PrintHub{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    
+    <!-- Header -->
+    <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-6">
+        <div class="flex flex-wrap justify-between items-start gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-white">{{ doc_request.title }}</h1>
+                <p class="text-gray-400 text-sm mt-1">
+                    {{ doc_request.get_document_type_display() }} • 
+                    {{ doc_request.word_count_target }} words • 
+                    Due: {{ doc_request.deadline|date:"M d, Y H:i" }}
+                </p>
+            </div>
+            <span class="px-3 py-1 rounded-full text-sm font-bold bg-slate-700 {{ doc_request.get_status_color }}">
+                {{ doc_request.get_status_display }}
+            </span>
+        </div>
+        
+        {% if doc_request.assigned_team_member %}
+        <p class="text-gray-500 text-sm mt-2">
+            👤 Assigned to: <span class="text-gray-300">{{ doc_request.assigned_team_member.username }}</span>
+        </p>
+        {% endif %}
+        
+        <p class="text-gray-500 text-sm mt-1">
+            📅 Submitted: {{ doc_request.created_at|date:"M d, Y H:i" }}
+        </p>
+    </div>
+
+    <!-- Instructions -->
+    <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-6">
+        <h2 class="text-lg font-bold text-white mb-3">📋 Instructions</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <p class="text-gray-500 text-xs uppercase mb-1">Description</p>
+                <p class="text-gray-300 text-sm">{{ doc_request.description
