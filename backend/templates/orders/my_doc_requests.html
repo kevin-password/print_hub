@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Document Requests - PrintHub{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-white">📝 My Document Requests</h1>
+        <a href="{% url 'create_document_request' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold">
+            + New Request
+        </a>
+    </div>
+
+    {% if requests %}
+    <div class="space-y-4">
+        {% for req in requests %}
+        <div class="bg-slate-800 border border-slate-700 rounded-lg p-4">
+            <div class="flex justify-between items-start">
+                <div>
+                    <a href="{% url 'doc_request_detail' req.id %}" class="text-white font-bold hover:text-blue-400">{{ req.title }}</a>
+                    <p class="text-gray-400 text-sm mt-1">
+                        {{ req.get_document_type_display }} • {{ req.word_count_target }} words • 
+                        Due: {{ req.deadline|date:"M d, Y" }}
+                    </p>
+                </div>
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-700 {{ req.get_status_color }}">
+                    {{ req.get_status_display }}
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center text-gray-500 py-12">
+        <p>No document requests yet.</p>
+        <a href="{% url 'create_document_request' %}" class="text-blue-400 underline mt-2 inline-block">Create your first request</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
