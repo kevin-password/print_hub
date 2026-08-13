@@ -6,6 +6,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 
+
 class SystemSettings(models.Model):
     """Singleton model to store global system state like pause timers."""
     is_paused = models.BooleanField(default=False)
@@ -32,6 +33,7 @@ class SystemSettings(models.Model):
             total += (timezone.now() - self.pause_started_at).total_seconds()
         return total
 
+
 class Announcement(models.Model):
     """Custom announcement banner shown at top of all pages."""
     title = models.CharField(max_length=200, default='Announcement')
@@ -55,6 +57,7 @@ class Announcement(models.Model):
     def get_active(cls):
         return cls.objects.filter(is_active=True).first()
 
+
 class DeliveryZone(models.Model):
     name = models.CharField(max_length=100, help_text="e.g., Main Campus, City Center")
     description = models.CharField(max_length=255, blank=True, null=True)
@@ -68,6 +71,7 @@ class DeliveryZone(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.delivery_fee:,} UGX)"
+
 
 class Order(models.Model):
     STATUS_CHOICES = (
@@ -152,7 +156,7 @@ class Order(models.Model):
     profit = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Net profit for this order")
     notes = models.TextField(blank=True, default='', help_text="Internal notes about this order")
     
-    # 🆕 Referral discount field
+    # Referral discount field
     referral_discount_applied = models.DecimalField(
         max_digits=10, 
         decimal_places=2, 
@@ -163,9 +167,7 @@ class Order(models.Model):
     cancellation_reason = models.TextField(blank=True, default='', help_text="Reason for cancellation")
     cancelled_at = models.DateTimeField(blank=True, null=True)
 
-    # ============================================================
-    # 🆕 FILE PROCESSING FIELDS
-    # ============================================================
+    # File processing fields
     file_metadata = models.JSONField(blank=True, default=dict, help_text="File metadata from processing")
     file_preview = models.TextField(blank=True, default='', help_text="Text preview of file content")
     file_thumbnail = models.TextField(blank=True, default='', help_text="Base64 thumbnail for images")
@@ -197,20 +199,12 @@ class Order(models.Model):
         Returns: (total_price, effective_pages, price_per_unit)
         """
         if order_type == 'passport':
-            # Passport: copies × 1000 UGX per photo
             price_per_unit = cls.PASSPORT_PHOTO_PRICE
-            
-            # FIX: Use 'copies' instead of 'page_count' to calculate passport price.
-            # This guarantees that even if page_count is somehow mismatched, 
-            # the price is strictly based on the number of photos requested.
             printing_cost = price_per_unit * copies
             total_price = printing_cost + delivery_fee
-            
-            # For passports, effective pages/sheets is equal to the number of photos
             return total_price, copies, price_per_unit
 
         elif order_type == 'scanned':
-            # Scanned documents use standard B&W/color pricing
             price_per_unit = cls.SCANNED_DOC_PRICE + (cls.COLOR_SURCHARGE if is_color else 0)
             effective_pages = page_count
             if is_double_sided:
@@ -221,7 +215,6 @@ class Order(models.Model):
             return total_price, effective_pages * copies, price_per_unit
 
         else:
-            # Standard document printing
             price_per_unit = cls.BASE_PRICE_BW + (cls.COLOR_SURCHARGE if is_color else 0)
             effective_pages = page_count
             if is_double_sided:
@@ -405,9 +398,6 @@ class Order(models.Model):
             return self.copies
         return self.page_count
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    # SAVE - Only calculates price if total_price is 0
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     def save(self, *args, **kwargs):
         is_new = self._state.adding
 
@@ -435,8 +425,6 @@ class Order(models.Model):
         order_type_display = dict(self.ORDER_TYPE_CHOICES).get(self.order_type, 'Document')
         return f"{order_type_display} Order #{self.id} by {self.client.username}"
 
-
-# backend/orders/models.py - Add this new model
 
 class SupportSettings(models.Model):
     """Support settings for the chatbot."""
@@ -471,7 +459,9 @@ class SupportSettings(models.Model):
         return obj
 
 
-# orders/models.py (add to existing file)
+# ============================================================
+# DOCUMENT CREATION SERVICE MODELS
+# ============================================================
 
 class DocumentCreationRequest(models.Model):
     DOCUMENT_TYPES = [
@@ -499,50 +489,43 @@ class DocumentCreationRequest(models.Model):
         ('rejected', 'Rejected'),
     ]
     
-    client = models.ForeignKey(User, on_delete=models.CASCADE, related_name='doc_requests')
+    # FIXED: Use settings.AUTH_USER_MODEL instead of User
+    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='doc_requests')
     document_type = models.CharField(max_length=50, choices=DOCUMENT_TYPES)
     title = models.CharField(max_length=300)
     
-    # Client's instructions
     description = models.TextField(help_text="What do you need?")
-    instructions = models.TextField(help_text="Specific requirements (formatting, style, etc.)")
+    instructions = models.TextField(help_text="Specific requirements (formatting, style, references)")
     word_count_target = models.IntegerField(default=1000)
     deadline = models.DateTimeField()
     
-    # Pricing (free service, but track for analytics)
     estimated_hours = models.DecimalField(max_digits=4, decimal_places=1, default=0)
     
-    # Source materials
     notebooklm_link = models.URLField(blank=True, help_text="Link to NotebookLM project")
     research_notes = models.TextField(blank=True, help_text="Extracted notes from NotebookLM")
     
-    # AI Generation tracking
     ai_model_used = models.CharField(max_length=50, blank=True)
     ai_draft_text = models.TextField(blank=True)
     ai_draft_tokens = models.IntegerField(default=0)
     
-    # LaTeX & Overleaf
     latex_code = models.TextField(blank=True)
     overleaf_project_url = models.URLField(blank=True)
-    
-    # Final document
     final_pdf = models.FileField(upload_to='final_documents/%Y/%m/', blank=True)
     
-    # Workflow
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    # FIXED: Use settings.AUTH_USER_MODEL instead of User
     assigned_team_member = models.ForeignKey(
-        User, 
+        settings.AUTH_USER_MODEL, 
         on_delete=models.SET_NULL, 
         null=True, 
         blank=True, 
         related_name='assigned_doc_requests'
     )
     
-    # Revisions
     revision_count = models.IntegerField(default=0)
     max_revisions = models.IntegerField(default=3)
     
-    # Connection to printing system
     linked_order = models.OneToOneField('Order', on_delete=models.SET_NULL, null=True, blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
@@ -556,6 +539,22 @@ class DocumentCreationRequest(models.Model):
     
     def can_request_revision(self):
         return self.revision_count < self.max_revisions and self.status in ['client_review', 'revision']
+    
+    def get_status_color(self):
+        colors = {
+            'pending': 'text-gray-400',
+            'research': 'text-blue-400',
+            'generating': 'text-purple-400',
+            'formatting': 'text-indigo-400',
+            'human_review': 'text-yellow-400',
+            'client_review': 'text-cyan-400',
+            'revision': 'text-orange-400',
+            'approved': 'text-green-400',
+            'printing': 'text-blue-300',
+            'completed': 'text-green-300',
+            'rejected': 'text-red-400',
+        }
+        return colors.get(self.status, 'text-gray-400')
 
 
 class DocumentSourceFile(models.Model):
@@ -579,7 +578,6 @@ class DocumentRevision(models.Model):
     
     class Meta:
         ordering = ['-created_at']
-
-
-
-
+    
+    def __str__(self):
+        return f"Revision for {self.request.title} ({self.created_at})"
