@@ -19,6 +19,9 @@ from django.conf import settings
 from django.urls import reverse
 from django.utils.html import strip_tags
 
+# 🛡️ ADDED FOR SECURE CLOUDINARY URL GENERATION
+import cloudinary
+
 from stations.models import Station
 from orders.models import Order, DeliveryZone, Announcement
 from orders.utils import apply_order_status_change
@@ -376,14 +379,14 @@ def my_orders_view(request):
 
 
 # ============================================================
-# DOWNLOAD ORDER FILE VIEW (FIXED)
+# DOWNLOAD ORDER FILE VIEW (BULLETPROOF FIX)
 # ============================================================
 @login_required
 def download_order_file_view(request, order_id):
     """
-    FIX: Redirects directly to the Cloudinary URL instead of streaming
-    through the server. This bypasses the 401 Unauthorized error and 
-    saves Render server bandwidth. ?fl_attachment=true forces download.
+    FIXED: 
+    1. Handles case-sensitivity for roles (e.g., 'Admin' vs 'admin').
+    2. Generates a Signed Cloudinary URL to prevent 401 errors from private folders.
     """
     if not str(order_id).isdigit():
         return HttpResponseForbidden('Invalid order ID.')
@@ -391,16 +394,56 @@ def download_order_file_view(request, order_id):
     order = get_object_or_404(Order, id=int(order_id))
     user = request.user
     
-    if _user_role(user) not in ('admin', 'agent') and order.client != user:
+    # 1. BULLETPROOF ROLE & OWNERSHIP CHECK
+    is_owner = (order.client == user)
+    is_privileged = False
+    
+    # Check standard Django superuser/staff status first
+    if user.is_superuser or getattr(user, 'is_staff', False):
+        is_privileged = True
+    else:
+        # Check custom role (handle case-insensitivity and spaces)
+        role = str(_user_role(user)).lower().strip()
+        if role in ('admin', 'agent', 'super_admin', 'manager', 'staff'):
+            is_privileged = True
+            
+    # If they are NOT the owner AND NOT privileged, block them
+    if not is_owner and not is_privileged:
+        logger.warning(f"🚫 Unauthorized download attempt by {user.username} (Role: {_user_role(user)}) on Order #{order.id}")
         return HttpResponseForbidden('You do not have permission to download this file.')
         
     if not order.file:
         messages.error(request, 'File not found.')
         return redirect('dashboard')
         
-    # 🛡️ Redirect directly to Cloudinary URL to avoid 401 errors
-    download_url = f"{order.file.url}?fl_attachment=true"
-    
+    # 2. SECURE CLOUDINARY URL GENERATION (FIXES CLOUDINARY 401)
+    # If your Cloudinary folder is private, standard order.file.url throws a 401.
+    # We generate a signed URL to guarantee access and force the download.
+    try:
+        # Determine resource type (raw for PDFs/docs, image for photos)
+        resource_type = "raw"
+        if order.file.name.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
+            resource_type = "image"
+            
+        # Generate a secure, signed URL that forces attachment (download)
+        download_url, _ = cloudinary.utils.cloudinary_url(
+            order.file.name, 
+            resource_type=resource_type,
+            sign_url=True,               # Bypasses private folder 401 errors
+            flags="attachment",          # Forces browser to download instead of preview
+            type="upload"                # Change to "authenticated" if using Cloudinary Auth Delivery
+        )
+        
+        # Fallback safety check
+        if not download_url or not download_url.startswith("http"):
+             download_url = order.file.url
+             
+    except Exception as e:
+        logger.error(f"Cloudinary signed URL generation failed for Order #{order.id}: {e}")
+        # Fallback to standard URL with attachment parameter if SDK fails
+        download_url = f"{order.file.url}?fl_attachment=true"
+
+    # 3. REDIRECT TO SECURE URL
     return redirect(download_url)
 
 
