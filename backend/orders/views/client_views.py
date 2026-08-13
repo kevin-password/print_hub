@@ -2,6 +2,7 @@
 import json
 import logging
 import base64
+import urllib.parse # 🛡️ ADDED FOR SAFE URL PARSING
 from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -41,6 +42,56 @@ print("⚠️ file_processor is DISABLED - file processing skipped")
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
+
+# ============================================================
+# 🛡️ HELPER: SAFE CLOUDINARY URL PARSER
+# ============================================================
+def get_cloudinary_url_parts(url):
+    """
+    Extracts resource_type, upload_type, public_id, and version from a Cloudinary URL.
+    This prevents 404 errors by perfectly preserving the exact public ID and version
+    that Cloudinary expects, rather than guessing it from the file name.
+    """
+    try:
+        parsed = urllib.parse.urlparse(url)
+        path_parts = parsed.path.strip('/').split('/')
+        
+        # Cloudinary URLs typically have at least 4 parts:
+        # <cloud_name>/<resource_type>/<type>/<public_id>
+        if len(path_parts) < 4:
+            return None
+            
+        resource_type = path_parts[1]
+        upload_type = path_parts[2]
+        
+        # Heuristic check to ensure this is actually a Cloudinary URL
+        if resource_type not in ('image', 'raw', 'video') or upload_type not in ('upload', 'authenticated', 'private', 'fetch', 'facebook', 'twitter', 'gravatar'):
+            return None 
+            
+        remaining = path_parts[3:]
+        
+        # Scan for the version number (e.g., v1623456789)
+        version = None
+        version_idx = -1
+        for i, part in enumerate(remaining):
+            if part.startswith('v') and part[1:].isdigit():
+                version = part
+                version_idx = i
+                break
+                
+        # Everything after the version is the public ID. 
+        # (This safely ignores any transformations that might appear before the version)
+        if version_idx != -1:
+            public_id_parts = remaining[version_idx + 1:]
+        else:
+            public_id_parts = remaining
+            
+        public_id_with_ext = '/'.join(public_id_parts)
+        
+        return resource_type, upload_type, public_id_with_ext, version
+    except Exception as e:
+        logger.error(f"Error parsing Cloudinary URL: {e}")
+        return None
 
 
 # ============================================================
@@ -379,14 +430,15 @@ def my_orders_view(request):
 
 
 # ============================================================
-# DOWNLOAD ORDER FILE VIEW (BULLETPROOF FIX)
+# DOWNLOAD ORDER FILE VIEW (FINAL BULLETPROOF FIX)
 # ============================================================
 @login_required
 def download_order_file_view(request, order_id):
     """
-    FIXED: 
-    1. Handles case-sensitivity for roles (e.g., 'Admin' vs 'admin').
-    2. Generates a Signed Cloudinary URL to prevent 401 errors from private folders.
+    FIXES BOTH 401 (Unauthorized) AND 404 (Not Found):
+    1. Extracts the EXACT public ID and version from the existing valid URL.
+    2. Generates a signed Cloudinary URL to bypass private folder restrictions.
+    3. Gracefully falls back to local media files if not using Cloudinary.
     """
     if not str(order_id).isdigit():
         return HttpResponseForbidden('Invalid order ID.')
@@ -416,28 +468,47 @@ def download_order_file_view(request, order_id):
         messages.error(request, 'File not found.')
         return redirect('dashboard')
         
-    # 2. SECURE CLOUDINARY URL GENERATION (FIXES CLOUDINARY 401)
-    # If your Cloudinary folder is private, standard order.file.url throws a 401.
-    # We generate a signed URL to guarantee access and force the download.
+    # 2. SECURE CLOUDINARY URL GENERATION
     try:
-        # Determine resource type (raw for PDFs/docs, image for photos)
-        resource_type = "raw"
-        if order.file.name.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
-            resource_type = "image"
-            
-        # Generate a secure, signed URL that forces attachment (download)
-        download_url, _ = cloudinary.utils.cloudinary_url(
-            order.file.name, 
-            resource_type=resource_type,
-            sign_url=True,               # Bypasses private folder 401 errors
-            flags="attachment",          # Forces browser to download instead of preview
-            type="upload"                # Change to "authenticated" if using Cloudinary Auth Delivery
-        )
+        original_url = order.file.url
         
-        # Fallback safety check
+        # Attempt to parse the URL as a Cloudinary URL
+        parts = get_cloudinary_url_parts(original_url)
+        
+        if not parts:
+            # Not a Cloudinary URL (e.g., local file). Just redirect with attachment flag.
+            return redirect(f"{original_url}?fl_attachment=true")
+            
+        resource_type, upload_type, public_id_with_ext, version = parts
+        
+        # Handle extension based on resource_type (Crucial for preventing 404s)
+        public_id = public_id_with_ext
+        format_ext = None
+        
+        if '.' in public_id_with_ext:
+            p_parts = public_id_with_ext.rsplit('.', 1)
+            if resource_type == 'image':
+                public_id = p_parts[0] # Images don't include extension in public_id
+                format_ext = p_parts[1]
+            else:
+                public_id = public_id_with_ext # Raw/Video files keep extension
+                
+        options = {
+            'resource_type': resource_type,
+            'type': upload_type,
+            'sign_url': True,               # Bypasses private folder 401 errors
+            'flags': 'attachment',          # Forces browser to download instead of preview
+        }
+        if version:
+            options['version'] = version     # Prevents 404 errors by keeping exact version
+        if format_ext:
+            options['format'] = format_ext
+            
+        download_url, _ = cloudinary.utils.cloudinary_url(public_id, **options)
+        
         if not download_url or not download_url.startswith("http"):
-             download_url = order.file.url
-             
+            download_url = original_url
+            
     except Exception as e:
         logger.error(f"Cloudinary signed URL generation failed for Order #{order.id}: {e}")
         # Fallback to standard URL with attachment parameter if SDK fails
