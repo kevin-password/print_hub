@@ -1,6 +1,6 @@
 # orders/urls.py
 from django.urls import path
-from .views import client_views, admin_views, agent_views, api_views, live_board_views
+from .views import client_views, admin_views, agent_views, api_views, live_board_views, document_views
 
 urlpatterns = [
     # Public URLs
@@ -16,6 +16,12 @@ urlpatterns = [
     path('<int:order_id>/cancel/', client_views.cancel_order_view, name='cancel_order'),
     path('<int:order_id>/download/', client_views.download_order_file_view, name='download_order_file'),
     path('<int:order_id>/payment/', client_views.payment_page_view, name='payment_page'),
+    
+    # Document Creation Service
+    path('documents/create/', document_views.create_document_request_view, name='create_document_request'),
+    path('documents/<int:request_id>/', document_views.doc_request_detail_view, name='doc_request_detail'),
+    path('documents/admin/', document_views.admin_doc_requests_view, name='admin_doc_requests'),
+    path('documents/my-requests/', document_views.my_doc_requests_view, name='my_doc_requests'),
     
     # Admin URLs
     path('admin-dashboard/', admin_views.admin_dashboard_view, name='admin_dashboard'),
