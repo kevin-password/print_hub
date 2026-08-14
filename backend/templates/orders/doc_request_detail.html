@@ -12,18 +12,46 @@
             <div>
                 <h1 class="text-2xl font-bold text-white">{{ doc_request.title }}</h1>
                 <p class="text-gray-400 text-sm mt-1">
-                    <!-- ✅ FIXED: Removed the () from get_document_type_display -->
                     {{ doc_request.get_document_type_display }} • 
                     {{ doc_request.word_count_target }} words • 
                     Due: {{ doc_request.deadline|date:"M d, Y H:i" }}
                 </p>
             </div>
-            <span class="px-3 py-1 rounded-full text-sm font-bold bg-slate-700 {{ doc_request.get_status_color }}">
-                {{ doc_request.get_status_display }}
-            </span>
+            
+            <!-- Status Badge -->
+            {% if is_team %}
+                <!-- Team sees the exact internal status -->
+                <span class="px-3 py-1 rounded-full text-sm font-bold bg-slate-700 {{ doc_request.get_status_color }}">
+                    {{ doc_request.get_status_display }}
+                </span>
+            {% else %}
+                <!-- 🛡️ CLIENT sees simplified, professional status -->
+                {% if doc_request.status == 'client_review' %}
+                    <span class="px-3 py-1 rounded-full text-sm font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                        Ready for Review
+                    </span>
+                {% elif doc_request.status == 'approved' %}
+                    <span class="px-3 py-1 rounded-full text-sm font-bold bg-green-500/20 text-green-300 border border-green-500/30">
+                        Approved
+                    </span>
+                {% elif doc_request.status == 'printing' or doc_request.status == 'completed' %}
+                    <span class="px-3 py-1 rounded-full text-sm font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        {{ doc_request.get_status_display }}
+                    </span>
+                {% elif doc_request.status == 'rejected' %}
+                    <span class="px-3 py-1 rounded-full text-sm font-bold bg-red-500/20 text-red-300 border border-red-500/30">
+                        Rejected
+                    </span>
+                {% else %}
+                    <!-- Hides all internal AI/Research steps from client -->
+                    <span class="px-3 py-1 rounded-full text-sm font-bold bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 animate-pulse">
+                        In Progress
+                    </span>
+                {% endif %}
+            {% endif %}
         </div>
         
-        {% if doc_request.assigned_team_member %}
+        {% if doc_request.assigned_team_member and is_team %}
         <p class="text-gray-500 text-sm mt-2">
             👤 Assigned to: <span class="text-gray-300">{{ doc_request.assigned_team_member.username }}</span>
         </p>
@@ -34,9 +62,25 @@
         </p>
     </div>
 
-    <!-- Instructions -->
+    <!-- 🛡️ CLIENT VIEW: "In Progress" Message -->
+    {% if not is_team and doc_request.status != 'client_review' and doc_request.status != 'approved' and doc_request.status != 'printing' and doc_request.status != 'completed' and doc_request.status != 'rejected' %}
+    <div class="bg-slate-800 border border-slate-700 rounded-xl p-8 mb-6 text-center">
+        <div class="w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-indigo-400 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+        </div>
+        <h2 class="text-xl font-bold text-white mb-2">Our Team is Working on Your Document</h2>
+        <p class="text-gray-400 max-w-md mx-auto">
+            Our professional writing team is currently researching, drafting, and formatting your document to meet your exact specifications. 
+            Please relax! We will notify you as soon as the first draft is ready for your review.
+        </p>
+    </div>
+    {% endif %}
+
+    <!-- Instructions (Visible to both) -->
     <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-6">
-        <h2 class="text-lg font-bold text-white mb-3">📋 Instructions</h2>
+        <h2 class="text-lg font-bold text-white mb-3">📋 Your Instructions</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <p class="text-gray-500 text-xs uppercase mb-1">Description</p>
@@ -49,7 +93,7 @@
         </div>
     </div>
 
-    <!-- Source Files -->
+    <!-- Source Files (Visible to both, but team gets the NotebookLM tip) -->
     {% if source_files %}
     <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-6">
         <h2 class="text-lg font-bold text-white mb-3">📎 Source Files ({{ source_files|length }})</h2>
@@ -61,100 +105,110 @@
             </div>
             {% endfor %}
         </div>
+        
+        <!-- 🛡️ Only team sees the NotebookLM instructions -->
         {% if is_team %}
         <div class="mt-4 bg-yellow-500/10 border border-yellow-500/30 rounded p-3">
-            <p class="text-yellow-400 text-sm">💡 <strong>Next:</strong> Download these files and upload them to <a href="https://notebooklm.google.com" target="_blank" class="underline">NotebookLM</a> for research. Paste the research notes below.</p>
+            <p class="text-yellow-400 text-sm">💡 <strong>Team:</strong> Download these files and upload them to <a href="https://notebooklm.google.com" target="_blank" class="underline">NotebookLM</a> for research. Paste the research notes below.</p>
         </div>
         {% endif %}
     </div>
     {% endif %}
 
-    <!-- TEAM: Research Notes Input -->
-    {% if is_team and doc_request.status == 'research' %}
-    <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-6">
-        <h2 class="text-lg font-bold text-white mb-3">🔬 Research Notes (from NotebookLM)</h2>
-        <form method="post">
-            {% csrf_token %}
-            <div class="mb-4">
-                <label class="block text-sm text-gray-400 mb-1">NotebookLM Link</label>
-                <input type="url" name="notebooklm_link" value="{{ doc_request.notebooklm_link }}"
-                       class="w-full bg-slate-700 border border-slate-600 rounded px-4 py-2 text-white"
-                       placeholder="https://notebooklm.google.com/...">
-            </div>
-            <div class="mb-4">
-                <label class="block text-sm text-gray-400 mb-1">Research Notes</label>
-                <textarea name="research_notes" rows="8" 
-                          class="w-full bg-slate-700 border border-slate-600 rounded px-4 py-2 text-white"
-                          placeholder="Paste research notes extracted from NotebookLM...">{{ doc_request.research_notes }}</textarea>
-            </div>
-            <button type="submit" name="save_research" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-lg">
-                ✅ Save Research & Proceed
-            </button>
-        </form>
-    </div>
-    {% endif %}
-
-    <!-- TEAM: AI Generation Controls -->
-    {% if is_team and doc_request.status == 'generating' %}
-    <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-6">
-        <h2 class="text-lg font-bold text-white mb-3">🤖 AI Draft Generation</h2>
-        <p class="text-gray-400 text-sm mb-4">Research notes saved. Click below to generate the AI draft using Groq/Gemini (FREE).</p>
-        <form method="post">
-            {% csrf_token %}
-            <button type="submit" name="generate_draft" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-3 rounded-lg">
-                ⚡ Generate AI Draft
-            </button>
-        </form>
-    </div>
-    {% endif %}
-
-    <!-- AI Draft Preview -->
-    {% if doc_request.ai_draft_text %}
-    <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-6">
-        <h2 class="text-lg font-bold text-white mb-3">
-            📝 AI Draft 
-            {% if doc_request.ai_model_used %}<span class="text-xs text-gray-500">({{ doc_request.ai_model_used }})</span>{% endif %}
-        </h2>
-        <div class="bg-slate-900 rounded p-4 max-h-60 overflow-y-auto text-sm text-gray-300 whitespace-pre-wrap">{{ doc_request.ai_draft_text|truncatewords:500 }}</div>
-        
-        {% if is_team and doc_request.status == 'formatting' %}
-        <form method="post" class="mt-4">
-            {% csrf_token %}
-            <button type="submit" name="format_latex" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-lg">
-                📐 Format to LaTeX
-            </button>
-        </form>
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 🛡️ SECRET SAUCE: ONLY VISIBLE TO TEAM MEMBERS         -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    {% if is_team %}
+        <!-- TEAM: Research Notes Input -->
+        {% if doc_request.status == 'research' %}
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-6">
+            <h2 class="text-lg font-bold text-white mb-3">🔬 Research Notes (from NotebookLM)</h2>
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-400 mb-1">NotebookLM Link</label>
+                    <input type="url" name="notebooklm_link" value="{{ doc_request.notebooklm_link }}"
+                           class="w-full bg-slate-700 border border-slate-600 rounded px-4 py-2 text-white">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-400 mb-1">Research Notes</label>
+                    <textarea name="research_notes" rows="8" 
+                              class="w-full bg-slate-700 border border-slate-600 rounded px-4 py-2 text-white"
+                              placeholder="Paste research notes...">{{ doc_request.research_notes }}</textarea>
+                </div>
+                <button type="submit" name="save_research" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-lg">
+                    ✅ Save Research & Proceed to AI
+                </button>
+            </form>
+        </div>
         {% endif %}
-    </div>
-    {% endif %}
 
-    <!-- LaTeX Preview -->
-    {% if doc_request.latex_code %}
-    <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-6">
-        <h2 class="text-lg font-bold text-white mb-3">📐 LaTeX Code</h2>
-        <div class="bg-slate-900 rounded p-4 max-h-60 overflow-y-auto text-sm text-gray-300 font-mono whitespace-pre-wrap">{{ doc_request.latex_code|truncatewords:200 }}</div>
-        
-        {% if is_team and doc_request.status == 'human_review' %}
-        <form method="post" class="mt-4">
-            {% csrf_token %}
-            <div class="mb-4">
-                <label class="block text-sm text-gray-400 mb-1">Overleaf Project URL (create manually at overleaf.com)</label>
-                <input type="url" name="overleaf_url" class="w-full bg-slate-700 border border-slate-600 rounded px-4 py-2 text-white" placeholder="https://www.overleaf.com/...">
-            </div>
-            <button type="submit" name="send_to_client" class="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3 rounded-lg">
-                📤 Send to Client for Review
-            </button>
-        </form>
+        <!-- TEAM: AI Generation Controls -->
+        {% if doc_request.status == 'generating' %}
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-6">
+            <h2 class="text-lg font-bold text-white mb-3">🤖 AI Draft Generation</h2>
+            <p class="text-gray-400 text-sm mb-4">Research notes saved. Click below to generate the AI draft using Groq/Gemini (FREE).</p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" name="generate_draft" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-3 rounded-lg">
+                    ⚡ Generate AI Draft
+                </button>
+            </form>
+        </div>
         {% endif %}
-    </div>
-    {% endif %}
 
-    <!-- Overleaf Link -->
+        <!-- AI Draft Preview (Team Only) -->
+        {% if doc_request.ai_draft_text %}
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-6">
+            <h2 class="text-lg font-bold text-white mb-3">
+                📝 AI Draft 
+                {% if doc_request.ai_model_used %}<span class="text-xs text-gray-500">({{ doc_request.ai_model_used }})</span>{% endif %}
+            </h2>
+            <div class="bg-slate-900 rounded p-4 max-h-60 overflow-y-auto text-sm text-gray-300 whitespace-pre-wrap">{{ doc_request.ai_draft_text|truncatewords:500 }}</div>
+            
+            {% if doc_request.status == 'formatting' %}
+            <form method="post" class="mt-4">
+                {% csrf_token %}
+                <button type="submit" name="format_latex" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-lg">
+                    📐 Format to LaTeX
+                </button>
+            </form>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- LaTeX Preview (Team Only) -->
+        {% if doc_request.latex_code %}
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-6">
+            <h2 class="text-lg font-bold text-white mb-3">📐 LaTeX Code</h2>
+            <div class="bg-slate-900 rounded p-4 max-h-60 overflow-y-auto text-sm text-gray-300 font-mono whitespace-pre-wrap">{{ doc_request.latex_code|truncatewords:200 }}</div>
+            
+            {% if doc_request.status == 'human_review' %}
+            <form method="post" class="mt-4">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-400 mb-1">Overleaf Project URL (create manually at overleaf.com)</label>
+                    <input type="url" name="overleaf_url" class="w-full bg-slate-700 border border-slate-600 rounded px-4 py-2 text-white" placeholder="https://www.overleaf.com/...">
+                </div>
+                <button type="submit" name="send_to_client" class="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3 rounded-lg">
+                    📤 Send to Client for Review
+                </button>
+            </form>
+            {% endif %}
+        </div>
+        {% endif %}
+    {% endif %}
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- 🛑 END OF SECRET SAUCE                                -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+
+    <!-- Overleaf Link (Visible to both when ready for review) -->
     {% if doc_request.overleaf_project_url %}
     <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-6">
-        <h2 class="text-lg font-bold text-white mb-3">🔗 Overleaf Project</h2>
-        <a href="{{ doc_request.overleaf_project_url }}" target="_blank" class="text-blue-400 hover:text-blue-300 underline break-all">
-            {{ doc_request.overleaf_project_url }}
+        <h2 class="text-lg font-bold text-white mb-3">🔗 Review Your Document</h2>
+        <p class="text-gray-400 text-sm mb-4">Our team has prepared your document. Click the link below to view, edit, and leave comments on the draft.</p>
+        <a href="{{ doc_request.overleaf_project_url }}" target="_blank" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-lg transition-all">
+            Open Document Draft →
         </a>
     </div>
     {% endif %}
@@ -162,7 +216,7 @@
     <!-- CLIENT: Review Actions -->
     {% if is_client and doc_request.status == 'client_review' %}
     <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-6">
-        <h2 class="text-lg font-bold text-white mb-4">✅ Your Review</h2>
+        <h2 class="text-lg font-bold text-white mb-4">✅ Your Feedback</h2>
         
         {% if doc_request.can_request_revision %}
         <form method="post" class="mb-6">
