@@ -1,222 +1,143 @@
-# backend/orders/views/document_creation_views.py
-
-import logging
-from django.shortcuts import render, redirect, get_object_or_404
+# backend/core/urls.py
+from django.contrib import admin
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.db import transaction
-from django.utils import timezone
+from django.http import HttpResponse
+from django.views.generic import TemplateView
+from django.contrib.sitemaps.views import sitemap
+from django.views.static import serve
 
-# ✅ FIXED: Use absolute import path instead of relative
-from orders.models import (
-    DocumentCreationRequest, 
-    DocumentSourceFile, 
-    DocumentRevision
+# ✅ FIXED: Import the functions directly to prevent module shadowing
+from orders.views import client_views, admin_views, agent_views, api_views, live_board_views
+from orders.views.document_creation_views import (
+    create_document_request_view,
+    doc_request_detail_view,
+    admin_doc_requests_view,
+    my_doc_requests_view
 )
-from orders.services.ai_document_service import FreeAIDocumentService
+from accounts import views as accounts_views
+from .sitemap import StaticSitemap
 
-logger = logging.getLogger(__name__)
+
+# ─── ROBOTS.TXT ──────────────────────────────────────────────
+def robots_txt(request):
+    lines = [
+        "User-agent: *",
+        "Allow: /",
+        "Allow: /upload/",
+        "Allow: /dashboard/",
+        "Allow: /track/",
+        "Allow: /live-board/",
+        "Allow: /stations/",
+        "Disallow: /admin/",
+        "Disallow: /api/",
+        "Disallow: /accounts/",
+        "Disallow: /payments/",
+        "Disallow: /whatsapp/",
+        "Disallow: /webhook/",
+        "Sitemap: https://www.printhubug.com/sitemap.xml",
+        "Crawl-delay: 2",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
 
 
-# ============================================================
-# CLIENT: CREATE DOCUMENT REQUEST
-# ============================================================
-@login_required
-def create_document_request_view(request):
-    """Client submits a new document creation request"""
+# ─── SITEMAP - STATIC FILE (NO DJANGO FRAMEWORK) ───────────
+def static_sitemap(request):
+    """Serve static sitemap.xml with forced index header."""
+    import os
+    from django.conf import settings
     
-    if request.method == 'POST':
-        try:
-            with transaction.atomic():
-                doc_request = DocumentCreationRequest.objects.create(
-                    client=request.user,
-                    document_type=request.POST.get('document_type'),
-                    title=request.POST.get('title', '').strip(),
-                    description=request.POST.get('description', '').strip(),
-                    instructions=request.POST.get('instructions', '').strip(),
-                    word_count_target=int(request.POST.get('word_count_target', 1000)),
-                    deadline=request.POST.get('deadline'),
-                    status='pending'
-                )
-                
-                # Handle source file uploads
-                for file in request.FILES.getlist('source_files'):
-                    DocumentSourceFile.objects.create(
-                        request=doc_request,
-                        file=file,
-                        file_name=file.name,
-                        file_size=file.size
-                    )
-                
-                messages.success(
-                    request, 
-                    f'✅ Request "{doc_request.title}" submitted! Our team will start working on it soon.'
-                )
-                return redirect('doc_request_detail', request_id=doc_request.id)
-                
-        except Exception as e:
-            logger.error(f"Error creating document request: {e}")
-            messages.error(request, f'Error: {str(e)}')
+    file_path = os.path.join(settings.BASE_DIR, 'static', 'sitemap.xml')
     
-    return render(request, 'orders/create_document_request.html', {
-        'document_types': DocumentCreationRequest.DOCUMENT_TYPES,
-    })
+    with open(file_path, 'r') as f:
+        content = f.read()
+    
+    response = HttpResponse(content, content_type='application/xml')
+    
+    # 🔥 FORCE INDEX - No middleware can override this
+    response['X-Robots-Tag'] = 'index, follow'
+    response['Cache-Control'] = 'public, max-age=3600'
+    
+    return response
 
 
 # ============================================================
-# CLIENT/TEAM: VIEW REQUEST DETAIL
+# URL PATTERNS
 # ============================================================
-@login_required
-def doc_request_detail_view(request, request_id):
-    """View document request details (client or team member)"""
+urlpatterns = [
+    # Admin
+    path('admin/', admin.site.urls),
     
-    doc_request = get_object_or_404(DocumentCreationRequest, id=request_id)
+    # Home
+    path('', client_views.home_view, name='home'),
     
-    # Check permissions
-    is_client = (doc_request.client == request.user)
-    is_team = getattr(request.user, 'role', '') in ['admin', 'agent'] or request.user.is_staff
+    # Authentication
+    path('auth/login/', accounts_views.login_view, name='login'),
+    path('auth/logout/', accounts_views.logout_view, name='logout'),
+    path('auth/register/', accounts_views.register_view, name='register'),
+    path('auth/profile/', accounts_views.profile_view, name='profile'),
+    path('auth/', include('django.contrib.auth.urls')),
     
-    if not (is_client or is_team):
-        messages.error(request, 'Access denied.')
-        return redirect('dashboard')
+    # Orders & Upload
+    path('dashboard/', client_views.dashboard_view, name='dashboard'),
+    path('upload/', client_views.upload_view, name='upload'),
+    path('my-orders/', client_views.my_orders_view, name='my_orders'),
+    path('track/', client_views.order_track_view, name='track_order'),
     
-    if request.method == 'POST':
-        # Client: Request revision
-        if is_client and doc_request.can_request_revision() and 'request_revision' in request.POST:
-            notes = request.POST.get('revision_notes', '').strip()
-            if notes:
-                DocumentRevision.objects.create(request=doc_request, client_notes=notes)
-                doc_request.revision_count += 1
-                doc_request.status = 'revision'
-                doc_request.save()
-                messages.success(request, '✅ Revision request submitted!')
-                return redirect('doc_request_detail', request_id=doc_request.id)
-        
-        # Client: Approve
-        if is_client and doc_request.status == 'client_review' and 'approve' in request.POST:
-            doc_request.status = 'approved'
-            doc_request.save()
-            messages.success(request, '✅ Approved! Preparing for printing.')
-            return redirect('doc_request_detail', request_id=doc_request.id)
-        
-        # Team: Save research notes
-        if is_team and 'save_research' in request.POST:
-            doc_request.research_notes = request.POST.get('research_notes', '')
-            doc_request.notebooklm_link = request.POST.get('notebooklm_link', '')
-            doc_request.status = 'generating'
-            doc_request.save()
-            messages.success(request, '✅ Research saved! Ready to generate draft.')
-            return redirect('doc_request_detail', request_id=doc_request.id)
-        
-        # Team: Generate draft
-        if is_team and 'generate_draft' in request.POST:
-            try:
-                ai_service = FreeAIDocumentService()
-                draft = ai_service.generate_document_draft(doc_request)
-                doc_request.ai_draft_text = draft
-                doc_request.status = 'formatting'
-                doc_request.save()
-                messages.success(request, '✅ AI draft generated!')
-            except Exception as e:
-                messages.error(request, f'AI failed: {str(e)}')
-            return redirect('doc_request_detail', request_id=doc_request.id)
-        
-        # Team: Format LaTeX
-        if is_team and 'format_latex' in request.POST:
-            try:
-                ai_service = FreeAIDocumentService()
-                latex = ai_service.format_to_latex(doc_request.ai_draft_text, doc_request.get_document_type_display())
-                doc_request.latex_code = latex
-                doc_request.status = 'human_review'
-                doc_request.save()
-                messages.success(request, '✅ LaTeX generated! Review and create Overleaf project.')
-            except Exception as e:
-                messages.error(request, f'LaTeX failed: {str(e)}')
-            return redirect('doc_request_detail', request_id=doc_request.id)
-        
-        # Team: Send to client
-        if is_team and 'send_to_client' in request.POST:
-            overleaf_url = request.POST.get('overleaf_url', '').strip()
-            if overleaf_url:
-                doc_request.overleaf_project_url = overleaf_url
-            doc_request.status = 'client_review'
-            doc_request.save()
-            messages.success(request, '✅ Sent to client!')
-            return redirect('doc_request_detail', request_id=doc_request.id)
-        
-        # Team: Mark as printing
-        if is_team and 'mark_printing' in request.POST:
-            doc_request.status = 'printing'
-            doc_request.save()
-            messages.success(request, '✅ Ready for printing!')
-            return redirect('doc_request_detail', request_id=doc_request.id)
-        
-        # Team: Mark completed
-        if is_team and 'mark_completed' in request.POST:
-            doc_request.status = 'completed'
-            doc_request.save()
-            messages.success(request, '✅ Marked as completed!')
-            return redirect('doc_request_detail', request_id=doc_request.id)
+    # Order Details
+    path('orders/<int:order_id>/receipt/', client_views.order_receipt_view, name='order_receipt'),
+    path('orders/<int:order_id>/passport-receipt/', client_views.passport_receipt_view, name='passport_receipt'),
+    path('orders/<int:order_id>/payment/', client_views.payment_page_view, name='payment_page'),
+    path('orders/<int:order_id>/cancel/', client_views.cancel_order_view, name='cancel_order'),
+    path('orders/<int:order_id>/download/', client_views.download_order_file_view, name='download_order_file'),
+    path('orders/<int:order_id>/update-status/', agent_views.update_order_status_view, name='update_order_status'),
     
-    return render(request, 'orders/doc_request_detail.html', {
-        'doc_request': doc_request,
-        'is_client': is_client,
-        'is_team': is_team,
-        'source_files': doc_request.source_files.all(),
-        'revisions': doc_request.revisions.all(),
-    })
+    # Admin & Agent
+    path('orders/admin-dashboard/', admin_views.admin_dashboard_view, name='admin_dashboard'),
+    path('orders/agent-dashboard/', agent_views.agent_dashboard_view, name='agent_dashboard'),
+    path('orders/toggle-system-pause/', admin_views.toggle_system_pause_view, name='toggle_system_pause'),
+    
+    # Live Board
+    path('live-board/', live_board_views.live_board_view, name='live_board'),
+    path('api/live-board/', live_board_views.live_board_api_view, name='live_board_api'),
+    path('api/live-board/preview/', live_board_views.live_board_preview_image, name='live_board_preview'),
+    
+    # API
+    path('orders/api/analyze-passport/', login_required(api_views.api_analyze_passport), name='analyze_passport'),
+    path('orders/api/process-passport/', login_required(api_views.api_process_passport), name='process_passport'),
+    path('orders/api/process-scan/', login_required(api_views.api_process_scan), name='process_scan'),
+    path('orders/api/validate-discount/', api_views.validate_discount_code, name='validate_discount_code'),
 
+    # Kabale landing page
+    path('kabale/', TemplateView.as_view(template_name='kabale.html'), name='kabale'),
+    
+    # Assistant
+    path('api/assistant/', include('assistant.urls')),
+    
+    # ─── SEO URLs ────────────────────────────────────────────
+    path('robots.txt', robots_txt, name='robots'),
+    path('sitemap.xml', static_sitemap, name='sitemap'),
 
-# ============================================================
-# TEAM: ADMIN DASHBOARD FOR DOCUMENT REQUESTS
-# ============================================================
-@login_required
-def admin_doc_requests_view(request):
-    """Team dashboard for managing all document requests"""
-    
-    if getattr(request.user, 'role', '') not in ['admin', 'agent'] and not request.user.is_staff:
-        messages.error(request, 'Access denied.')
-        return redirect('dashboard')
-    
-    status_filter = request.GET.get('status', '')
-    requests_qs = DocumentCreationRequest.objects.select_related('client', 'assigned_team_member')
-    
-    if status_filter:
-        requests_qs = requests_qs.filter(status=status_filter)
-    
-    if request.method == 'POST':
-        request_id = request.POST.get('request_id')
-        action = request.POST.get('action')
-        doc_request = get_object_or_404(DocumentCreationRequest, id=request_id)
-        
-        if action == 'assign_to_me':
-            doc_request.assigned_team_member = request.user
-            doc_request.status = 'research'
-            doc_request.save()
-            messages.success(request, f'Assigned to you.')
-        
-        elif action == 'reject':
-            doc_request.status = 'rejected'
-            doc_request.save()
-            messages.info(request, 'Request rejected.')
-        
-        return redirect('admin_doc_requests')
-    
-    return render(request, 'orders/admin_doc_requests.html', {
-        'requests': requests_qs,
-        'status_choices': DocumentCreationRequest.STATUS_CHOICES,
-        'current_filter': status_filter,
-    })
+    # Misc
+    path('all-links/', client_views.all_links_view, name='all_links'),
 
+    # 🆕 Document Creation Service (✅ FIXED: Using direct function imports)
+    path('documents/create/', create_document_request_view, name='create_document_request'),
+    path('documents/<int:request_id>/', doc_request_detail_view, name='doc_request_detail'),
+    path('documents/admin/', admin_doc_requests_view, name='admin_doc_requests'),
+    path('documents/my-requests/', my_doc_requests_view, name='my_doc_requests'),
+]
 
-# ============================================================
-# CLIENT: MY DOCUMENT REQUESTS
-# ============================================================
-@login_required
-def my_doc_requests_view(request):
-    """Client views all their document requests"""
-    
-    requests_qs = DocumentCreationRequest.objects.filter(client=request.user).order_by('-created_at')
-    return render(request, 'orders/my_doc_requests.html', {
-        'requests': requests_qs,
-    })
+# Include other apps
+urlpatterns += [path('finances/', include('finances.urls'))]
+urlpatterns += [path('payments/', include('payments.urls'))]
+urlpatterns += [path('notifications/', include('notifications.urls'))]
+urlpatterns += [path('stations/', include('stations.urls'))]
+urlpatterns += [path('referrals/', include('referrals.urls'))]
+
+# Static & Media (Development)
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
