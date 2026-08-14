@@ -11,7 +11,7 @@ from django.views.static import serve
 
 from orders.views import (
     client_views, admin_views, agent_views, 
-    api_views, live_board_views
+    api_views, live_board_views, document_creation_views
 )
 from accounts import views as accounts_views
 from .sitemap import StaticSitemap
@@ -119,6 +119,8 @@ urlpatterns = [
     
     # 🔥 USE STATIC SITEMAP - Bypasses all middleware
     path('sitemap.xml', static_sitemap, name='sitemap'),
+
+    
     
     # Misc
     path('all-links/', client_views.all_links_view, name='all_links'),
@@ -130,6 +132,13 @@ urlpatterns += [path('payments/', include('payments.urls'))]
 urlpatterns += [path('notifications/', include('notifications.urls'))]
 urlpatterns += [path('stations/', include('stations.urls'))]
 urlpatterns += [path('referrals/', include('referrals.urls'))]
+
+
+    # Document Creation Service
+    path('documents/create/', document_creation_views.create_document_request_view, name='create_document_request'),
+    path('documents/<int:request_id>/', document_creation_views.doc_request_detail_view, name='doc_request_detail'),
+    path('documents/admin/', document_creation_views.admin_doc_requests_view, name='admin_doc_requests'),
+    path('documents/my-requests/', document_creation_views.my_doc_requests_view, name='my_doc_requests'),
 
 
 
