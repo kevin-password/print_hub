@@ -48,20 +48,12 @@
    </script>
    
    <!-- ─── FAVICON & APP ICONS ────────────────────────────────── -->
-   <!-- Primary SVG favicon (modern browsers) -->
    <link rel="icon" type="image/svg+xml" href="{% static 'icon.svg' %}">
-   
-   <!-- Fallback ICO format (older browsers) -->
    <link rel="shortcut icon" href="{% static 'icon.svg' %}">
-   
-   <!-- PNG fallback sizes -->
    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'icon.svg' %}">
    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'icon.svg' %}">
-   
-   <!-- Apple Touch Icon (iOS home screen) -->
    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'icon.svg' %}">
    
-   <!-- Android Chrome -->
    <link rel="manifest" href="/static/manifest.json">
    <meta name="theme-color" content="#0f172a" id="meta-theme-color">
    <meta name="apple-mobile-web-app-capable" content="yes">
@@ -196,8 +188,18 @@
                         </a>
                         {% if user.is_authenticated %}
                             <a href="{% url 'dashboard' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10">My Orders</a>
+                            
+                            <!-- 🆕 Document Creation Links for Clients -->
+                            <a href="{% url 'my_doc_requests' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10">My Requests</a>
+                            <a href="{% url 'create_document_request' %}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded text-sm font-medium flex items-center space-x-1 transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                <span>Hire Writer</span>
+                            </a>
+
                             {% if user.is_staff or user.role == 'agent' %}
                                 <a href="{% url 'agent_dashboard' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10">Agent</a>
+                                <!-- 🆕 Document Management Link for Agents -->
+                                <a href="{% url 'admin_doc_requests' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10">Doc Requests</a>
                                 <a href="{% url 'admin_approve_payments' %}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10">Payments</a>
                             {% endif %}
                             {% if user.is_staff or user.role == 'admin' %}
@@ -222,8 +224,15 @@
             <div class="px-4 pt-2 pb-4 space-y-2">
                 {% if user.is_authenticated %}
                     <a href="{% url 'dashboard' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-white/10">My Orders</a>
+                    
+                    <!-- 🆕 Document Creation Links for Mobile Clients -->
+                    <a href="{% url 'my_doc_requests' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-white/10">My Document Requests</a>
+                    <a href="{% url 'create_document_request' %}" class="block px-3 py-2 rounded-md text-base font-medium text-indigo-400 hover:text-indigo-300 hover:bg-white/10 font-bold">📝 Hire a Writer</a>
+
                     {% if user.is_staff or user.role == 'agent' %}
                         <a href="{% url 'agent_dashboard' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-white/10">Agent Dashboard</a>
+                        <!-- 🆕 Document Management Link for Mobile Agents -->
+                        <a href="{% url 'admin_doc_requests' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-white/10">Document Requests</a>
                         <a href="{% url 'admin_approve_payments' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-white/10">Payments</a>
                     {% endif %}
                     {% if user.is_staff or user.role == 'admin' %}
@@ -259,7 +268,6 @@
     <!-- ─── FOOTER ────────────────────────────────────────────── -->
     <footer class="bg-slate-800/50 backdrop-blur-md border-t border-white/10 mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Partners Section -->
             <div class="mb-6 pb-6 border-b border-white/10">
                 <div class="flex flex-wrap justify-center items-center gap-4">
                     <span class="text-gray-500 text-sm">Partners:</span>
@@ -274,7 +282,6 @@
         </div>
     </footer>
 
-    <!-- ─── PWA INSTALL BANNER ───────────────────────────────── -->
     <div id="pwa-install-banner" class="hidden fixed bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 p-4 z-50">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -291,9 +298,7 @@
         </div>
     </div>
 
-    <!-- ─── JAVASCRIPT ────────────────────────────────────────── -->
     <script>
-        // ─── THEME TOGGLE ──────────────────────────────────────
         function toggleTheme() {
             const html = document.documentElement;
             const btn = document.getElementById('themeBtn');
@@ -307,13 +312,11 @@
         }
         (function(){document.getElementById('themeBtn').innerHTML=(localStorage.getItem('theme')||'dark')==='dark'?'&#9788;':'&#9790;';})();
         
-        // ─── MOBILE MENU ──────────────────────────────────────
         document.addEventListener('DOMContentLoaded',function(){
             const btn=document.getElementById('mobile-menu-btn'),menu=document.getElementById('mobile-menu'),hi=document.getElementById('hamburger-icon'),ci=document.getElementById('close-icon');
             if(btn)btn.addEventListener('click',function(){menu.classList.toggle('hidden');hi.classList.toggle('hidden');ci.classList.toggle('hidden');});
         });
 
-        // ─── NOTIFICATIONS ────────────────────────────────────
         function playNotificationSound() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -338,7 +341,6 @@
         setInterval(fetchNotifications,15000);fetchNotifications();
         document.addEventListener('click',function(e){const b=document.getElementById('notification-bell');if(b&&!b.contains(e.target))document.getElementById('notification-dropdown').classList.add('hidden');});
 
-        // ─── PUSH NOTIFICATIONS ──────────────────────────────
         async function subscribeToPush() {
             try {
                 const data = await fetch('/notifications/api/').then(r => r.json());
@@ -357,7 +359,6 @@
         if ('serviceWorker' in navigator && 'PushManager' in window) { subscribeToPush(); }
         {% endif %}
 
-        // ─── PWA INSTALL ──────────────────────────────────────
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e;document.getElementById('pwa-install-banner').classList.remove('hidden');});
         function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('pwa-install-banner').classList.add('hidden');});}}
@@ -366,7 +367,6 @@
         if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js');
     </script>
 
-    <!-- ─── ASSISTANT CHAT WIDGET ────────────────────────────── -->
     {% if user.is_authenticated %}
         {% include 'assistant/widget.html' with user=user %}
     {% endif %}
