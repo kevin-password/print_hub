@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction
 from django.utils import timezone
-from .models import DocumentCreationRequest, DocumentSourceFile, DocumentRevision
+from orders.models import DocumentCreationRequest, DocumentSourceFile, DocumentRevision
 from .services.ai_document_service import FreeAIDocumentService
 
 @login_required
