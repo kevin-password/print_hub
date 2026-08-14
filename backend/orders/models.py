@@ -524,7 +524,7 @@ class DocumentCreationRequest(models.Model):
     )
     
     revision_count = models.IntegerField(default=0)
-    max_revisions = models.IntegerField(default=3)
+    max_revisions = models.IntegerField(default=1)
     
     linked_order = models.OneToOneField('Order', on_delete=models.SET_NULL, null=True, blank=True)
     
