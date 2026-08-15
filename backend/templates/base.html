@@ -372,5 +372,32 @@
     {% endif %}
 
     {% block extra_scripts %}{% endblock %}
+
+
+   <style>
+      :root {
+    /* Kabale University Inspired */
+    --primary-blue: #0072BB;
+    --accent-yellow: #F6EE25;
+    
+    /* Light Theme Defaults */
+    --bg-main: #F8F9FA;
+    --bg-surface: #FFFFFF;
+    --text-main: #212529;
+    --text-muted: #6C757D;
+    
+    /* Status Colors */
+    --color-success: #10B981; /* Ready for Pickup */
+    --color-warning: #F59E0B; /* Pending Payment */
+    --color-danger: #EF4444;  /* Failed/Cancelled */
+}
+
+[data-theme="dark"] {
+    --bg-main: #0F172A;
+    --bg-surface: #1E293B;
+    --text-main: #F8FAFC;
+    --primary-blue: #3B82F6; /* Brighter blue for dark mode */
+}
+   </style>
 </body>
 </html>
