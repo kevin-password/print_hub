@@ -20,19 +20,13 @@ from django.conf import settings
 from django.urls import reverse
 from django.utils.html import strip_tags
 
-# 🛡️ Import Cloudinary for secure URL generation
-try:
-    import cloudinary
-except ImportError:
-    cloudinary = None
-
 from stations.models import Station
 from orders.models import Order, DeliveryZone, Announcement
 from orders.utils import apply_order_status_change
 from .helpers import (
     _user_role, _can_view_order, validate_upload_file,
     _build_order_queryset, _order_summary_counts,
-    _get_tracked_orders, send_order_confirmation_email, send_cancellation_email
+    _get_tracked_order, send_order_confirmation_email, send_cancellation_email
 )
 
 # ============================================================
@@ -97,7 +91,6 @@ def upload_view(request):
         scanner_data = request.POST.get('scanner_data', '')
         
         # 🛡️ FIX: Only force passport/scanned if NO regular files were uploaded!
-        # This prevents "ghost data" from previous tests overriding document uploads.
         if not files:
             if passport_data:
                 order_type = 'passport'
@@ -263,9 +256,7 @@ def upload_view(request):
 # ============================================================
 @login_required
 def passport_receipt_view(request, order_id):
-    if not str(order_id).isdigit():
-        return HttpResponseForbidden('Invalid order ID.')
-    order = get_object_or_404(Order.objects.select_related('station', 'delivery_zone'), id=int(order_id))
+    order = get_object_or_404(Order.objects.select_related('station', 'delivery_zone'), id=order_id)
     if not _can_view_order(request.user, order):
         return HttpResponseForbidden('You do not have permission to view this receipt.')
     estimated_ready = order.estimated_ready_at()
@@ -288,9 +279,7 @@ def passport_receipt_view(request, order_id):
 # ============================================================
 @login_required
 def order_receipt_view(request, order_id):
-    if not str(order_id).isdigit():
-        return HttpResponseForbidden('Invalid order ID.')
-    order = get_object_or_404(Order.objects.select_related('station', 'delivery_zone'), id=int(order_id))
+    order = get_object_or_404(Order.objects.select_related('station', 'delivery_zone'), id=order_id)
     if not _can_view_order(request.user, order):
         return HttpResponseForbidden('You do not have permission to view this receipt.')
     estimated_ready = order.estimated_ready_at()
@@ -314,11 +303,8 @@ def order_receipt_view(request, order_id):
 @login_required
 @transaction.atomic
 def cancel_order_view(request, order_id):
-    if not str(order_id).isdigit():
-        messages.error(request, 'Invalid order ID.')
-        return redirect('dashboard')
     try:
-        order = Order.objects.select_for_update().get(id=int(order_id))
+        order = Order.objects.select_for_update().get(id=order_id)
     except Order.DoesNotExist:
         messages.error(request, 'Order not found.')
         return redirect('dashboard')
@@ -363,74 +349,65 @@ def my_orders_view(request):
 
 
 # ============================================================
-# DOWNLOAD ORDER FILE VIEW (FINAL FIX: REDIRECT + SDK)
+# DOWNLOAD ORDER FILE VIEW (BULLETPROOF VERSION)
 # ============================================================
+def _can_download_order_file(user, order):
+    """Owner OR any privileged role can download."""
+    if order.client == user:
+        return True
+    if user.is_superuser or getattr(user, 'is_staff', False):
+        return True
+    role = str(getattr(user, 'role', '') or '').lower().strip()
+    return role in ('admin', 'agent', 'super_admin', 'manager', 'staff')
+
+
 @login_required
 def download_order_file_view(request, order_id):
     """
-    FIXES 403 (Auth), 404 (Cloudinary), and 502 (Render Timeout):
-    1. Checks Role accurately (Case-insensitive).
-    2. Uses Cloudinary SDK to build a mathematically perfect URL (fixes 404s).
-    3. Uses a fast Redirect instead of Streaming (fixes 502 Bad Gateway).
+    Bulletproof download:
+    - Cloudinary: redirects to the exact URL the storage layer built
+      (no resource_type guessing → no 404s), forces attachment on images/videos only.
+    - Local storage (dev): streams with as_attachment=True.
+    - Every failure path returns a friendly message, never a 500.
     """
-    if not str(order_id).isdigit():
-        return HttpResponseForbidden('Invalid order ID.')
-        
-    order = get_object_or_404(Order, id=int(order_id))
-    user = request.user
-    
-    # 1. ROBUST AUTH CHECK
-    is_owner = (order.client == user)
-    is_privileged = False
-    
-    if user.is_superuser or getattr(user, 'is_staff', False):
-        is_privileged = True
-    else:
-        role = str(_user_role(user)).lower().strip()
-        if role in ('admin', 'agent', 'super_admin', 'manager', 'staff'):
-            is_privileged = True
-            
-    if not is_owner and not is_privileged:
-        logger.warning(f"🚫 Unauthorized download attempt by {user.username} on Order #{order.id}")
-        return HttpResponseForbidden('You do not have permission to download this file.')
-        
-    if not order.file:
-        messages.error(request, 'File not found.')
-        return redirect('dashboard')
-        
-    # 2. GET DOWNLOAD URL
-    try:
-        if 'cloudinary.com' in str(order.file.url) and cloudinary:
-            # Get the exact public ID stored by django-cloudinary-storage
-            public_id = order.file.name 
-            
-            # Cloudinary strips extensions for images, but keeps them for raw files (PDFs, Docs)
-            resource_type = "raw"
-            if public_id.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.gif')):
-                resource_type = "image"
-                
-            # Generate a clean, working URL using the official SDK
-            clean_url, _ = cloudinary.utils.cloudinary_url(
-                public_id, 
-                resource_type=resource_type, 
-                type="upload",
-                flags="attachment" # Forces browser to download instead of previewing
-            )
-            download_url = clean_url or order.file.url
-        else:
-            # Fallback for local files or non-Cloudinary storage
-            download_url = order.file.url
-            if '?' in download_url:
-                download_url += '&fl_attachment=true'
-            else:
-                download_url += '?fl_attachment=true'
-                
-    except Exception as e:
-        logger.error(f"Failed to get file URL for Order #{order.id}: {e}")
-        download_url = order.file.url # Absolute last resort fallback
+    order = get_object_or_404(Order, id=order_id)
 
-    # 3. FAST REDIRECT (No 502 Bad Gateway)
-    return redirect(download_url)
+    # 1. AUTH — robust role handling (handles None, wrong casing, missing attr)
+    if not _can_download_order_file(request.user, order):
+        logger.warning(f"🚫 Unauthorized download attempt by {request.user} on Order #{order.id}")
+        return HttpResponseForbidden('You do not have permission to download this file.')
+
+    # 2. MISSING FILE — friendly, no crash
+    if not order.file:
+        messages.error(request, 'No file is attached to this order.')
+        return redirect('dashboard')
+
+    # 3. GET URL exactly as the storage layer created it (source of truth)
+    try:
+        url = order.file.url
+    except Exception as e:
+        logger.error(f"Storage error fetching URL for Order #{order.id}: {e}")
+        messages.error(request, 'This file is temporarily unavailable. Please try again later.')
+        return redirect('dashboard')
+
+    # 4. CLOUDINARY → fast redirect (no streaming, so no 502 on Render)
+    if 'cloudinary.com' in url:
+        # Raw files (PDF/DOCX) already download as attachment by default.
+        # Only images/videos need the flag to stop browser previewing them.
+        if '/image/upload/' in url or '/video/upload/' in url:
+            url = url.replace('/upload/', '/upload/fl_attachment/', 1)
+        return redirect(url)
+
+    # 5. LOCAL STORAGE (development) → stream as attachment
+    try:
+        fh = order.file.open('rb')
+    except Exception as e:
+        logger.error(f"Could not open local file for Order #{order.id}: {e}")
+        messages.error(request, 'This file is temporarily unavailable.')
+        return redirect('dashboard')
+
+    filename = os.path.basename(order.file.name or f'order_{order.id}')
+    return FileResponse(fh, as_attachment=True, filename=filename)
 
 
 # ============================================================
@@ -438,9 +415,7 @@ def download_order_file_view(request, order_id):
 # ============================================================
 @login_required
 def payment_page_view(request, order_id):
-    if not str(order_id).isdigit():
-        return HttpResponseForbidden('Invalid order ID.')
-    order = get_object_or_404(Order.objects.select_related('station', 'delivery_zone'), id=int(order_id))
+    order = get_object_or_404(Order.objects.select_related('station', 'delivery_zone'), id=order_id)
     if order.client != request.user:
         return HttpResponseForbidden('You can only pay for your own orders.')
     if order.status != 'pending':
