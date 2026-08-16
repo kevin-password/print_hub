@@ -7,13 +7,18 @@ from django.core.validators import ValidationError
 from django.db.models import Q
 from django.utils import timezone
 from django.conf import settings
-from django.core.mail import send_mail
 
 # 🛡️ Safely import python-magic so the app doesn't crash if the C-library is missing
 try:
     import magic
 except ImportError:
     magic = None
+
+# 🛡️ Safely import resend for email sending
+try:
+    import resend
+except ImportError:
+    resend = None
 
 from orders.models import Order
 
@@ -41,7 +46,6 @@ def _user_role(user):
     """
     role = getattr(user, 'role', None)
     if role is None:
-        # Fallback if role ever lives on a profile object
         profile = getattr(user, 'profile', None)
         if profile:
             role = getattr(profile, 'role', None)
@@ -56,32 +60,27 @@ def _is_staff_role(user):
 
 def validate_upload_file(file):
     """Enhanced file validation with extension, size, and MIME type checking."""
-    # 1. Check extension
     ext = os.path.splitext(file.name)[1].lower()
     if ext not in ALLOWED_EXTENSIONS:
         allowed = ', '.join(sorted(ALLOWED_EXTENSIONS))
         return f'Invalid file type. Allowed: {allowed}'
     
-    # 2. Check size
     if file.size > MAX_UPLOAD_SIZE:
         return 'File size exceeds 10MB limit.'
     
-    # 3. Check MIME type
     if magic is None:
-        return None  # Skip MIME check if magic library isn't installed
+        return None
         
     try:
-        # Read first 1024 bytes to detect MIME
         file_content = file.read(1024)
         mime = magic.from_buffer(file_content, mime=True)
-        file.seek(0)  # Reset pointer so Django can read the whole file later
+        file.seek(0)
         
         if mime not in ALLOWED_MIME_TYPES:
             logger.warning(f"Blocked upload: extension {ext}, MIME type {mime}")
             return f'File type not allowed. Detected type: {mime}'
     except Exception as e:
         logger.error(f"Error checking MIME type: {e}", exc_info=True)
-        # Fail open if magic throws an unexpected OS-level error
             
     return None
 
@@ -167,7 +166,6 @@ def _get_tracked_orders(order_id=None, email=None):
             return Order.objects.none()
     return Order.objects.none()
 
-# 🛡️ Alias for client_views.py compatibility (it imports the singular name)
 _get_tracked_order = _get_tracked_orders
 
 
@@ -181,23 +179,142 @@ def is_agent_or_admin(user):
     return role in ('admin', 'agent', 'super_admin', 'manager', 'staff')
 
 
-def send_order_confirmation_email(order):
-    """Send order confirmation email safely."""
+# ============================================================
+# 📧 EMAIL SERVICE - RESEND (Works on Render)
+# ============================================================
+
+def _send_email(to_email: str, subject: str, html_content: str, text_content: str = '') -> bool:
+    """
+    Send email using Resend API (bypasses Render's Port 25 block).
+    Falls back to Django's send_mail if Resend is not configured.
+    """
+    # Try Resend first
+    if resend is not None and hasattr(settings, 'RESEND_API_KEY') and settings.RESEND_API_KEY:
+        try:
+            resend.api_key = settings.RESEND_API_KEY
+            
+            params = {
+                "from": getattr(settings, 'DEFAULT_FROM_EMAIL', 'PrintHub <onboarding@resend.dev>'),
+                "to": [to_email],
+                "subject": subject,
+                "html": html_content,
+            }
+            
+            # Add text fallback if provided
+            if text_content:
+                params["text"] = text_content
+                
+            response = resend.Emails.send(params)
+            logger.info(f"✅ Email sent via Resend to {to_email}: {subject}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ Resend API error: {e}")
+            # Fall through to Django send_mail
+    
+    # Fallback: Try Django's send_mail (works locally with console backend)
+    try:
+        from django.core.mail import send_mail
+        send_mail(
+            subject=subject,
+            message=text_content or f"Please view in HTML-capable email client.",
+            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', None),
+            recipient_list=[to_email],
+            fail_silently=False,  # Changed to False so we see errors locally
+            html_message=html_content if hasattr(settings, 'DEBUG') and settings.DEBUG else None,
+        )
+        logger.info(f"✅ Email sent via Django to {to_email}: {subject}")
+        return True
+    except Exception as e:
+        logger.error(f"❌ Django send_mail error: {e}")
+        return False
+
+
+def send_order_confirmation_email(order) -> bool:
+    """Send order confirmation email with HTML template."""
     if not order.client.email:
         logger.warning(f"Order #{order.id} confirmation skipped: User has no email.")
-        return
+        return False
 
     try:
         subject = f'Order #{order.id} Confirmed - PrintHub'
-        order_type_info = ""
+        
+        # Build order type info
         if order.order_type == 'passport':
-            order_type_info = f"\nOrder Type: Passport Photo\nPhoto Size: {order.get_paper_size_display()}\nCopies: {order.copies}\n"
+            order_type_html = f"""
+            <tr><td style="padding:8px;border:1px solid #ddd;"><strong>Order Type</strong></td><td style="padding:8px;border:1px solid #ddd;">Passport Photo</td></tr>
+            <tr><td style="padding:8px;border:1px solid #ddd;"><strong>Photo Size</strong></td><td style="padding:8px;border:1px solid #ddd;">{order.get_paper_size_display()}</td></tr>
+            <tr><td style="padding:8px;border:1px solid #ddd;"><strong>Copies</strong></td><td style="padding:8px;border:1px solid #ddd;">{order.copies}</td></tr>
+            """
         elif order.order_type == 'scanned':
-            order_type_info = f"\nOrder Type: Scanned Document\nPaper Size: {order.get_paper_size_display()}\nCopies: {order.copies}\n"
+            order_type_html = f"""
+            <tr><td style="padding:8px;border:1px solid #ddd;"><strong>Order Type</strong></td><td style="padding:8px;border:1px solid #ddd;">Scanned Document</td></tr>
+            <tr><td style="padding:8px;border:1px solid #ddd;"><strong>Paper Size</strong></td><td style="padding:8px;border:1px solid #ddd;">{order.get_paper_size_display()}</td></tr>
+            <tr><td style="padding:8px;border:1px solid #ddd;"><strong>Copies</strong></td><td style="padding:8px;border:1px solid #ddd;">{order.copies}</td></tr>
+            """
         else:
-            order_type_info = f"\nPaper Size: {order.get_paper_size_display()}\nCopies: {order.copies}\n"
-            
-        message = f"""Dear {order.client.username},
+            order_type_html = f"""
+            <tr><td style="padding:8px;border:1px solid #ddd;"><strong>Paper Size</strong></td><td style="padding:8px;border:1px solid #ddd;">{order.get_paper_size_display()}</td></tr>
+            <tr><td style="padding:8px;border:1px solid #ddd;"><strong>Copies</strong></td><td style="padding:8px;border:1px solid #ddd;">{order.copies}</td></tr>
+            """
+
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
+                .content {{ background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }}
+                .order-box {{ background: white; border: 2px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 20px 0; }}
+                .status-badge {{ display: inline-block; background: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }}
+                .btn {{ display: inline-block; background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 20px; }}
+                .footer {{ text-align: center; padding: 20px; color: #6b7280; font-size: 12px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1 style="margin:0;">🖨️ PrintHub</h1>
+                    <p style="margin:10px 0 0 0;">Order Confirmation</p>
+                </div>
+                <div class="content">
+                    <h2>Hi {order.client.username},</h2>
+                    <p>Your print order has been received! <span class="status-badge">PENDING</span></p>
+                    
+                    <div class="order-box">
+                        <h3 style="margin-top:0;color:#667eea;">Order Details</h3>
+                        <table style="width:100%;border-collapse:collapse;">
+                            <tr><td style="padding:8px;border:1px solid #ddd;"><strong>Order ID</strong></td><td style="padding:8px;border:1px solid #ddd;">#{order.id}</td></tr>
+                            <tr><td style="padding:8px;border:1px solid #ddd;"><strong>File</strong></td><td style="padding:8px;border:1px solid #ddd;">{order.file_name}</td></tr>
+                            <tr><td style="padding:8px;border:1px solid #ddd;"><strong>Pages</strong></td><td style="padding:8px;border:1px solid #ddd;">{order.page_count}</td></tr>
+                            <tr><td style="padding:8px;border:1px solid #ddd;"><strong>Color</strong></td><td style="padding:8px;border:1px solid #ddd;">{'Yes' if order.is_color else 'No'}</td></tr>
+                            <tr><td style="padding:8px;border:1px solid #ddd;"><strong>Double-sided</strong></td><td style="padding:8px;border:1px solid #ddd;">{'Yes' if order.is_double_sided else 'No'}</td></tr>
+                            <tr><td style="padding:8px;border:1px solid #ddd;"><strong>Binding</strong></td><td style="padding:8px;border:1px solid #ddd;">{order.get_binding_display()}</td></tr>
+                            {order_type_html}
+                            <tr style="background:#f0fdf4;"><td style="padding:12px;border:1px solid #ddd;"><strong>Total</strong></td><td style="padding:12px;border:1px solid #ddd;"><strong style="color:#16a34a;font-size:18px;">{order.total_price:,.0f} UGX</strong></td></tr>
+                        </table>
+                    </div>
+                    
+                    <p style="text-align:center;">
+                        <a href="{getattr(settings, 'SITE_URL', '')}/track/?order_id={order.id}" class="btn">📍 Track Your Order</a>
+                    </p>
+                    
+                    <p style="color:#6b7280;font-size:14px;">We'll notify you via WhatsApp when your order is ready for pickup.</p>
+                </div>
+                <div class="footer">
+                    <p>Thank you for choosing PrintHub!<br>Kabale University Printing Service</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Plain text fallback
+        text_content = f"""
+Dear {order.client.username},
 
 Your print order has been received!
 
@@ -206,56 +323,95 @@ Order Details:
 - File: {order.file_name}
 - Pages: {order.page_count}
 - Color: {'Yes' if order.is_color else 'No'}
-- Double-sided: {'Yes' if order.is_double_sided else 'No'}
-- Binding: {order.get_binding_display()}{order_type_info}
 - Total: {order.total_price:,.0f} UGX
 
 Track your order at: {getattr(settings, 'SITE_URL', '')}/track/?order_id={order.id}
 
 Thank you for choosing PrintHub!
 """
-        send_mail(
-            subject, 
-            message, 
-            settings.DEFAULT_FROM_EMAIL, 
-            [order.client.email], 
-            fail_silently=True
-        )
+        
+        return _send_email(order.client.email, subject, html_content, text_content)
+        
     except Exception as e:
         logger.error(f"Failed to send confirmation email for order #{order.id}: {e}", exc_info=True)
+        return False
 
 
-def send_cancellation_email(order, reason=''):
-    """Send order cancellation email safely."""
+def send_cancellation_email(order, reason='') -> bool:
+    """Send order cancellation email with HTML template."""
     if not order.client.email:
         logger.warning(f"Order #{order.id} cancellation email skipped: User has no email.")
-        return
+        return False
 
     try:
         subject = f'Order #{order.id} Cancelled - PrintHub'
-        message = f"""Dear {order.client.username},
+        
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
+                .content {{ background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }}
+                .order-box {{ background: white; border: 2px solid #fecaca; border-radius: 8px; padding: 20px; margin: 20px 0; }}
+                .status-badge {{ display: inline-block; background: #fee2e2; color: #dc2626; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }}
+                .btn {{ display: inline-block; background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 20px; }}
+                .footer {{ text-align: center; padding: 20px; color: #6b7280; font-size: 12px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1 style="margin:0;">🖨️ PrintHub</h1>
+                    <p style="margin:10px 0 0 0;">Order Cancelled</p>
+                </div>
+                <div class="content">
+                    <h2>Hi {order.client.username},</h2>
+                    <p>Your order has been cancelled. <span class="status-badge">CANCELLED</span></p>
+                    
+                    <div class="order-box">
+                        <h3 style="margin-top:0;color:#dc2626;">Cancellation Details</h3>
+                        <table style="width:100%;border-collapse:collapse;">
+                            <tr><td style="padding:8px;border:1px solid #ddd;"><strong>Order ID</strong></td><td style="padding:8px;border:1px solid #ddd;">#{order.id}</td></tr>
+                            <tr><td style="padding:8px;border:1px solid #ddd;"><strong>File</strong></td><td style="padding:8px;border:1px solid #ddd;">{order.file_name}</td></tr>
+                            <tr><td style="padding:8px;border:1px solid #ddd;"><strong>Date</strong></td><td style="padding:8px;border:1px solid #ddd;">{order.created_at.strftime('%Y-%m-%d %H:%M')}</td></tr>
+                            <tr><td style="padding:8px;border:1px solid #ddd;"><strong>Reason</strong></td><td style="padding:8px;border:1px solid #ddd;">{reason or 'Not specified'}</td></tr>
+                        </table>
+                    </div>
+                    
+                    <p style="text-align:center;">
+                        <a href="{getattr(settings, 'SITE_URL', '')}/upload/" class="btn">📄 Place a New Order</a>
+                    </p>
+                </div>
+                <div class="footer">
+                    <p>PrintHub Team<br>Kabale University Printing Service</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        text_content = f"""
+Dear {order.client.username},
 
-Your order has been cancelled as requested.
+Your order has been cancelled.
 
 Order Details:
 - Order ID: #{order.id}
 - File: {order.file_name}
-- Date: {order.created_at.strftime('%Y-%m-%d %H:%M')}
-- Status: Cancelled
-
-Reason for cancellation: {reason or 'Not specified'}
+- Reason: {reason or 'Not specified'}
 
 Place a new order at: {getattr(settings, 'SITE_URL', '')}/upload/
 
 Thank you,
 PrintHub Team
 """
-        send_mail(
-            subject, 
-            message, 
-            settings.DEFAULT_FROM_EMAIL, 
-            [order.client.email], 
-            fail_silently=True
-        )
+        
+        return _send_email(order.client.email, subject, html_content, text_content)
+        
     except Exception as e:
         logger.error(f"Failed to send cancellation email for order #{order.id}: {e}", exc_info=True)
+        return False
