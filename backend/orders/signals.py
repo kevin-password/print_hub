@@ -1,4 +1,4 @@
-# orders/signals.py
+# backend/orders/signals.py
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -99,7 +99,6 @@ def handle_order_status_change(sender, instance, created, **kwargs):
             logger.warning(f"WhatsApp notification failed: {e}")   
                     
 
-
 def create_order_notification(order, status_type):
     """Create notification for order status changes."""
     try:
@@ -110,4 +109,87 @@ def create_order_notification(order, status_type):
                 'title': 'Payment Confirmed',
                 'message': f'Payment received for Order #{order.id}. Your order is being processed.',
             },
-            '
+            'printing': {
+                'title': 'Printing Started',
+                'message': f'Order #{order.id} ({order.file_name}) is now printing.',
+            },
+            'in_transit': {
+                'title': 'Order In Transit',
+                'message': f'Order #{order.id} is on its way to {order.station.name if order.station else "the station"}.',
+            },
+            'ready': {
+                'title': 'Order Ready for Pickup',
+                'message': f'Order #{order.id} ({order.file_name}) is ready at {order.station.name if order.station else "the station"}.',
+            },
+            'cancelled': {
+                'title': 'Order Cancelled',
+                'message': f'Order #{order.id} has been cancelled. {order.cancellation_reason or ""}',
+            },
+        }
+        
+        info = notifications_map.get(status_type)
+        if info:
+            Notification.create_notification(
+                user=order.client,
+                notification_type='order_status',
+                title=info['title'],
+                message=info['message'],
+                link=f'/orders/{order.id}/receipt/'
+            )
+    except Exception as e:
+        logger.error(f"Notification failed for Order #{order.id}: {e}")
+
+
+def create_financial_records(order):
+    """Create FinancialRecord and AgentEarning entries for completed order."""
+    try:
+        from finances.models import FinancialRecord, AgentEarning, CommissionRate
+        from django.contrib.auth import get_user_model
+        
+        # Find agent
+        User = get_user_model()
+        agent = None
+        if order.station:
+            agent = User.objects.filter(role='agent', station=order.station).first()
+        
+        # Income record (only if not exists)
+        if not FinancialRecord.objects.filter(order=order, transaction_type='income').exists():
+            FinancialRecord.objects.create(
+                transaction_type='income',
+                amount=order.total_price,
+                description=f'Order #{order.id} - {order.file_name}',
+                order=order
+            )
+        
+        # Commission + AgentEarning
+        if order.agent_commission > 0 and agent:
+            if not FinancialRecord.objects.filter(order=order, transaction_type='commission').exists():
+                FinancialRecord.objects.create(
+                    transaction_type='commission',
+                    amount=order.agent_commission,
+                    description=f'Commission for Order #{order.id}',
+                    order=order,
+                    agent=agent
+                )
+            
+            if not AgentEarning.objects.filter(order=order, agent=agent).exists():
+                rate = CommissionRate.get_active_rate()
+                AgentEarning.objects.create(
+                    order=order,
+                    agent=agent,
+                    commission_rate=rate.rate_percentage if rate else Decimal('0.00'),
+                    commission_amount=order.agent_commission,
+                    order_total=order.total_price,
+                )
+                
+                from notifications.models import Notification
+                Notification.create_notification(
+                    user=agent,
+                    notification_type='commission_paid',
+                    title='Commission Earned',
+                    message=f'You earned {order.agent_commission} UGX from Order #{order.id}.',
+                    link=f'/finances/agent-earnings/'
+                )
+                
+    except Exception as e:
+        logger.error(f"Financial records failed for Order #{order.id}: {e}")
