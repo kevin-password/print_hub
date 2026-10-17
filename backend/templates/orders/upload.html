@@ -1,3 +1,4 @@
+
 {% extends 'base.html' %}
 {% load static %}
 
@@ -16,11 +17,514 @@
 {% block twitter_description %}Upload your files and get them printed at Kabale University. Quick, affordable, and reliable.{% endblock %}
 
 {% block content %}
+
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+:root {
+    --ph-navy: #0E2148;
+    --ph-navy-deep: #08162F;
+    --ph-orange: #F0631E;
+    --ph-orange-hover: #D94F12;
+    --ph-cream: #F5F0E6;
+    --ph-white: #FFFFFF;
+    --ph-text: #17243B;
+    --ph-muted: #657188;
+    --ph-border: #DCE2EA;
+    --ph-soft: #F7F9FC;
+    --ph-radius: 14px;
+    --ph-shadow: 0 12px 32px rgba(14, 33, 72, .08);
+}
+
+/* Main page */
+#content,
+main {
+    color: var(--ph-text);
+}
+
+.max-w-2xl.mx-auto {
+    max-width: 790px !important;
+    padding-top: 36px !important;
+    padding-bottom: 64px !important;
+}
+
+/* Heading */
+.max-w-2xl.mx-auto > .text-center:first-child {
+    margin-bottom: 28px !important;
+}
+
+.max-w-2xl.mx-auto > .text-center:first-child h1 {
+    color: var(--ph-navy) !important;
+    font-size: clamp(1.8rem, 4vw, 2.45rem) !important;
+    line-height: 1.2;
+    font-weight: 800 !important;
+    letter-spacing: -.045em;
+}
+
+.max-w-2xl.mx-auto > .text-center:first-child p {
+    color: var(--ph-muted) !important;
+    font-size: .98rem;
+}
+
+/* Mode tabs */
+.max-w-2xl.mx-auto > .flex.gap-2.mb-4 {
+    gap: 8px !important;
+    padding: 6px;
+    background: #EEF1F6;
+    border: 1px solid var(--ph-border);
+    border-radius: 14px;
+}
+
+#btn-document,
+#btn-passport,
+#btn-scanner {
+    min-height: 46px;
+    border-radius: 10px !important;
+    font-weight: 750 !important;
+    transition: background .2s ease, color .2s ease, box-shadow .2s ease;
+}
+
+#btn-document.bg-indigo-600,
+#btn-passport.bg-indigo-600,
+#btn-scanner.bg-indigo-600 {
+    background: var(--ph-navy) !important;
+    color: white !important;
+    box-shadow: 0 3px 10px rgba(14, 33, 72, .16);
+}
+
+#btn-document.bg-slate-700,
+#btn-passport.bg-slate-700,
+#btn-scanner.bg-slate-700 {
+    background: transparent !important;
+    color: #56637A !important;
+}
+
+#btn-document.bg-slate-700:hover,
+#btn-passport.bg-slate-700:hover,
+#btn-scanner.bg-slate-700:hover {
+    background: white !important;
+    color: var(--ph-navy) !important;
+}
+
+/* Mode description */
+#mode-info {
+    background: #FFF6F0 !important;
+    border: 1px solid #F8D6C5 !important;
+    border-radius: 12px !important;
+    padding: 14px 16px !important;
+}
+
+#mode-info-text {
+    color: #68402F !important;
+    line-height: 1.6;
+}
+
+#mode-info-text strong {
+    color: var(--ph-orange);
+}
+
+/* Main form card */
+.max-w-2xl.mx-auto > .bg-slate-800 {
+    background: var(--ph-white) !important;
+    border: 1px solid var(--ph-border) !important;
+    border-radius: 18px !important;
+    padding: clamp(18px, 4vw, 34px) !important;
+    box-shadow: var(--ph-shadow);
+}
+
+/* All form labels and explanatory text */
+#upload-form label.block,
+#upload-form label.block.text-sm {
+    color: var(--ph-navy) !important;
+    font-weight: 750 !important;
+}
+
+#upload-form .text-gray-300,
+#upload-form .text-gray-400 {
+    color: #48566D !important;
+}
+
+#upload-form .text-gray-500 {
+    color: var(--ph-muted) !important;
+}
+
+#upload-form .text-white {
+    color: var(--ph-text) !important;
+}
+
+/* Inputs, selects and textareas */
+#upload-form input[type="text"],
+#upload-form input[type="number"],
+#upload-form select,
+#upload-form textarea {
+    background-color: #FFFFFF !important;
+    color: var(--ph-text) !important;
+    border: 1px solid #CCD5E1 !important;
+    border-radius: 10px !important;
+    min-height: 46px;
+    box-shadow: none !important;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+#upload-form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+#upload-form input::placeholder,
+#upload-form textarea::placeholder {
+    color: #8994A5 !important;
+    opacity: 1;
+}
+
+#upload-form input:focus,
+#upload-form select:focus,
+#upload-form textarea:focus {
+    outline: none !important;
+    border-color: var(--ph-orange) !important;
+    box-shadow: 0 0 0 3px rgba(240, 99, 30, .13) !important;
+}
+
+/* Select options */
+#upload-form select option {
+    color: var(--ph-text);
+    background: white;
+}
+
+/* Form sections */
+#common-fields > .mb-6.bg-slate-700\/30,
+#common-fields .bg-slate-700\/30 {
+    background: var(--ph-soft) !important;
+    border: 1px solid var(--ph-border) !important;
+    border-radius: 13px !important;
+}
+
+#upload-form .border-slate-600 {
+    border-color: var(--ph-border) !important;
+}
+
+#upload-form .bg-slate-700,
+#upload-form .bg-slate-800 {
+    background-color: white !important;
+}
+
+#upload-form .bg-slate-700\/50 {
+    background-color: #F5F7FA !important;
+}
+
+/* Radio and checkbox options */
+#upload-form label.flex.items-center.p-3,
+#upload-form label.flex.items-center.justify-center.p-3 {
+    background: white;
+    border-color: var(--ph-border) !important;
+    border-radius: 10px !important;
+    transition: border-color .2s ease, background .2s ease;
+}
+
+#upload-form label.flex.items-center.p-3:hover,
+#upload-form label.flex.items-center.justify-center.p-3:hover {
+    border-color: #F5A27D !important;
+}
+
+#upload-form label:has(input:checked) {
+    background-color: #FFF5EF !important;
+    border-color: var(--ph-orange) !important;
+}
+
+#upload-form input[type="radio"],
+#upload-form input[type="checkbox"] {
+    accent-color: var(--ph-orange);
+}
+
+/* Document upload area */
+#dropzone,
+#passport-dropzone {
+    background: #F8FAFD !important;
+    border: 2px dashed #B8C5D6 !important;
+    border-radius: 14px !important;
+    transition: background .2s ease, border-color .2s ease;
+}
+
+#dropzone:hover,
+#passport-dropzone:hover {
+    background: #FFF6F0 !important;
+    border-color: var(--ph-orange) !important;
+}
+
+#dropzone-icon {
+    color: var(--ph-orange) !important;
+}
+
+#dropzone-text,
+#passport-file-name {
+    color: var(--ph-navy) !important;
+    text-align: center;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+/* File list */
+#file-list > div {
+    background: #F8FAFD !important;
+    border-color: var(--ph-border) !important;
+    border-radius: 10px !important;
+    padding: 12px !important;
+}
+
+#file-list .text-indigo-400 {
+    color: var(--ph-orange) !important;
+}
+
+#file-list .text-gray-300 {
+    color: var(--ph-text) !important;
+}
+
+#page-count-status {
+    color: var(--ph-muted) !important;
+}
+
+/* Preview panels */
+#preview-content {
+    background: #F8FAFD !important;
+    border-color: var(--ph-border) !important;
+    color: var(--ph-text) !important;
+    border-radius: 12px !important;
+}
+
+/* Passport mode */
+.passport-toggle-btn {
+    border-radius: 10px !important;
+    min-height: 44px;
+}
+
+#btn-passport-upload.bg-indigo-600,
+#btn-passport-camera.bg-indigo-600 {
+    background: var(--ph-navy) !important;
+    color: white !important;
+}
+
+#btn-passport-upload.bg-slate-700,
+#btn-passport-camera.bg-slate-700 {
+    background: #F0F3F8 !important;
+    color: #536078 !important;
+}
+
+#passport-upload-preview {
+    max-height: 240px;
+    object-fit: contain;
+    border-radius: 12px;
+    border-color: var(--ph-border) !important;
+}
+
+#passport-analysis {
+    background: #F8FAFD !important;
+    border-color: var(--ph-border) !important;
+}
+
+#passport-analysis .text-gray-400 {
+    color: var(--ph-muted) !important;
+}
+
+/* Camera and scanner */
+#passport-camera-container .relative.bg-black,
+#scanner-mode .relative.bg-black {
+    background: #101827 !important;
+    border-radius: 14px !important;
+    border: 1px solid #DCE2EA;
+}
+
+#passport-video,
+#passport-canvas,
+#scanner-video {
+    max-height: 480px;
+    object-fit: contain;
+}
+
+#scanner-thumbnails img {
+    border-color: var(--ph-border) !important;
+}
+
+#scanner-thumbnails p {
+    color: var(--ph-muted) !important;
+}
+
+/* Buttons */
+#upload-form button {
+    transition: background .2s ease, border-color .2s ease, transform .15s ease;
+}
+
+#upload-form button:active {
+    transform: translateY(1px);
+}
+
+#start-passport-camera,
+#start-scanner-camera,
+#btn-passport-upload.bg-indigo-600,
+#btn-passport-camera.bg-indigo-600 {
+    background: var(--ph-navy) !important;
+}
+
+#capture-passport,
+#scan-page {
+    background: #16835D !important;
+    color: white !important;
+}
+
+#capture-passport:hover,
+#scan-page:hover {
+    background: #116B4B !important;
+}
+
+#retake-passport {
+    background: #EEF1F6 !important;
+    color: var(--ph-navy) !important;
+    border: 1px solid var(--ph-border);
+}
+
+/* Copies controls */
+#copies {
+    background: white !important;
+    color: var(--ph-navy) !important;
+    border-color: #CCD5E1 !important;
+}
+
+#common-fields button[onclick="adjustCopies(-1)"],
+#common-fields button[onclick="adjustCopies(1)"] {
+    background: var(--ph-navy) !important;
+    color: white !important;
+    box-shadow: none !important;
+}
+
+#common-fields button[onclick="adjustCopies(-1)"]:hover,
+#common-fields button[onclick="adjustCopies(1)"]:hover {
+    background: var(--ph-orange) !important;
+}
+
+/* Discount button */
+#apply-discount {
+    background: var(--ph-navy) !important;
+    color: white !important;
+    border-radius: 10px !important;
+}
+
+#apply-discount:hover {
+    background: var(--ph-orange) !important;
+}
+
+/* Price summary */
+#common-fields > .bg-indigo-500\/10 {
+    background: #FFF5EF !important;
+    border: 1px solid #F6D7C7 !important;
+    border-radius: 14px !important;
+}
+
+#common-fields > .bg-indigo-500\/10 p:first-child {
+    color: #A94A20 !important;
+    letter-spacing: .08em;
+}
+
+#live-price {
+    color: var(--ph-navy) !important;
+    font-size: clamp(2rem, 6vw, 2.65rem) !important;
+    letter-spacing: -.04em;
+    overflow-wrap: anywhere;
+}
+
+/* Submit order */
+#upload-form button[type="submit"] {
+    background: var(--ph-orange) !important;
+    color: white !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    min-height: 58px;
+    font-size: 1.02rem !important;
+    box-shadow: 0 6px 16px rgba(240, 99, 30, .20);
+}
+
+#upload-form button[type="submit"]:hover {
+    background: var(--ph-orange-hover) !important;
+    box-shadow: 0 8px 20px rgba(240, 99, 30, .27);
+}
+
+/* Errors and feedback */
+#upload-form .text-red-400 {
+    color: #C62828 !important;
+}
+
+#upload-form .text-green-400 {
+    color: #16835D !important;
+}
+
+/* File information */
+#file-info > div {
+    background: #F5F7FA !important;
+    border: 1px solid var(--ph-border);
+    border-radius: 9px !important;
+}
+
+/* Responsive layout */
+@media (max-width: 640px) {
+    .max-w-2xl.mx-auto {
+        padding: 24px 12px 42px !important;
+    }
+
+    .max-w-2xl.mx-auto > .text-center:first-child {
+        margin-bottom: 22px !important;
+    }
+
+    .max-w-2xl.mx-auto > .flex.gap-2.mb-4 {
+        gap: 4px !important;
+        padding: 4px;
+    }
+
+    #btn-document,
+    #btn-passport,
+    #btn-scanner {
+        font-size: 11px !important;
+        padding: 10px 4px !important;
+        min-height: 44px;
+    }
+
+    .max-w-2xl.mx-auto > .bg-slate-800 {
+        padding: 16px !important;
+        border-radius: 14px !important;
+    }
+
+    #upload-form .grid.grid-cols-1.md\:grid-cols-2 {
+        gap: 18px !important;
+    }
+
+    #upload-form .text-4xl {
+        font-size: 2rem !important;
+    }
+
+    #upload-form .flex.gap-2 input {
+        min-width: 0;
+    }
+
+    #apply-discount {
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+    }
+
+    #passport-camera-container .relative.bg-black,
+    #scanner-mode .relative.bg-black {
+        min-height: 230px !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #upload-form *,
+    .max-w-2xl.mx-auto * {
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+    }
+}
+</style>
 
 <div class="max-w-2xl mx-auto px-4 py-8 sm:py-12">
     <div class="text-center mb-8">
@@ -29,9 +533,9 @@
     </div>
 
     <div class="flex gap-2 mb-4">
-        <button onclick="switchMode('document')" id="btn-document" class="flex-1 py-3 rounded-lg font-bold text-sm bg-indigo-600 text-white transition-all">Upload Document</button>
-        <button onclick="switchMode('passport')" id="btn-passport" class="flex-1 py-3 rounded-lg font-bold text-sm bg-slate-700 text-gray-400 hover:bg-slate-600 transition-all">Take Passport</button>
-        <button onclick="switchMode('scanner')" id="btn-scanner" class="flex-1 py-3 rounded-lg font-bold text-sm bg-slate-700 text-gray-400 hover:bg-slate-600 transition-all">Scan to Photocopy</button>
+        <button type="button" onclick="switchMode('document')" id="btn-document" class="flex-1 py-3 rounded-lg font-bold text-sm bg-indigo-600 text-white transition-all">Upload Document</button>
+        <button type="button" onclick="switchMode('passport')" id="btn-passport" class="flex-1 py-3 rounded-lg font-bold text-sm bg-slate-700 text-gray-400 hover:bg-slate-600 transition-all">Take Passport</button>
+        <button type="button" onclick="switchMode('scanner')" id="btn-scanner" class="flex-1 py-3 rounded-lg font-bold text-sm bg-slate-700 text-gray-400 hover:bg-slate-600 transition-all">Scan to Photocopy</button>
     </div>
 
     <div id="mode-info" class="bg-slate-700/50 border border-slate-600 rounded-lg p-3 mb-6 text-center">
@@ -57,16 +561,13 @@
                         <svg id="dropzone-icon" class="w-12 h-12 text-gray-400 group-hover:scale-110 group-hover:text-indigo-400 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                         <span class="text-sm text-gray-300 font-semibold mt-2" id="dropzone-text">Drag and drop your files here or click to browse</span>
                         <span class="text-xs text-gray-500 mt-1">PDF, PPTX, DOCX, TXT, PNG, JPG (Max 10MB per file)</span>
-                        <!-- 🆕 MULTIPLE FILE INPUT -->
                         <input type="file" class="hidden" id="file-input" name="files" accept=".pdf,.pptx,.docx,.doc,.txt,.png,.jpg,.jpeg" multiple>
                     </label>
-                    
-                    <!-- 🆕 FILE LIST UI -->
+
                     <div id="file-list" class="mt-3"></div>
                     <div id="page-count-status" class="text-sm mt-2 text-gray-400 text-center h-5"></div>
                 </div>
-                
-                <!-- PREVIEW CONTAINER (Hidden for multi-file to keep UI clean) -->
+
                 <div id="preview-container" class="mb-6 hidden">
                     <label class="block text-sm font-bold text-gray-300 mb-2">📄 Document Preview</label>
                     <div id="preview-content" class="border border-slate-600 rounded p-4 bg-slate-700/30 max-h-80 overflow-auto"></div>
@@ -82,7 +583,7 @@
             <!-- PASSPORT MODE -->
             <div id="passport-mode" style="display:none;">
                 <input type="hidden" id="passport-copies" value="6">
-                
+
                 <div class="grid grid-cols-2 gap-3 mb-4">
                     <button type="button" id="btn-passport-upload" onclick="switchPassportInput('upload')" class="passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-indigo-600 text-white transition-all">📁 Upload Photo</button>
                     <button type="button" id="btn-passport-camera" onclick="switchPassportInput('camera')" class="passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-slate-700 text-gray-400 transition-all">📸 Take Photo</button>
@@ -111,6 +612,7 @@
                             </label>
                         </div>
                     </div>
+
                     <div class="mb-4">
                         <label class="block text-sm font-bold text-gray-300 mb-2">Background Color</label>
                         <div class="grid grid-cols-4 gap-2">
@@ -121,6 +623,7 @@
                         </div>
                         <input type="hidden" id="bg-color" value="#ffffff">
                     </div>
+
                     <div class="relative bg-black rounded-lg overflow-hidden mb-4" style="min-height:300px;">
                         <video id="passport-video" autoplay playsinline class="w-full" style="display:none;"></video>
                         <canvas id="passport-canvas" class="w-full" style="display:none;"></canvas>
@@ -132,6 +635,7 @@
                         </div>
                         <div id="face-guide" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:200px; height:250px; border:3px dashed #22c55e; border-radius:50%; pointer-events:none;"></div>
                     </div>
+
                     <div id="passport-analysis" class="bg-slate-700/50 border border-slate-600 rounded-lg p-3 mb-4" style="display:none;">
                         <p class="text-xs font-bold text-gray-400 uppercase mb-2">Photo Analysis (Server)</p>
                         <div class="grid grid-cols-2 gap-2 text-xs">
@@ -143,14 +647,17 @@
                             <div class="flex justify-between"><span class="text-gray-400">Overall</span><span id="check-overall" class="text-yellow-400">-</span></div>
                         </div>
                     </div>
+
                     <div class="flex gap-3 mb-4">
                         <button type="button" id="start-passport-camera" onclick="startPassportCamera()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded transition-all">Start Camera</button>
                         <button type="button" id="capture-passport" onclick="capturePassport()" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded transition-all" style="display:none;">Capture & Process</button>
                     </div>
+
                     <div id="passport-processing" class="text-center py-4 hidden">
                         <div class="animate-spin w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto mb-2"></div>
                         <p class="text-gray-400 text-sm">Processing photo...</p>
                     </div>
+
                     <button type="button" id="retake-passport" onclick="retakePassport()" class="w-full bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 rounded transition-all mb-4" style="display:none;">Retake</button>
                     <input type="hidden" id="passport-data" name="passport_data">
                 </div>
@@ -165,6 +672,7 @@
                         <option value="4x6">4x6</option>
                     </select>
                 </div>
+
                 <div class="relative bg-black rounded-lg overflow-hidden mb-4" style="min-height:300px;">
                     <video id="scanner-video" autoplay playsinline class="w-full" style="display:none;"></video>
                     <div id="scanner-placeholder" class="flex items-center justify-center h-64 text-gray-500">
@@ -174,31 +682,34 @@
                         </div>
                     </div>
                 </div>
+
                 <div id="scanner-processing" class="text-center py-4 hidden">
                     <div class="animate-spin w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto mb-2"></div>
                     <p class="text-gray-400 text-sm">Enhancing document...</p>
                 </div>
+
                 <div class="flex gap-3 mb-4">
                     <button type="button" id="start-scanner-camera" onclick="startScannerCamera()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded transition-all">Start Scanner</button>
                     <button type="button" id="scan-page" onclick="scanPage()" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded transition-all" style="display:none;">Scan Page</button>
                 </div>
+
                 <div class="mb-4">
                     <p class="text-sm text-gray-400 mb-2">Pages scanned: <span id="scanner-page-count" class="text-white font-bold">0</span></p>
                     <div id="scanner-thumbnails" class="flex gap-2 flex-wrap"></div>
                 </div>
+
                 <button type="button" id="finish-scanning" onclick="finishScanning()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded transition-all mb-4" style="display:none;">Finish & Create PDF</button>
                 <input type="hidden" id="scanner-data" name="scanner_data">
             </div>
 
             <!-- COMMON FIELDS -->
             <div id="common-fields">
-                
+
                 <div class="mb-6 bg-slate-700/30 rounded p-5 border border-slate-600">
                     <label class="block text-sm font-bold text-gray-300 mb-3 text-center">Number of Copies</label>
                     <div class="flex items-center justify-center space-x-6">
                         <button type="button" onclick="adjustCopies(-1)" class="w-12 h-12 flex items-center justify-center rounded-full bg-slate-600 text-white hover:bg-red-500/80 transition-colors text-2xl font-bold shadow-lg">-</button>
-                        <input type="number" id="copies" name="copies" value="1" min="1" max="100" 
-                               class="w-24 text-center bg-slate-800 text-white text-3xl font-extrabold border-2 border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 price-trigger" onchange="calculatePrice()">
+                        <input type="number" id="copies" name="copies" value="1" min="1" max="100" class="w-24 text-center bg-slate-800 text-white text-3xl font-extrabold border-2 border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 price-trigger" onchange="calculatePrice()">
                         <button type="button" onclick="adjustCopies(1)" class="w-12 h-12 flex items-center justify-center rounded-full bg-slate-600 text-white hover:bg-green-500/80 transition-colors text-2xl font-bold shadow-lg">+</button>
                     </div>
                     <p class="text-xs text-gray-500 text-center mt-3">Adjust the number of physical copies you need.</p>
@@ -224,6 +735,7 @@
                             </label>
                         </div>
                     </div>
+
                     <div id="double-sided-option">
                         <label class="block text-sm font-bold text-gray-300 mb-2">Paper Options</label>
                         <label class="flex items-center p-3 border border-slate-600 rounded cursor-pointer hover:bg-slate-700/50 has-[:checked]:bg-indigo-500/10 has-[:checked]:border-indigo-500 h-full">
@@ -264,6 +776,7 @@
                             <span class="ml-2 text-sm font-semibold text-gray-300">Deliver to Me</span>
                         </label>
                     </div>
+
                     <div id="delivery-zone-container" class="hidden">
                         <select class="price-trigger w-full bg-slate-700 border border-slate-600 rounded px-4 py-3 text-white" id="delivery_zone" name="delivery_zone">
                             <option value="" disabled selected>Choose a zone...</option>
@@ -305,23 +818,20 @@
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-const BASE_PRICE_BW = {{ base_price_bw|default:200 }}, 
-      COLOR_SURCHARGE = {{ color_surcharge|default:100 }}, 
-      SPIRAL_FEE = {{ spiral_binding_fee|default:1000 }}, 
+const BASE_PRICE_BW = {{ base_price_bw|default:200 }},
+      COLOR_SURCHARGE = {{ color_surcharge|default:100 }},
+      SPIRAL_FEE = {{ spiral_binding_fee|default:1000 }},
       PASSPORT_PRICE_PER_COPY = 1000;
 
-let currentMode='document', bgColor='#ffffff', passportStream=null, analysisTimer=null, scannerStream=null, scannedPages=[];
-let selectedFiles = []; // 🆕 Array to hold multiple files
+let currentMode = 'document', bgColor = '#ffffff', passportStream = null, analysisTimer = null, scannerStream = null, scannedPages = [];
+let selectedFiles = [];
 
-const infoTexts={
-    document:'<strong>Upload your files</strong> - PDF, Word, PowerPoint, or images', 
-    passport:'<strong>Take or Upload a passport photo</strong>', 
-    scanner:'<strong>Scan documents</strong> - Server-powered enhancement'
+const infoTexts = {
+    document: '<strong>Upload your files</strong> - PDF, Word, PowerPoint, or images',
+    passport: '<strong>Take or Upload a passport photo</strong>',
+    scanner: '<strong>Scan documents</strong> - Server-powered enhancement'
 };
 
-// ============================================================
-// 🆕 MULTI-FILE HANDLING
-// ============================================================
 document.getElementById('file-input').addEventListener('change', function(e) {
     const newFiles = Array.from(e.target.files);
     newFiles.forEach(file => {
@@ -329,7 +839,7 @@ document.getElementById('file-input').addEventListener('change', function(e) {
             selectedFiles.push(file);
         }
     });
-    e.target.value = ''; // Reset so selecting same file again triggers change
+    e.target.value = '';
     renderFileList();
     processAllFiles();
 });
@@ -342,14 +852,17 @@ function removeFile(index) {
 
 function renderFileList() {
     const listContainer = document.getElementById('file-list');
+
     if (selectedFiles.length === 0) {
         listContainer.innerHTML = '';
-        document.getElementById('dropzone-text').innerText = "Drag and drop your files here or click to browse";
+        document.getElementById('dropzone-text').innerText = 'Drag and drop your files here or click to browse';
         document.getElementById('page-count-status').textContent = '';
         document.getElementById('preview-container').classList.add('hidden');
         return;
     }
+
     document.getElementById('dropzone-text').innerText = `${selectedFiles.length} file(s) selected. Click to add more.`;
+
     listContainer.innerHTML = selectedFiles.map((file, index) => `
         <div class="flex items-center justify-between bg-slate-700/50 rounded p-2 mb-2 border border-slate-600">
             <div class="flex items-center space-x-2 overflow-hidden">
@@ -370,12 +883,13 @@ async function processAllFiles() {
         calculatePrice();
         return;
     }
-    
+
     let totalPages = 0;
     document.getElementById('page-count-status').textContent = `⏳ Reading ${selectedFiles.length} file(s)...`;
-    
+
     for (let file of selectedFiles) {
         const ext = file.name.split('.').pop().toLowerCase();
+
         if (ext === 'pdf') {
             try {
                 const arrayBuffer = await file.arrayBuffer();
@@ -383,7 +897,7 @@ async function processAllFiles() {
                 const pdf = await pdfjsLib.getDocument(typedarray).promise;
                 totalPages += pdf.numPages;
             } catch (e) {
-                totalPages += Math.max(1, Math.ceil(file.size / 3000)); 
+                totalPages += Math.max(1, Math.ceil(file.size / 3000));
             }
         } else if (['jpg', 'jpeg', 'png'].includes(ext)) {
             totalPages += 1;
@@ -396,7 +910,7 @@ async function processAllFiles() {
                 const result = await mammoth.extractRawText({arrayBuffer: arrayBuffer});
                 const words = result.value.split(/\s+/).length;
                 totalPages += Math.max(1, Math.ceil(words / 500));
-            } catch(e) {
+            } catch (e) {
                 totalPages += Math.max(1, Math.ceil(file.size / 3000));
             }
         } else if (ext === 'pptx') {
@@ -405,23 +919,20 @@ async function processAllFiles() {
                 const zip = await JSZip.loadAsync(arrayBuffer);
                 const slides = Object.keys(zip.files).filter(name => name.startsWith('ppt/slides/slide') && name.endsWith('.xml'));
                 totalPages += Math.max(1, Math.ceil(slides.length / 2));
-            } catch(e) {
+            } catch (e) {
                 totalPages += Math.max(1, Math.ceil(file.size / 3000));
             }
         } else {
             totalPages += Math.max(1, Math.ceil(file.size / 3000));
         }
     }
-    
+
     document.getElementById('page_count').value = totalPages;
     document.getElementById('page-count-status').textContent = `✅ ${totalPages} total page(s) across ${selectedFiles.length} file(s)`;
-    document.getElementById('preview-container').classList.add('hidden'); // Hide preview for multiple files
+    document.getElementById('preview-container').classList.add('hidden');
     calculatePrice();
 }
 
-// ============================================================
-// HELPER: Sync Passport Hidden Fields
-// ============================================================
 function syncPassportValues() {
     if (currentMode === 'passport') {
         let copies = parseInt(document.getElementById('copies').value) || 6;
@@ -430,15 +941,17 @@ function syncPassportValues() {
     }
 }
 
-function setBgColor(c,btn){
-    bgColor=c;
-    document.getElementById('bg-color').value=c;
-    document.querySelectorAll('#passport-mode .grid-cols-4 button').forEach(b=>{
-        b.classList.remove('border-indigo-400','ring-2','ring-indigo-300');
-        b.classList.add('border-slate-600')
+function setBgColor(c, btn) {
+    bgColor = c;
+    document.getElementById('bg-color').value = c;
+
+    document.querySelectorAll('#passport-mode .grid-cols-4 button').forEach(b => {
+        b.classList.remove('border-indigo-400', 'ring-2', 'ring-indigo-300');
+        b.classList.add('border-slate-600');
     });
+
     btn.classList.remove('border-slate-600');
-    btn.classList.add('border-indigo-400','ring-2','ring-indigo-300');
+    btn.classList.add('border-indigo-400', 'ring-2', 'ring-indigo-300');
 }
 
 function switchPassportInput(mode) {
@@ -452,13 +965,13 @@ function switchPassportInput(mode) {
     if (mode === 'upload') {
         uploadContainer.style.display = 'block';
         cameraContainer.style.display = 'none';
-        btnUpload.className = "passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-indigo-600 text-white transition-all";
-        btnCamera.className = "passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-slate-700 text-gray-400 transition-all";
+        btnUpload.className = 'passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-indigo-600 text-white transition-all';
+        btnCamera.className = 'passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-slate-700 text-gray-400 transition-all';
     } else {
         uploadContainer.style.display = 'none';
         cameraContainer.style.display = 'block';
-        btnCamera.className = "passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-indigo-600 text-white transition-all";
-        btnUpload.className = "passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-slate-700 text-gray-400 transition-all";
+        btnCamera.className = 'passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-indigo-600 text-white transition-all';
+        btnUpload.className = 'passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-slate-700 text-gray-400 transition-all';
     }
 }
 
@@ -466,17 +979,16 @@ function handlePassportUpload(input) {
     if (input.files && input.files[0]) {
         const file = input.files[0];
         document.getElementById('passport-file-name').innerText = file.name;
-        
+
         const reader = new FileReader();
         reader.onload = function(e) {
             document.getElementById('passport-upload-preview').src = e.target.result;
             document.getElementById('passport-upload-preview').classList.remove('hidden');
-        }
+        };
         reader.readAsDataURL(file);
 
-        // For passport, we only handle 1 file, so we clear the multi-file array and sync
         selectedFiles = [file];
-        document.getElementById('passport-data').value = ''; 
+        document.getElementById('passport-data').value = '';
         calculatePrice();
     }
 }
@@ -485,73 +997,73 @@ function adjustCopies(amount) {
     const input = document.getElementById('copies');
     let val = parseInt(input.value) || 1;
     val += amount;
+
     if (val < 1) val = 1;
     if (val > 100) val = 100;
+
     input.value = val;
     calculatePrice();
 }
 
-function switchMode(mode){
-    currentMode=mode;
-    document.getElementById('order_type').value=mode==='passport'?'passport':mode==='scanner'?'scanned':'document';
-    document.getElementById('document-mode').style.display=mode==='document'?'block':'none';
-    document.getElementById('passport-mode').style.display=mode==='passport'?'block':'none';
-    document.getElementById('scanner-mode').style.display=mode==='scanner'?'block':'none';
-    document.getElementById('mode-info-text').innerHTML=infoTexts[mode];
-    
-    ['btn-document','btn-passport','btn-scanner'].forEach(id=>{
-        const b=document.getElementById(id);
-        b.classList.remove('bg-indigo-600','text-white');
-        b.classList.add('bg-slate-700','text-gray-400')
+function switchMode(mode) {
+    currentMode = mode;
+    document.getElementById('order_type').value = mode === 'passport' ? 'passport' : mode === 'scanner' ? 'scanned' : 'document';
+    document.getElementById('document-mode').style.display = mode === 'document' ? 'block' : 'none';
+    document.getElementById('passport-mode').style.display = mode === 'passport' ? 'block' : 'none';
+    document.getElementById('scanner-mode').style.display = mode === 'scanner' ? 'block' : 'none';
+    document.getElementById('mode-info-text').innerHTML = infoTexts[mode];
+
+    ['btn-document', 'btn-passport', 'btn-scanner'].forEach(id => {
+        const b = document.getElementById(id);
+        b.classList.remove('bg-indigo-600', 'text-white');
+        b.classList.add('bg-slate-700', 'text-gray-400');
     });
-    const ab=document.getElementById('btn-'+mode);
-    ab.classList.remove('bg-slate-700','text-gray-400');
-    ab.classList.add('bg-indigo-600','text-white');
-    
+
+    const ab = document.getElementById('btn-' + mode);
+    ab.classList.remove('bg-slate-700', 'text-gray-400');
+    ab.classList.add('bg-indigo-600', 'text-white');
+
     stopPassportCamera();
     stopScannerCamera();
-    
-    if(mode==='passport'){
-        document.querySelector('input[name="passport_size"][value="4x6"]').checked=true;
-        document.getElementById('paper_size').value='4x6';
-        document.querySelector('input[name="is_color"][value="True"]').checked=true;
-        document.getElementById('binding-option').style.opacity='0.4';
-        document.getElementById('binding-option').style.pointerEvents='none';
-        document.getElementById('double-sided-option').style.opacity='0.4';
-        document.getElementById('double-sided-option').style.pointerEvents='none';
-        
+
+    if (mode === 'passport') {
+        document.querySelector('input[name="passport_size"][value="4x6"]').checked = true;
+        document.getElementById('paper_size').value = '4x6';
+        document.querySelector('input[name="is_color"][value="True"]').checked = true;
+        document.getElementById('binding-option').style.opacity = '0.4';
+        document.getElementById('binding-option').style.pointerEvents = 'none';
+        document.getElementById('double-sided-option').style.opacity = '0.4';
+        document.getElementById('double-sided-option').style.pointerEvents = 'none';
+
         document.getElementById('copies').value = 6;
-        document.getElementById('page-count-label').innerText='Number of Photos';
-        document.getElementById('page-count-container').style.display='none';
-        
+        document.getElementById('page-count-label').innerText = 'Number of Photos';
+        document.getElementById('page-count-container').style.display = 'none';
+
         switchPassportInput('upload');
-        
-    } else if(mode==='scanner'){
-        document.getElementById('paper_size').value='A4';
-        document.getElementById('binding-option').style.opacity='1';
-        document.getElementById('binding-option').style.pointerEvents='auto';
-        document.getElementById('double-sided-option').style.opacity='1';
-        document.getElementById('double-sided-option').style.pointerEvents='auto';
-        document.getElementById('page_count').min=1;
-        document.getElementById('page_count').step=1;
-        document.getElementById('page-count-label').innerText='Number of Pages';
-        document.getElementById('page-count-container').style.display='block';
-        
+    } else if (mode === 'scanner') {
+        document.getElementById('paper_size').value = 'A4';
+        document.getElementById('binding-option').style.opacity = '1';
+        document.getElementById('binding-option').style.pointerEvents = 'auto';
+        document.getElementById('double-sided-option').style.opacity = '1';
+        document.getElementById('double-sided-option').style.pointerEvents = 'auto';
+        document.getElementById('page_count').min = 1;
+        document.getElementById('page_count').step = 1;
+        document.getElementById('page-count-label').innerText = 'Number of Pages';
+        document.getElementById('page-count-container').style.display = 'block';
         document.getElementById('copies').value = 1;
-        
     } else {
-        document.getElementById('paper_size').value='A4';
-        document.getElementById('binding-option').style.opacity='1';
-        document.getElementById('binding-option').style.pointerEvents='auto';
-        document.getElementById('double-sided-option').style.opacity='1';
-        document.getElementById('double-sided-option').style.pointerEvents='auto';
-        document.getElementById('page_count').min=1;
-        document.getElementById('page_count').step=1;
-        document.getElementById('page-count-label').innerText='Total Number of Pages';
-        document.getElementById('page-count-container').style.display='block';
-        
+        document.getElementById('paper_size').value = 'A4';
+        document.getElementById('binding-option').style.opacity = '1';
+        document.getElementById('binding-option').style.pointerEvents = 'auto';
+        document.getElementById('double-sided-option').style.opacity = '1';
+        document.getElementById('double-sided-option').style.pointerEvents = 'auto';
+        document.getElementById('page_count').min = 1;
+        document.getElementById('page_count').step = 1;
+        document.getElementById('page-count-label').innerText = 'Total Number of Pages';
+        document.getElementById('page-count-container').style.display = 'block';
         document.getElementById('copies').value = 1;
     }
+
     calculatePrice();
 }
 
@@ -561,206 +1073,266 @@ function formatFileSize(bytes) {
     return (bytes / 1048576).toFixed(1) + ' MB';
 }
 
-async function startPassportCamera(){
-    try{
-        passportStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:640,height:480}});
-        const v=document.getElementById('passport-video');
-        v.srcObject=passportStream;
-        v.style.display='block';
-        document.getElementById('passport-placeholder').style.display='none';
-        document.getElementById('face-guide').style.display='block';
-        document.getElementById('passport-analysis').style.display='block';
-        document.getElementById('start-passport-camera').style.display='none';
-        document.getElementById('capture-passport').style.display='block';
-        startAnalysis(v)
-    }catch(e){alert('Camera access denied.')}
+async function startPassportCamera() {
+    try {
+        passportStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'user', width: 640, height: 480}});
+        const v = document.getElementById('passport-video');
+        v.srcObject = passportStream;
+        v.style.display = 'block';
+        document.getElementById('passport-placeholder').style.display = 'none';
+        document.getElementById('face-guide').style.display = 'block';
+        document.getElementById('passport-analysis').style.display = 'block';
+        document.getElementById('start-passport-camera').style.display = 'none';
+        document.getElementById('capture-passport').style.display = 'block';
+        startAnalysis(v);
+    } catch (e) {
+        alert('Camera access denied.');
+    }
 }
 
-function startAnalysis(video){
-    analysisTimer=setInterval(async()=>{
-        const c=document.createElement('canvas');
-        c.width=video.videoWidth||640;
-        c.height=video.videoHeight||480;
-        const ctx=c.getContext('2d');
-        ctx.drawImage(video,0,0);
-        const dataUrl=c.toDataURL('image/jpeg',0.7);
-        try{
-            const res=await fetch('/orders/api/analyze-passport/',{
-                method:'POST',
-                headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},
-                body:JSON.stringify({image:dataUrl})
+function startAnalysis(video) {
+    analysisTimer = setInterval(async () => {
+        const c = document.createElement('canvas');
+        c.width = video.videoWidth || 640;
+        c.height = video.videoHeight || 480;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+        const dataUrl = c.toDataURL('image/jpeg', 0.7);
+
+        try {
+            const res = await fetch('/orders/api/analyze-passport/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCSRF()},
+                body: JSON.stringify({image: dataUrl})
             });
-            const data=await res.json();
-            if(data.success){
-                const a=data.analysis;
-                updateCheck('check-position',a.face_position.status==='pass',a.face_position.label,'Not centered');
-                updateCheck('check-brightness',a.brightness.status==='pass',a.brightness.label,'Adjust lighting');
-                updateCheck('check-expression',a.expression.status==='pass',a.expression.label,'Not neutral');
-                updateCheck('check-eyes',a.eyes.status==='pass',a.eyes.label,'Not visible');
-                updateCheck('check-background',a.background.status==='pass',a.background.label,'Not uniform');
-                updateCheck('check-overall',a.overall.status==='pass',a.overall.label,'Keep adjusting');
-                document.getElementById('face-guide').style.borderColor=a.overall.status==='pass'?'#22c55e':'#eab308'
+
+            const data = await res.json();
+
+            if (data.success) {
+                const a = data.analysis;
+                updateCheck('check-position', a.face_position.status === 'pass', a.face_position.label, 'Not centered');
+                updateCheck('check-brightness', a.brightness.status === 'pass', a.brightness.label, 'Adjust lighting');
+                updateCheck('check-expression', a.expression.status === 'pass', a.expression.label, 'Not neutral');
+                updateCheck('check-eyes', a.eyes.status === 'pass', a.eyes.label, 'Not visible');
+                updateCheck('check-background', a.background.status === 'pass', a.background.label, 'Not uniform');
+                updateCheck('check-overall', a.overall.status === 'pass', a.overall.label, 'Keep adjusting');
+                document.getElementById('face-guide').style.borderColor = a.overall.status === 'pass' ? '#22c55e' : '#eab308';
             }
-        }catch(e){}
-    },800)
+        } catch (e) {}
+    }, 800);
 }
 
-function updateCheck(id,pass,g,b){
-    const e=document.getElementById(id);
-    e.textContent=pass?g:b;
-    e.className=pass?'text-green-400':'text-red-400'
+function updateCheck(id, pass, good, bad) {
+    const e = document.getElementById(id);
+    e.textContent = pass ? good : bad;
+    e.className = pass ? 'text-green-400' : 'text-red-400';
 }
 
-async function capturePassport(){
-    if(analysisTimer){clearInterval(analysisTimer);analysisTimer=null}
-    const v=document.getElementById('passport-video');
-    const c=document.createElement('canvas');
-    c.width=v.videoWidth||640;
-    c.height=v.videoHeight||480;
-    c.getContext('2d').drawImage(v,0,0);
-    const dataUrl=c.toDataURL('image/jpeg',0.9);
+async function capturePassport() {
+    if (analysisTimer) {
+        clearInterval(analysisTimer);
+        analysisTimer = null;
+    }
+
+    const v = document.getElementById('passport-video');
+    const c = document.createElement('canvas');
+    c.width = v.videoWidth || 640;
+    c.height = v.videoHeight || 480;
+    c.getContext('2d').drawImage(v, 0, 0);
+    const dataUrl = c.toDataURL('image/jpeg', 0.9);
+
     document.getElementById('passport-processing').classList.remove('hidden');
-    document.getElementById('capture-passport').style.display='none';
-    try{
-        const res=await fetch('/orders/api/process-passport/',{
-            method:'POST',
-            headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},
-            body:JSON.stringify({image:dataUrl,bg_color:bgColor,size:document.querySelector('input[name="passport_size"]:checked').value})
+    document.getElementById('capture-passport').style.display = 'none';
+
+    try {
+        const res = await fetch('/orders/api/process-passport/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCSRF()},
+            body: JSON.stringify({
+                image: dataUrl,
+                bg_color: bgColor,
+                size: document.querySelector('input[name="passport_size"]:checked').value
+            })
         });
-        const data=await res.json();
-        if(data.success){
-            document.getElementById('passport-canvas').src=data.processed_image;
-            const pc=document.getElementById('passport-canvas');
-            const img=new Image();
-            img.onload=()=>{
-                pc.width=img.width;
-                pc.height=img.height;
-                pc.getContext('2d').drawImage(img,0,0);
-                pc.style.display='block';
-                v.style.display='none';
-                document.getElementById('face-guide').style.display='none';
-                document.getElementById('passport-analysis').style.display='none';
+
+        const data = await res.json();
+
+        if (data.success) {
+            const pc = document.getElementById('passport-canvas');
+            const img = new Image();
+
+            img.onload = () => {
+                pc.width = img.width;
+                pc.height = img.height;
+                pc.getContext('2d').drawImage(img, 0, 0);
+                pc.style.display = 'block';
+                v.style.display = 'none';
+                document.getElementById('face-guide').style.display = 'none';
+                document.getElementById('passport-analysis').style.display = 'none';
                 document.getElementById('passport-processing').classList.add('hidden');
-                document.getElementById('retake-passport').style.display='block';
-                document.getElementById('passport-data').value=data.processed_image;
-                
+                document.getElementById('retake-passport').style.display = 'block';
+                document.getElementById('passport-data').value = data.processed_image;
+
                 syncPassportValues();
                 createPassportFile(data.processed_image);
-                calculatePrice()
+                calculatePrice();
             };
-            img.src=data.processed_image
+
+            img.src = data.processed_image;
         }
-    }catch(e){alert('Processing failed.')}
+    } catch (e) {
+        alert('Processing failed.');
+    }
 }
 
-function createPassportFile(dataUrl){
-    fetch(dataUrl).then(r=>r.blob()).then(b=>{
-        const f=new File([b],'passport-photo.jpg',{type:'image/jpeg'});
-        selectedFiles = [f]; // Set single file for passport
-        document.getElementById('passport-file-name').innerText='passport-photo.jpg (Captured)';
+function createPassportFile(dataUrl) {
+    fetch(dataUrl).then(r => r.blob()).then(b => {
+        const f = new File([b], 'passport-photo.jpg', {type: 'image/jpeg'});
+        selectedFiles = [f];
+        document.getElementById('passport-file-name').innerText = 'passport-photo.jpg (Captured)';
         document.getElementById('passport-upload-preview').classList.add('hidden');
-    })
-}
-
-function retakePassport(){
-    document.getElementById('passport-canvas').style.display='none';
-    document.getElementById('passport-video').style.display='block';
-    document.getElementById('face-guide').style.display='block';
-    document.getElementById('passport-analysis').style.display='block';
-    document.getElementById('capture-passport').style.display='block';
-    document.getElementById('retake-passport').style.display='none';
-    ['check-position','check-brightness','check-expression','check-eyes','check-background','check-overall'].forEach(id=>{
-        document.getElementById(id).textContent='-';
-        document.getElementById(id).className='text-yellow-400'
     });
-    startAnalysis(document.getElementById('passport-video'))
 }
 
-function stopPassportCamera(){
-    if(passportStream){passportStream.getTracks().forEach(t=>t.stop());passportStream=null}
-    if(analysisTimer){clearInterval(analysisTimer);analysisTimer=null}
+function retakePassport() {
+    document.getElementById('passport-canvas').style.display = 'none';
+    document.getElementById('passport-video').style.display = 'block';
+    document.getElementById('face-guide').style.display = 'block';
+    document.getElementById('passport-analysis').style.display = 'block';
+    document.getElementById('capture-passport').style.display = 'block';
+    document.getElementById('retake-passport').style.display = 'none';
+
+    ['check-position', 'check-brightness', 'check-expression', 'check-eyes', 'check-background', 'check-overall'].forEach(id => {
+        document.getElementById(id).textContent = '-';
+        document.getElementById(id).className = 'text-yellow-400';
+    });
+
+    startAnalysis(document.getElementById('passport-video'));
 }
 
-async function startScannerCamera(){
-    try{
-        scannerStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080}}});
-        const v=document.getElementById('scanner-video');
-        v.srcObject=scannerStream;
-        v.style.display='block';
-        document.getElementById('scanner-placeholder').style.display='none';
-        document.getElementById('start-scanner-camera').style.display='none';
-        document.getElementById('scan-page').style.display='block'
-    }catch(e){alert('Camera access denied.')}
+function stopPassportCamera() {
+    if (passportStream) {
+        passportStream.getTracks().forEach(t => t.stop());
+        passportStream = null;
+    }
+
+    if (analysisTimer) {
+        clearInterval(analysisTimer);
+        analysisTimer = null;
+    }
 }
 
-async function scanPage(){
-    const v=document.getElementById('scanner-video');
-    const c=document.createElement('canvas');
-    c.width=v.videoWidth||1920;
-    c.height=v.videoHeight||1080;
-    c.getContext('2d').drawImage(v,0,0);
-    const dataUrl=c.toDataURL('image/jpeg',0.85);
+async function startScannerCamera() {
+    try {
+        scannerStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'environment', width: {ideal: 1920}, height: {ideal: 1080}}});
+        const v = document.getElementById('scanner-video');
+        v.srcObject = scannerStream;
+        v.style.display = 'block';
+        document.getElementById('scanner-placeholder').style.display = 'none';
+        document.getElementById('start-scanner-camera').style.display = 'none';
+        document.getElementById('scan-page').style.display = 'block';
+    } catch (e) {
+        alert('Camera access denied.');
+    }
+}
+
+async function scanPage() {
+    const v = document.getElementById('scanner-video');
+    const c = document.createElement('canvas');
+    c.width = v.videoWidth || 1920;
+    c.height = v.videoHeight || 1080;
+    c.getContext('2d').drawImage(v, 0, 0);
+    const dataUrl = c.toDataURL('image/jpeg', 0.85);
+
     document.getElementById('scanner-processing').classList.remove('hidden');
-    try{
-        const res=await fetch('/orders/api/process-scan/',{
-            method:'POST',
-            headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},
-            body:JSON.stringify({image:dataUrl})
+
+    try {
+        const res = await fetch('/orders/api/process-scan/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCSRF()},
+            body: JSON.stringify({image: dataUrl})
         });
-        const data=await res.json();
-        if(data.success){
+
+        const data = await res.json();
+
+        if (data.success) {
             scannedPages.push(data.processed_image);
             updateScannerThumbs();
-            document.getElementById('scanner-page-count').textContent=scannedPages.length;
-            document.getElementById('finish-scanning').style.display='block';
-            document.getElementById('page_count').value=scannedPages.length;
-            calculatePrice()
+            document.getElementById('scanner-page-count').textContent = scannedPages.length;
+            document.getElementById('finish-scanning').style.display = 'block';
+            document.getElementById('page_count').value = scannedPages.length;
+            calculatePrice();
         }
-        document.getElementById('scanner-processing').classList.add('hidden')
-    }catch(e){document.getElementById('scanner-processing').classList.add('hidden')}
-}
 
-function updateScannerThumbs(){
-    document.getElementById('scanner-thumbnails').innerHTML=scannedPages.map((p,i)=>`<div class="relative"><img src="${p}" class="h-20 rounded border border-slate-600"><span class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-400 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center cursor-pointer" onclick="deleteScannedPage(${i})">x</span><p class="text-xs text-gray-400 text-center mt-1">Page ${i+1}</p></div>`).join('')
-}
-
-function deleteScannedPage(i){
-    scannedPages.splice(i,1);
-    updateScannerThumbs();
-    document.getElementById('scanner-page-count').textContent=scannedPages.length;
-    document.getElementById('page_count').value=scannedPages.length||1;
-    if(scannedPages.length===0)document.getElementById('finish-scanning').style.display='none';
-    calculatePrice()
-}
-
-async function finishScanning(){
-    if(scannedPages.length===0){alert('No pages scanned.');return}
-    const {jsPDF}=window.jspdf;
-    const pdf=new jsPDF('p','mm','a4');
-    for(let i=0;i<scannedPages.length;i++){
-        if(i>0)pdf.addPage();
-        const img=new Image();
-        img.src=scannedPages[i];
-        await new Promise(r=>{img.onload=r});
-        pdf.addImage(img,'JPEG',0,0,210,297)
+        document.getElementById('scanner-processing').classList.add('hidden');
+    } catch (e) {
+        document.getElementById('scanner-processing').classList.add('hidden');
     }
-    const blob=pdf.output('blob');
-    const f=new File([blob],'scanned-document.pdf',{type:'application/pdf'});
-    
-    selectedFiles = [f]; // Set single file for scanner
-    
+}
+
+function updateScannerThumbs() {
+    document.getElementById('scanner-thumbnails').innerHTML = scannedPages.map((p, i) => `
+        <div class="relative">
+            <img src="${p}" class="h-20 rounded border border-slate-600">
+            <span class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-400 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center cursor-pointer" onclick="deleteScannedPage(${i})">x</span>
+            <p class="text-xs text-gray-400 text-center mt-1">Page ${i + 1}</p>
+        </div>
+    `).join('');
+}
+
+function deleteScannedPage(i) {
+    scannedPages.splice(i, 1);
+    updateScannerThumbs();
+    document.getElementById('scanner-page-count').textContent = scannedPages.length;
+    document.getElementById('page_count').value = scannedPages.length || 1;
+
+    if (scannedPages.length === 0) {
+        document.getElementById('finish-scanning').style.display = 'none';
+    }
+
+    calculatePrice();
+}
+
+async function finishScanning() {
+    if (scannedPages.length === 0) {
+        alert('No pages scanned.');
+        return;
+    }
+
+    const {jsPDF} = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+
+    for (let i = 0; i < scannedPages.length; i++) {
+        if (i > 0) pdf.addPage();
+
+        const img = new Image();
+        img.src = scannedPages[i];
+        await new Promise(r => { img.onload = r; });
+        pdf.addImage(img, 'JPEG', 0, 0, 210, 297);
+    }
+
+    const blob = pdf.output('blob');
+    const f = new File([blob], 'scanned-document.pdf', {type: 'application/pdf'});
+
+    selectedFiles = [f];
+
     switchMode('document');
-    document.getElementById('page_count').value=scannedPages.length;
-    document.getElementById('dropzone-text').innerText='scanned-document.pdf ('+scannedPages.length+' pages)';
+    document.getElementById('page_count').value = scannedPages.length;
+    document.getElementById('dropzone-text').innerText = 'scanned-document.pdf (' + scannedPages.length + ' pages)';
     document.getElementById('dropzone-text').classList.add('font-bold');
-    calculatePrice()
+    calculatePrice();
 }
 
-function stopScannerCamera(){
-    if(scannerStream){scannerStream.getTracks().forEach(t=>t.stop());scannerStream=null}
+function stopScannerCamera() {
+    if (scannerStream) {
+        scannerStream.getTracks().forEach(t => t.stop());
+        scannerStream = null;
+    }
 }
 
-function getCSRF(){return document.querySelector('[name=csrfmiddlewaretoken]').value}
+function getCSRF() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
 
 const pageCountInput = document.getElementById('page_count'),
       livePrice = document.getElementById('live-price'),
@@ -789,7 +1361,7 @@ function calculatePrice() {
     let b = document.getElementById('binding').value;
     let df = 0;
     let t = 0;
-    
+
     if ((document.querySelector('input[name="delivery_type"]:checked')?.value || 'pickup') === 'delivery') {
         const o = deliveryZoneSelect.options[deliveryZoneSelect.selectedIndex];
         if (o) df = parseInt(o.getAttribute('data-fee')) || 0;
@@ -803,11 +1375,11 @@ function calculatePrice() {
     } else if (currentMode === 'passport') {
         t = copies * PASSPORT_PRICE_PER_COPY;
     }
-    
+
     t += df;
-    
+
     if (discountApplied) t = Math.max(0, t - discountValue);
-    
+
     calculatedPriceInput.value = t;
     livePrice.innerText = t.toLocaleString() + ' UGX';
     submitPrice.innerText = t.toLocaleString() + ' UGX';
@@ -815,10 +1387,15 @@ function calculatePrice() {
 
 applyDiscountBtn.addEventListener('click', function() {
     const code = discountCodeInput.value.trim().toUpperCase();
-    if (!code) { showDiscountMsg('Enter a code.', 'error'); return; }
+
+    if (!code) {
+        showDiscountMsg('Enter a code.', 'error');
+        return;
+    }
+
     fetch('{% url "validate_discount_code" %}', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCSRF() },
+        headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCSRF()},
         body: 'code=' + encodeURIComponent(code) + '&order_total=' + calculateRawTotal()
     }).then(r => r.json()).then(data => {
         if (data.valid) {
@@ -828,7 +1405,10 @@ applyDiscountBtn.addEventListener('click', function() {
             showDiscountMsg('Discount applied! Save ' + data.savings.toLocaleString() + ' UGX', 'success');
             applyDiscountBtn.innerText = 'Remove';
             applyDiscountBtn.classList.add('bg-red-600');
-        } else showDiscountMsg(data.error, 'error');
+        } else {
+            showDiscountMsg(data.error, 'error');
+        }
+
         calculatePrice();
     }).catch(() => showDiscountMsg('Error.', 'error'));
 });
@@ -839,9 +1419,11 @@ function calculateRawTotal() {
     let c = document.querySelector('input[name="is_color"]:checked')?.value === 'True';
     let d = document.getElementById('double_sided').checked;
     let b = document.getElementById('binding').value;
+
     if (currentMode === 'passport') {
         return 0;
     }
+
     return (Math.ceil(p / (d ? 2 : 1)) * (BASE_PRICE_BW + (c ? COLOR_SURCHARGE : 0)) + (b === 'spiral' ? SPIRAL_FEE : 0)) * copies;
 }
 
@@ -855,17 +1437,13 @@ pageCountInput.addEventListener('input', calculatePrice);
 priceTriggers.forEach(t => t.addEventListener('change', calculatePrice));
 calculatePrice();
 
-// ============================================================
-// 🛠️ FIX: FORM SUBMIT (Re-attaches files to DOM)
-// ============================================================
 document.getElementById('upload-form').addEventListener('submit', function(e) {
-    // Re-attach files from JS memory back to the DOM input before submitting!
     if (selectedFiles.length > 0) {
         const dt = new DataTransfer();
         selectedFiles.forEach(file => dt.items.add(file));
         const fileInput = document.getElementById('file-input');
         fileInput.files = dt.files;
-        fileInput.name = 'files'; // Ensure backend receives it as 'files'
+        fileInput.name = 'files';
     }
 
     if (currentMode === 'passport') {
@@ -877,8 +1455,7 @@ document.getElementById('upload-form').addEventListener('submit', function(e) {
     } else {
         document.getElementById('order_type').value = 'document';
     }
-    
-    // Final safety check to prevent empty submissions
+
     if (currentMode === 'document' && selectedFiles.length === 0) {
         e.preventDefault();
         alert('Please select at least one document to upload.');
