@@ -3,22 +3,15 @@
 {% load static %}
 
 {% block title %}Upload Documents for Printing - PrintHub{% endblock %}
-
-{% block description %}Upload PDF, Word, PowerPoint, or image files for printing. Quick and affordable printing services for students at Kabale University. Get your documents printed today.{% endblock %}
-
-{% block keywords %}upload documents, print PDF, student printing, document upload, printing services, Kabale University printing, print files{% endblock %}
-
+{% block description %}Upload PDF, Word, PowerPoint, or image files for printing. Quick and affordable printing services for students at Kabale University.{% endblock %}
+{% block keywords %}upload documents, print PDF, student printing, document upload, printing services, Kabale University printing{% endblock %}
 {% block og_title %}Upload & Print Documents - PrintHub{% endblock %}
-
 {% block og_description %}Upload your files and get them printed at Kabale University. Quick, affordable, and reliable printing services.{% endblock %}
-
 {% block twitter_title %}Upload & Print Documents - PrintHub{% endblock %}
-
-{% block twitter_description %}Upload your files and get them printed at Kabale University. Quick, affordable, and reliable.{% endblock %}
+{% block twitter_description %}Upload your files and get them printed at Kabale University.{% endblock %}
 
 {% block content %}
 
-<script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -27,821 +20,944 @@
 <style>
 :root {
     --ph-navy: #0E2148;
-    --ph-navy-deep: #08162F;
+    --ph-deep: #08162F;
     --ph-orange: #F0631E;
-    --ph-orange-hover: #D94F12;
+    --ph-orange-dark: #D94F12;
     --ph-cream: #F5F0E6;
-    --ph-white: #FFFFFF;
     --ph-text: #17243B;
-    --ph-muted: #657188;
-    --ph-border: #DCE2EA;
-    --ph-soft: #F7F9FC;
-    --ph-radius: 14px;
-    --ph-shadow: 0 12px 32px rgba(14, 33, 72, .08);
+    --ph-muted: #69768B;
+    --ph-border: #E0E6EF;
+    --ph-soft: #F6F8FC;
+    --ph-green: #16835D;
+    --ph-shadow: 0 10px 30px rgba(14,33,72,.055);
 }
 
-/* Main page */
-#content,
-main {
+.ph-page, .ph-page * { box-sizing: border-box; }
+
+.ph-page {
+    max-width: 1180px;
+    margin: auto;
+    padding: 36px 20px 70px;
     color: var(--ph-text);
 }
 
-.max-w-2xl.mx-auto {
-    max-width: 790px !important;
-    padding-top: 36px !important;
-    padding-bottom: 64px !important;
+.ph-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 28px;
 }
 
-/* Heading */
-.max-w-2xl.mx-auto > .text-center:first-child {
-    margin-bottom: 28px !important;
+.ph-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--ph-orange);
+    background: #FFF1E9;
+    padding: 7px 11px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 850;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
 }
 
-.max-w-2xl.mx-auto > .text-center:first-child h1 {
-    color: var(--ph-navy) !important;
-    font-size: clamp(1.8rem, 4vw, 2.45rem) !important;
-    line-height: 1.2;
-    font-weight: 800 !important;
+.ph-hero h1 {
+    color: var(--ph-navy);
+    font-size: clamp(28px,4vw,42px);
+    line-height: 1.1;
+    font-weight: 850;
     letter-spacing: -.045em;
+    margin: 0 0 10px;
 }
 
-.max-w-2xl.mx-auto > .text-center:first-child p {
-    color: var(--ph-muted) !important;
-    font-size: .98rem;
-}
-
-/* Mode tabs */
-.max-w-2xl.mx-auto > .flex.gap-2.mb-4 {
-    gap: 8px !important;
-    padding: 6px;
-    background: #EEF1F6;
-    border: 1px solid var(--ph-border);
-    border-radius: 14px;
-}
-
-#btn-document,
-#btn-passport,
-#btn-scanner {
-    min-height: 46px;
-    border-radius: 10px !important;
-    font-weight: 750 !important;
-    transition: background .2s ease, color .2s ease, box-shadow .2s ease;
-}
-
-#btn-document.bg-indigo-600,
-#btn-passport.bg-indigo-600,
-#btn-scanner.bg-indigo-600 {
-    background: var(--ph-navy) !important;
-    color: white !important;
-    box-shadow: 0 3px 10px rgba(14, 33, 72, .16);
-}
-
-#btn-document.bg-slate-700,
-#btn-passport.bg-slate-700,
-#btn-scanner.bg-slate-700 {
-    background: transparent !important;
-    color: #56637A !important;
-}
-
-#btn-document.bg-slate-700:hover,
-#btn-passport.bg-slate-700:hover,
-#btn-scanner.bg-slate-700:hover {
-    background: white !important;
-    color: var(--ph-navy) !important;
-}
-
-/* Mode description */
-#mode-info {
-    background: #FFF6F0 !important;
-    border: 1px solid #F8D6C5 !important;
-    border-radius: 12px !important;
-    padding: 14px 16px !important;
-}
-
-#mode-info-text {
-    color: #68402F !important;
+.ph-hero p {
+    color: var(--ph-muted);
+    margin: 0;
+    font-size: 15px;
     line-height: 1.6;
 }
 
-#mode-info-text strong {
-    color: var(--ph-orange);
-}
-
-/* Main form card */
-.max-w-2xl.mx-auto > .bg-slate-800 {
-    background: var(--ph-white) !important;
-    border: 1px solid var(--ph-border) !important;
-    border-radius: 18px !important;
-    padding: clamp(18px, 4vw, 34px) !important;
+.ph-secure {
+    flex-shrink: 0;
+    background: white;
+    border: 1px solid var(--ph-border);
+    padding: 12px 15px;
+    border-radius: 13px;
+    font-size: 12px;
+    font-weight: 750;
+    color: var(--ph-navy);
     box-shadow: var(--ph-shadow);
 }
 
-/* All form labels and explanatory text */
-#upload-form label.block,
-#upload-form label.block.text-sm {
-    color: var(--ph-navy) !important;
-    font-weight: 750 !important;
+.ph-secure span {
+    display: block;
+    font-weight: 500;
+    color: var(--ph-muted);
+    margin-top: 3px;
 }
 
-#upload-form .text-gray-300,
-#upload-form .text-gray-400 {
-    color: #48566D !important;
+.ph-service-grid {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 16px;
+    margin-bottom: 24px;
 }
 
-#upload-form .text-gray-500 {
-    color: var(--ph-muted) !important;
-}
-
-#upload-form .text-white {
-    color: var(--ph-text) !important;
-}
-
-/* Inputs, selects and textareas */
-#upload-form input[type="text"],
-#upload-form input[type="number"],
-#upload-form select,
-#upload-form textarea {
-    background-color: #FFFFFF !important;
-    color: var(--ph-text) !important;
-    border: 1px solid #CCD5E1 !important;
-    border-radius: 10px !important;
-    min-height: 46px;
-    box-shadow: none !important;
-    transition: border-color .2s ease, box-shadow .2s ease;
-}
-
-#upload-form textarea {
-    min-height: 100px;
-    resize: vertical;
-}
-
-#upload-form input::placeholder,
-#upload-form textarea::placeholder {
-    color: #8994A5 !important;
-    opacity: 1;
-}
-
-#upload-form input:focus,
-#upload-form select:focus,
-#upload-form textarea:focus {
-    outline: none !important;
-    border-color: var(--ph-orange) !important;
-    box-shadow: 0 0 0 3px rgba(240, 99, 30, .13) !important;
-}
-
-/* Select options */
-#upload-form select option {
+.ph-service {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    width: 100%;
+    padding: 21px;
+    text-align: left;
+    background: white;
     color: var(--ph-text);
+    border: 1.5px solid var(--ph-border);
+    border-radius: 18px;
+    cursor: pointer;
+    transition: border-color .2s,box-shadow .2s,transform .2s;
+}
+
+.ph-service:hover { transform: translateY(-2px); border-color: #F2B08F; }
+
+.ph-service.active {
+    border-color: var(--ph-orange);
+    box-shadow: 0 0 0 3px rgba(240,99,30,.09),var(--ph-shadow);
+    background: #FFFCFA;
+}
+
+.ph-service-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 49px;
+    height: 49px;
+    flex-shrink: 0;
+    background: #EDF1F8;
+    color: var(--ph-navy);
+    border-radius: 14px;
+}
+
+.ph-service.active .ph-service-icon { background: #FFF0E7; color: var(--ph-orange); }
+.ph-service-icon svg { width: 25px; height: 25px; }
+
+.ph-service h2 {
+    font-size: 16px;
+    font-weight: 850;
+    margin: 2px 0 6px;
+    color: var(--ph-navy);
+}
+
+.ph-service p {
+    color: var(--ph-muted);
+    font-size: 12px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.ph-service .ph-choice {
+    display: inline-block;
+    margin-top: 10px;
+    color: var(--ph-orange);
+    font-size: 11px;
+    font-weight: 850;
+}
+
+.ph-service.active .ph-choice { color: var(--ph-green); }
+
+.ph-layout {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) 310px;
+    align-items: start;
+    gap: 22px;
+}
+
+.ph-main { min-width: 0; }
+
+.ph-card {
     background: white;
+    border: 1px solid var(--ph-border);
+    border-radius: 18px;
+    padding: 23px;
+    box-shadow: var(--ph-shadow);
+    margin-bottom: 18px;
 }
 
-/* Form sections */
-#common-fields > .mb-6.bg-slate-700\/30,
-#common-fields .bg-slate-700\/30 {
-    background: var(--ph-soft) !important;
-    border: 1px solid var(--ph-border) !important;
-    border-radius: 13px !important;
+.ph-card-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
-#upload-form .border-slate-600 {
-    border-color: var(--ph-border) !important;
+.ph-step {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 11px;
+    color: var(--ph-orange);
+    background: #FFF0E7;
+    font-weight: 900;
+    font-size: 13px;
 }
 
-#upload-form .bg-slate-700,
-#upload-form .bg-slate-800 {
-    background-color: white !important;
+.ph-card-heading h2 {
+    color: var(--ph-navy);
+    font-size: 17px;
+    line-height: 1.3;
+    font-weight: 850;
+    margin: 1px 0 5px;
 }
 
-#upload-form .bg-slate-700\/50 {
-    background-color: #F5F7FA !important;
+.ph-card-heading p {
+    color: var(--ph-muted);
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 0;
 }
 
-/* Radio and checkbox options */
-#upload-form label.flex.items-center.p-3,
-#upload-form label.flex.items-center.justify-center.p-3 {
-    background: white;
-    border-color: var(--ph-border) !important;
-    border-radius: 10px !important;
-    transition: border-color .2s ease, background .2s ease;
+.ph-label {
+    display: block;
+    color: var(--ph-navy);
+    font-size: 12px;
+    font-weight: 800;
+    margin-bottom: 9px;
 }
 
-#upload-form label.flex.items-center.p-3:hover,
-#upload-form label.flex.items-center.justify-center.p-3:hover {
-    border-color: #F5A27D !important;
-}
+.ph-hint { color: var(--ph-muted); font-size: 11px; line-height: 1.6; margin-top: 7px; }
 
-#upload-form label:has(input:checked) {
-    background-color: #FFF5EF !important;
-    border-color: var(--ph-orange) !important;
-}
-
-#upload-form input[type="radio"],
-#upload-form input[type="checkbox"] {
-    accent-color: var(--ph-orange);
-}
-
-/* Document upload area */
-#dropzone,
-#passport-dropzone {
-    background: #F8FAFD !important;
-    border: 2px dashed #B8C5D6 !important;
-    border-radius: 14px !important;
-    transition: background .2s ease, border-color .2s ease;
-}
-
-#dropzone:hover,
-#passport-dropzone:hover {
-    background: #FFF6F0 !important;
-    border-color: var(--ph-orange) !important;
-}
-
-#dropzone-icon {
-    color: var(--ph-orange) !important;
-}
-
-#dropzone-text,
-#passport-file-name {
-    color: var(--ph-navy) !important;
+.ph-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 190px;
+    padding: 25px 15px;
     text-align: center;
-    padding-left: 10px;
-    padding-right: 10px;
+    background: #F9FAFD;
+    border: 2px dashed #C6D0DF;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: .2s;
 }
 
-/* File list */
-#file-list > div {
-    background: #F8FAFD !important;
-    border-color: var(--ph-border) !important;
-    border-radius: 10px !important;
-    padding: 12px !important;
+.ph-dropzone:hover, .ph-dropzone.dragover {
+    background: #FFF7F2;
+    border-color: var(--ph-orange);
 }
 
-#file-list .text-indigo-400 {
-    color: var(--ph-orange) !important;
-}
+.ph-dropzone svg { width: 39px; height: 39px; color: var(--ph-orange); margin-bottom: 12px; }
+.ph-dropzone strong { color: var(--ph-navy); font-size: 14px; }
+.ph-dropzone span { color: var(--ph-muted); font-size: 11px; line-height: 1.6; margin-top: 7px; }
+.ph-dropzone input { display: none; }
 
-#file-list .text-gray-300 {
-    color: var(--ph-text) !important;
-}
+.ph-file-list { display: grid; gap: 8px; margin-top: 13px; }
 
-#page-count-status {
-    color: var(--ph-muted) !important;
-}
-
-/* Preview panels */
-#preview-content {
-    background: #F8FAFD !important;
-    border-color: var(--ph-border) !important;
-    color: var(--ph-text) !important;
-    border-radius: 12px !important;
-}
-
-/* Passport mode */
-.passport-toggle-btn {
-    border-radius: 10px !important;
-    min-height: 44px;
-}
-
-#btn-passport-upload.bg-indigo-600,
-#btn-passport-camera.bg-indigo-600 {
-    background: var(--ph-navy) !important;
-    color: white !important;
-}
-
-#btn-passport-upload.bg-slate-700,
-#btn-passport-camera.bg-slate-700 {
-    background: #F0F3F8 !important;
-    color: #536078 !important;
-}
-
-#passport-upload-preview {
-    max-height: 240px;
-    object-fit: contain;
+.ph-file {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+    padding: 11px;
+    border: 1px solid var(--ph-border);
     border-radius: 12px;
-    border-color: var(--ph-border) !important;
+    background: #FBFCFE;
 }
 
-#passport-analysis {
-    background: #F8FAFD !important;
-    border-color: var(--ph-border) !important;
+.ph-file-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    background: #EDF1F8;
+    color: var(--ph-navy);
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 900;
 }
 
-#passport-analysis .text-gray-400 {
-    color: var(--ph-muted) !important;
+.ph-file-details { min-width: 0; flex: 1; }
+.ph-file-name { overflow-wrap: anywhere; color: var(--ph-navy); font-size: 12px; font-weight: 800; }
+.ph-file-meta { color: var(--ph-muted); font-size: 10px; margin-top: 4px; }
+
+.ph-remove {
+    border: 0;
+    border-radius: 8px;
+    background: #FFF0EF;
+    color: #B42318;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-weight: 900;
 }
 
-/* Camera and scanner */
-#passport-camera-container .relative.bg-black,
-#scanner-mode .relative.bg-black {
-    background: #101827 !important;
-    border-radius: 14px !important;
-    border: 1px solid #DCE2EA;
+.ph-status { min-height: 18px; color: var(--ph-muted); font-size: 11px; margin-top: 10px; }
+.ph-status.error { color: #B42318; }
+.ph-status.success { color: var(--ph-green); }
+
+.ph-field { margin-bottom: 19px; }
+.ph-field:last-child { margin-bottom: 0; }
+
+.ph-input, .ph-select, .ph-textarea {
+    width: 100%;
+    min-height: 45px;
+    border: 1px solid #D4DCE7;
+    border-radius: 11px;
+    padding: 11px 13px;
+    background: white;
+    color: var(--ph-text);
+    font: inherit;
+    font-size: 13px;
 }
 
-#passport-video,
-#passport-canvas,
-#scanner-video {
-    max-height: 480px;
-    object-fit: contain;
+.ph-textarea { min-height: 90px; resize: vertical; }
+
+.ph-input:focus, .ph-select:focus, .ph-textarea:focus {
+    outline: none;
+    border-color: var(--ph-orange);
+    box-shadow: 0 0 0 3px rgba(240,99,30,.11);
 }
 
-#scanner-thumbnails img {
-    border-color: var(--ph-border) !important;
-}
+.ph-option-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
 
-#scanner-thumbnails p {
-    color: var(--ph-muted) !important;
-}
-
-/* Buttons */
-#upload-form button {
-    transition: background .2s ease, border-color .2s ease, transform .15s ease;
-}
-
-#upload-form button:active {
-    transform: translateY(1px);
-}
-
-#start-passport-camera,
-#start-scanner-camera,
-#btn-passport-upload.bg-indigo-600,
-#btn-passport-camera.bg-indigo-600 {
-    background: var(--ph-navy) !important;
-}
-
-#capture-passport,
-#scan-page {
-    background: #16835D !important;
-    color: white !important;
-}
-
-#capture-passport:hover,
-#scan-page:hover {
-    background: #116B4B !important;
-}
-
-#retake-passport {
-    background: #EEF1F6 !important;
-    color: var(--ph-navy) !important;
+.ph-option {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px;
     border: 1px solid var(--ph-border);
+    border-radius: 11px;
+    background: white;
+    color: var(--ph-text);
+    cursor: pointer;
+    min-height: 47px;
 }
 
-/* Copies controls */
-#copies {
-    background: white !important;
-    color: var(--ph-navy) !important;
-    border-color: #CCD5E1 !important;
-}
+.ph-option:has(input:checked) { border-color: var(--ph-orange); background: #FFF7F2; }
+.ph-option input { accent-color: var(--ph-orange); }
+.ph-option span { font-size: 12px; font-weight: 750; }
 
-#common-fields button[onclick="adjustCopies(-1)"],
-#common-fields button[onclick="adjustCopies(1)"] {
-    background: var(--ph-navy) !important;
-    color: white !important;
-    box-shadow: none !important;
-}
+.ph-two-col { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
 
-#common-fields button[onclick="adjustCopies(-1)"]:hover,
-#common-fields button[onclick="adjustCopies(1)"]:hover {
-    background: var(--ph-orange) !important;
-}
-
-/* Discount button */
-#apply-discount {
-    background: var(--ph-navy) !important;
-    color: white !important;
-    border-radius: 10px !important;
-}
-
-#apply-discount:hover {
-    background: var(--ph-orange) !important;
-}
-
-/* Price summary */
-#common-fields > .bg-indigo-500\/10 {
-    background: #FFF5EF !important;
-    border: 1px solid #F6D7C7 !important;
-    border-radius: 14px !important;
-}
-
-#common-fields > .bg-indigo-500\/10 p:first-child {
-    color: #A94A20 !important;
-    letter-spacing: .08em;
-}
-
-#live-price {
-    color: var(--ph-navy) !important;
-    font-size: clamp(2rem, 6vw, 2.65rem) !important;
-    letter-spacing: -.04em;
-    overflow-wrap: anywhere;
-}
-
-/* Submit order */
-#upload-form button[type="submit"] {
-    background: var(--ph-orange) !important;
-    color: white !important;
-    border: 0 !important;
-    border-radius: 12px !important;
-    min-height: 58px;
-    font-size: 1.02rem !important;
-    box-shadow: 0 6px 16px rgba(240, 99, 30, .20);
-}
-
-#upload-form button[type="submit"]:hover {
-    background: var(--ph-orange-hover) !important;
-    box-shadow: 0 8px 20px rgba(240, 99, 30, .27);
-}
-
-/* Errors and feedback */
-#upload-form .text-red-400 {
-    color: #C62828 !important;
-}
-
-#upload-form .text-green-400 {
-    color: #16835D !important;
-}
-
-/* File information */
-#file-info > div {
-    background: #F5F7FA !important;
+.ph-counter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     border: 1px solid var(--ph-border);
-    border-radius: 9px !important;
+    border-radius: 12px;
+    padding: 9px;
 }
 
-/* Responsive layout */
-@media (max-width: 640px) {
-    .max-w-2xl.mx-auto {
-        padding: 24px 12px 42px !important;
-    }
-
-    .max-w-2xl.mx-auto > .text-center:first-child {
-        margin-bottom: 22px !important;
-    }
-
-    .max-w-2xl.mx-auto > .flex.gap-2.mb-4 {
-        gap: 4px !important;
-        padding: 4px;
-    }
-
-    #btn-document,
-    #btn-passport,
-    #btn-scanner {
-        font-size: 11px !important;
-        padding: 10px 4px !important;
-        min-height: 44px;
-    }
-
-    .max-w-2xl.mx-auto > .bg-slate-800 {
-        padding: 16px !important;
-        border-radius: 14px !important;
-    }
-
-    #upload-form .grid.grid-cols-1.md\:grid-cols-2 {
-        gap: 18px !important;
-    }
-
-    #upload-form .text-4xl {
-        font-size: 2rem !important;
-    }
-
-    #upload-form .flex.gap-2 input {
-        min-width: 0;
-    }
-
-    #apply-discount {
-        padding-left: 14px !important;
-        padding-right: 14px !important;
-    }
-
-    #passport-camera-container .relative.bg-black,
-    #scanner-mode .relative.bg-black {
-        min-height: 230px !important;
-    }
+.ph-counter button {
+    width: 37px;
+    height: 37px;
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 9px;
+    color: white;
+    background: var(--ph-navy);
+    font-size: 22px;
+    cursor: pointer;
 }
 
-@media (prefers-reduced-motion: reduce) {
-    #upload-form *,
-    .max-w-2xl.mx-auto * {
-        transition-duration: .01ms !important;
-        animation-duration: .01ms !important;
-    }
+.ph-counter button:hover { background: var(--ph-orange); }
+.ph-counter input { width: 65px; text-align: center; border: 0; outline: 0; font-size: 21px; font-weight: 900; color: var(--ph-navy); }
+
+.ph-delivery-card {
+    padding: 15px;
+    border: 1px solid var(--ph-border);
+    border-radius: 13px;
+    background: #FAFBFD;
+}
+
+.ph-scanner-frame {
+    position: relative;
+    overflow: hidden;
+    background: #101827;
+    border-radius: 15px;
+    min-height: 250px;
+}
+
+#scanner-video { display: none; width: 100%; max-height: 470px; object-fit: contain; }
+.ph-camera-placeholder {
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    text-align: center;
+    color: #D8DFEA;
+}
+
+.ph-camera-placeholder svg { width: 45px; height: 45px; color: #91A0B8; margin-bottom: 12px; }
+.ph-camera-placeholder p { font-size: 12px; line-height: 1.6; margin: 0; }
+
+.ph-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    border: 0;
+    border-radius: 11px;
+    padding: 11px 15px;
+    font-size: 12px;
+    font-weight: 850;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.ph-btn-primary { background: var(--ph-navy); color: white; }
+.ph-btn-primary:hover { background: #193767; }
+.ph-btn-orange { background: var(--ph-orange); color: white; }
+.ph-btn-orange:hover { background: var(--ph-orange-dark); }
+.ph-btn-soft { background: #EEF2F8; color: var(--ph-navy); }
+.ph-btn-green { background: var(--ph-green); color: white; }
+.ph-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.ph-btn-row { display: flex; gap: 9px; margin-top: 13px; }
+.ph-btn-row .ph-btn { flex: 1; }
+
+.ph-thumbnails { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+
+.ph-thumb { position: relative; width: 82px; }
+.ph-thumb img { width: 82px; height: 92px; object-fit: cover; border: 1px solid var(--ph-border); border-radius: 9px; background: #F1F4F8; }
+.ph-thumb p { font-size: 10px; color: var(--ph-muted); text-align: center; margin: 5px 0 0; }
+.ph-thumb button { position: absolute; top: -7px; right: -7px; width: 23px; height: 23px; border: 0; border-radius: 50%; background: #B42318; color: white; cursor: pointer; font-weight: 900; }
+
+.ph-sidebar { position: sticky; top: 20px; }
+
+.ph-summary {
+    background: var(--ph-navy);
+    color: white;
+    border-radius: 18px;
+    padding: 23px;
+    box-shadow: 0 12px 28px rgba(14,33,72,.15);
+}
+
+.ph-summary-label { font-size: 10px; font-weight: 850; letter-spacing: .13em; text-transform: uppercase; color: #C4D0E5; }
+.ph-summary h2 { font-size: 18px; font-weight: 850; margin: 7px 0 20px; color: white; }
+
+.ph-total-label { color: #CBD5E7; font-size: 11px; }
+.ph-total { font-size: clamp(27px,3vw,35px); font-weight: 900; letter-spacing: -.04em; overflow-wrap: anywhere; margin: 5px 0 17px; color: white; }
+
+.ph-summary-line { display: flex; justify-content: space-between; gap: 12px; color: #E0E7F2; font-size: 11px; line-height: 1.5; margin: 12px 0; }
+.ph-summary-line strong { text-align: right; color: white; }
+.ph-summary-divider { border: 0; border-top: 1px solid rgba(255,255,255,.17); margin: 16px 0; }
+
+.ph-discount-row { display: flex; gap: 7px; }
+.ph-discount-row .ph-input { min-width: 0; text-transform: uppercase; }
+.ph-discount-row .ph-btn { flex-shrink: 0; }
+
+.ph-summary .ph-btn-orange { width: 100%; min-height: 52px; margin-top: 15px; font-size: 13px; }
+.ph-summary-note { font-size: 10px; color: #C4D0E5; line-height: 1.6; margin-top: 13px; }
+
+.ph-error-box { padding: 13px 15px; margin-bottom: 17px; border: 1px solid #F4B9B5; border-radius: 12px; background: #FFF1F0; color: #B42318; font-size: 12px; }
+
+#discount-message { font-size: 11px; margin-top: 8px; }
+.ph-hidden { display: none !important; }
+
+@media (max-width: 850px) {
+    .ph-layout { grid-template-columns: minmax(0,1fr); }
+    .ph-sidebar { position: static; }
+    .ph-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
+    .ph-summary-heading, .ph-summary-total, .ph-summary-lines, .ph-summary-checkout { grid-column: 1 / -1; }
+    .ph-total { font-size: 32px; }
+}
+
+@media (max-width: 560px) {
+    .ph-page { padding: 24px 12px 38px; }
+    .ph-hero { align-items: flex-start; }
+    .ph-secure { display: none; }
+    .ph-hero h1 { font-size: 30px; }
+    .ph-hero p { font-size: 13px; }
+    .ph-service-grid { gap: 9px; }
+    .ph-service { padding: 13px 11px; gap: 9px; border-radius: 14px; }
+    .ph-service-icon { width: 35px; height: 35px; border-radius: 10px; }
+    .ph-service-icon svg { width: 20px; height: 20px; }
+    .ph-service h2 { font-size: 12px; }
+    .ph-service p { font-size: 10px; }
+    .ph-service .ph-choice { font-size: 9px; }
+    .ph-card { padding: 16px; border-radius: 15px; }
+    .ph-two-col { grid-template-columns: 1fr; gap: 0; }
+    .ph-summary { display: block; padding: 19px; }
+    .ph-option-grid { gap: 7px; }
+    .ph-option { padding: 10px 8px; }
+    .ph-option span { font-size: 11px; }
+    .ph-btn-row { flex-direction: column; }
+    .ph-btn-row .ph-btn { width: 100%; }
 }
 </style>
 
-<div class="max-w-2xl mx-auto px-4 py-8 sm:py-12">
-    <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-white mb-2">Upload Print Job</h1>
-        <p class="text-gray-400">Fast, easy, and transparent pricing</p>
-    </div>
+<div class="ph-page">
+    <header class="ph-hero">
+        <div>
+            <div class="ph-eyebrow">PrintHub · Print smarter</div>
+            <h1>What are we printing today?</h1>
+            <p>Upload your files or scan physical pages. Configure your order and see the estimated cost instantly.</p>
+        </div>
+        <div class="ph-secure">
+            ✓ Secure order submission
+            <span>Simple, transparent pricing</span>
+        </div>
+    </header>
 
-    <div class="flex gap-2 mb-4">
-        <button type="button" onclick="switchMode('document')" id="btn-document" class="flex-1 py-3 rounded-lg font-bold text-sm bg-indigo-600 text-white transition-all">Upload Document</button>
-        <button type="button" onclick="switchMode('passport')" id="btn-passport" class="flex-1 py-3 rounded-lg font-bold text-sm bg-slate-700 text-gray-400 hover:bg-slate-600 transition-all">Take Passport</button>
-        <button type="button" onclick="switchMode('scanner')" id="btn-scanner" class="flex-1 py-3 rounded-lg font-bold text-sm bg-slate-700 text-gray-400 hover:bg-slate-600 transition-all">Scan to Photocopy</button>
-    </div>
+    {% if upload_error %}
+    <div class="ph-error-box">{{ upload_error }}</div>
+    {% endif %}
 
-    <div id="mode-info" class="bg-slate-700/50 border border-slate-600 rounded-lg p-3 mb-6 text-center">
-        <p id="mode-info-text" class="text-gray-300 text-sm"><strong>Upload your files</strong> - PDF, Word, PowerPoint, or images from your device</p>
-    </div>
+    <form method="post" enctype="multipart/form-data" id="upload-form">
+        {% csrf_token %}
 
-    <input type="hidden" id="order_type" name="order_type" value="document">
-    <input type="hidden" id="paper_size" name="paper_size" value="A4">
-    <input type="hidden" id="calculated_price" name="calculated_price" value="0">
+        <input type="hidden" id="order_type" name="order_type" value="document">
+        <input type="hidden" id="paper_size" name="paper_size" value="A4">
+        <input type="hidden" id="calculated_price" name="calculated_price" value="0">
+        <input type="hidden" id="scanner-data" name="scanner_data" value="">
 
-    <div class="bg-slate-800 border border-slate-700 rounded p-6 sm:p-8">
-        {% if upload_error %}
-        <div class="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded mb-6 text-sm">{{ upload_error }}</div>
-        {% endif %}
+        <div class="ph-service-grid">
+            <button type="button" id="service-document" class="ph-service active" onclick="switchMode('document')" aria-pressed="true">
+                <div class="ph-service-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M7 3h7l5 5v13H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/>
+                        <path d="M14 3v6h5M9 13h6M9 17h6"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2>Upload Documents</h2>
+                    <p>PDF, Word, PowerPoint, text files and images.</p>
+                    <span class="ph-choice" id="choice-document">● Selected service</span>
+                </div>
+            </button>
 
-        <form method="post" enctype="multipart/form-data" id="upload-form">
-            {% csrf_token %}
+            <button type="button" id="service-scanner" class="ph-service" onclick="switchMode('scanner')" aria-pressed="false">
+                <div class="ph-service-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M4 8V5a2 2 0 0 1 2-2h3M20 8V5a2 2 0 0 0-2-2h-3M4 16v3a2 2 0 0 0 2 2h3M20 16v3a2 2 0 0 1-2 2h-3"/>
+                        <path d="M7 8h10v8H7zM9 11h6M9 13h4"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2>Scan & Photocopy</h2>
+                    <p>Capture physical pages with your camera and create a PDF.</p>
+                    <span class="ph-choice" id="choice-scanner">● Choose service</span>
+                </div>
+            </button>
+        </div>
 
-            <!-- DOCUMENT MODE -->
-            <div id="document-mode">
-                <div class="mb-6">
-                    <label id="dropzone" class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-slate-600 rounded cursor-pointer bg-slate-700/30 hover:bg-slate-700/50 transition-all duration-200 group">
-                        <svg id="dropzone-icon" class="w-12 h-12 text-gray-400 group-hover:scale-110 group-hover:text-indigo-400 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                        <span class="text-sm text-gray-300 font-semibold mt-2" id="dropzone-text">Drag and drop your files here or click to browse</span>
-                        <span class="text-xs text-gray-500 mt-1">PDF, PPTX, DOCX, TXT, PNG, JPG (Max 10MB per file)</span>
-                        <input type="file" class="hidden" id="file-input" name="files" accept=".pdf,.pptx,.docx,.doc,.txt,.png,.jpg,.jpeg" multiple>
+        <div class="ph-layout">
+            <div class="ph-main">
+
+                <!-- DOCUMENT UPLOAD WIDGET -->
+                <section id="document-mode" class="ph-card">
+                    <div class="ph-card-heading">
+                        <div class="ph-step">01</div>
+                        <div>
+                            <h2>Upload your documents</h2>
+                            <p>Select one or more files. You can add more files or remove them before submitting.</p>
+                        </div>
+                    </div>
+
+                    <label id="dropzone" class="ph-dropzone" for="file-input">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                            <path d="M12 16V4m0 0L7 9m5-5 5 5"/>
+                            <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/>
+                        </svg>
+                        <strong id="dropzone-text">Drop your files here or browse</strong>
+                        <span>PDF · DOCX · DOC · PPTX · TXT · PNG · JPG<br>Maximum 10 MB per file</span>
+                        <input type="file" id="file-input" name="files" accept=".pdf,.pptx,.docx,.doc,.txt,.png,.jpg,.jpeg" multiple>
                     </label>
 
-                    <div id="file-list" class="mt-3"></div>
-                    <div id="page-count-status" class="text-sm mt-2 text-gray-400 text-center h-5"></div>
-                </div>
+                    <div id="file-list" class="ph-file-list"></div>
+                    <div id="page-count-status" class="ph-status" role="status" aria-live="polite"></div>
 
-                <div id="preview-container" class="mb-6 hidden">
-                    <label class="block text-sm font-bold text-gray-300 mb-2">📄 Document Preview</label>
-                    <div id="preview-content" class="border border-slate-600 rounded p-4 bg-slate-700/30 max-h-80 overflow-auto"></div>
-                    <div id="file-info" class="mt-3 grid grid-cols-2 gap-2 text-sm hidden">
-                        <div class="bg-slate-700/50 rounded p-2"><span class="text-gray-400">File Type:</span><span id="file-type" class="text-white font-medium ml-2">-</span></div>
-                        <div class="bg-slate-700/50 rounded p-2"><span class="text-gray-400">File Size:</span><span id="file-size" class="text-white font-medium ml-2">-</span></div>
-                        <div class="bg-slate-700/50 rounded p-2"><span class="text-gray-400">Pages/Sheets:</span><span id="file-pages" class="text-white font-medium ml-2">-</span></div>
-                        <div class="bg-slate-700/50 rounded p-2"><span class="text-gray-400">Status:</span><span id="file-status" class="text-green-400 font-medium ml-2">✅ Valid</span></div>
+                    <div id="preview-container" class="ph-hidden">
+                        <div id="preview-content"></div>
+                        <div id="file-info" class="ph-hidden">
+                            <span id="file-type"></span>
+                            <span id="file-size"></span>
+                            <span id="file-pages"></span>
+                            <span id="file-status"></span>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </section>
 
-            <!-- PASSPORT MODE -->
-            <div id="passport-mode" style="display:none;">
-                <input type="hidden" id="passport-copies" value="6">
-
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <button type="button" id="btn-passport-upload" onclick="switchPassportInput('upload')" class="passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-indigo-600 text-white transition-all">📁 Upload Photo</button>
-                    <button type="button" id="btn-passport-camera" onclick="switchPassportInput('camera')" class="passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-slate-700 text-gray-400 transition-all">📸 Take Photo</button>
-                </div>
-
-                <div id="passport-upload-container" class="mb-4">
-                    <label id="passport-dropzone" class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-600 rounded cursor-pointer bg-slate-700/30 hover:bg-slate-700/50 transition-all">
-                        <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                        <span class="text-sm text-gray-300 font-semibold mt-1" id="passport-file-name">Click to upload existing passport photo</span>
-                        <input type="file" class="hidden" id="passport-file-input" accept="image/*" onchange="handlePassportUpload(this)">
-                    </label>
-                    <img id="passport-upload-preview" class="hidden max-h-40 mx-auto mt-3 rounded border border-slate-600">
-                </div>
-
-                <div id="passport-camera-container" style="display:none;">
-                    <div class="mb-4">
-                        <label class="block text-sm font-bold text-gray-300 mb-2">Photo Size</label>
-                        <div class="grid grid-cols-2 gap-3">
-                            <label class="flex items-center justify-center p-3 border-2 border-slate-600 rounded cursor-pointer hover:border-indigo-500 has-[:checked]:bg-indigo-500/10 has-[:checked]:border-indigo-500">
-                                <input type="radio" name="passport_size" value="2x2" class="hidden" onchange="document.getElementById('paper_size').value='2x2'; calculatePrice();">
-                                <span class="text-sm font-semibold text-gray-300">2x2 (Visa)</span>
-                            </label>
-                            <label class="flex items-center justify-center p-3 border-2 border-slate-600 rounded cursor-pointer hover:border-indigo-500 has-[:checked]:bg-indigo-500/10 has-[:checked]:border-indigo-500">
-                                <input type="radio" name="passport_size" value="4x6" checked class="hidden" onchange="document.getElementById('paper_size').value='4x6'; calculatePrice();">
-                                <span class="text-sm font-semibold text-gray-300">4x6 (Standard)</span>
-                            </label>
+                <!-- SCANNER WIDGET -->
+                <section id="scanner-mode" class="ph-card ph-hidden">
+                    <div class="ph-card-heading">
+                        <div class="ph-step">01</div>
+                        <div>
+                            <h2>Scan physical pages</h2>
+                            <p>Allow camera access, capture each page and combine them into one PDF.</p>
                         </div>
                     </div>
 
-                    <div class="mb-4">
-                        <label class="block text-sm font-bold text-gray-300 mb-2">Background Color</label>
-                        <div class="grid grid-cols-4 gap-2">
-                            <button type="button" onclick="setBgColor('#ffffff', this)" class="bg-white h-10 rounded border-2 border-indigo-400 ring-2 ring-indigo-300" title="White"></button>
-                            <button type="button" onclick="setBgColor('#3b82f6', this)" class="bg-blue-500 h-10 rounded border-2 border-slate-600" title="Blue"></button>
-                            <button type="button" onclick="setBgColor('#ef4444', this)" class="bg-red-500 h-10 rounded border-2 border-slate-600" title="Red"></button>
-                            <button type="button" onclick="setBgColor('#cccccc', this)" class="bg-gray-400 h-10 rounded border-2 border-slate-600" title="Gray"></button>
-                        </div>
-                        <input type="hidden" id="bg-color" value="#ffffff">
-                    </div>
-
-                    <div class="relative bg-black rounded-lg overflow-hidden mb-4" style="min-height:300px;">
-                        <video id="passport-video" autoplay playsinline class="w-full" style="display:none;"></video>
-                        <canvas id="passport-canvas" class="w-full" style="display:none;"></canvas>
-                        <div id="passport-placeholder" class="flex items-center justify-center h-64 text-gray-500">
-                            <div class="text-center">
-                                <svg class="w-16 h-16 mx-auto mb-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><circle cx="12" cy="13" r="3" stroke="currentColor" stroke-width="1.5"></circle></svg>
-                                <p>Click "Start Camera" to begin</p>
-                            </div>
-                        </div>
-                        <div id="face-guide" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:200px; height:250px; border:3px dashed #22c55e; border-radius:50%; pointer-events:none;"></div>
-                    </div>
-
-                    <div id="passport-analysis" class="bg-slate-700/50 border border-slate-600 rounded-lg p-3 mb-4" style="display:none;">
-                        <p class="text-xs font-bold text-gray-400 uppercase mb-2">Photo Analysis (Server)</p>
-                        <div class="grid grid-cols-2 gap-2 text-xs">
-                            <div class="flex justify-between"><span class="text-gray-400">Face Position</span><span id="check-position" class="text-yellow-400">-</span></div>
-                            <div class="flex justify-between"><span class="text-gray-400">Brightness</span><span id="check-brightness" class="text-yellow-400">-</span></div>
-                            <div class="flex justify-between"><span class="text-gray-400">Expression</span><span id="check-expression" class="text-yellow-400">-</span></div>
-                            <div class="flex justify-between"><span class="text-gray-400">Eyes Visible</span><span id="check-eyes" class="text-yellow-400">-</span></div>
-                            <div class="flex justify-between"><span class="text-gray-400">Background</span><span id="check-background" class="text-yellow-400">-</span></div>
-                            <div class="flex justify-between"><span class="text-gray-400">Overall</span><span id="check-overall" class="text-yellow-400">-</span></div>
-                        </div>
-                    </div>
-
-                    <div class="flex gap-3 mb-4">
-                        <button type="button" id="start-passport-camera" onclick="startPassportCamera()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded transition-all">Start Camera</button>
-                        <button type="button" id="capture-passport" onclick="capturePassport()" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded transition-all" style="display:none;">Capture & Process</button>
-                    </div>
-
-                    <div id="passport-processing" class="text-center py-4 hidden">
-                        <div class="animate-spin w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto mb-2"></div>
-                        <p class="text-gray-400 text-sm">Processing photo...</p>
-                    </div>
-
-                    <button type="button" id="retake-passport" onclick="retakePassport()" class="w-full bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 rounded transition-all mb-4" style="display:none;">Retake</button>
-                    <input type="hidden" id="passport-data" name="passport_data">
-                </div>
-            </div>
-
-            <!-- SCANNER MODE -->
-            <div id="scanner-mode" style="display:none;">
-                <div class="mb-4">
-                    <label class="block text-sm font-bold text-gray-300 mb-2">Paper Size</label>
-                    <select id="scanner-paper-size" class="w-full bg-slate-700 border border-slate-600 rounded px-4 py-3 text-white" onchange="document.getElementById('paper_size').value=this.value;">
-                        <option value="A4" selected>A4</option>
-                        <option value="4x6">4x6</option>
-                    </select>
-                </div>
-
-                <div class="relative bg-black rounded-lg overflow-hidden mb-4" style="min-height:300px;">
-                    <video id="scanner-video" autoplay playsinline class="w-full" style="display:none;"></video>
-                    <div id="scanner-placeholder" class="flex items-center justify-center h-64 text-gray-500">
-                        <div class="text-center">
-                            <svg class="w-16 h-16 mx-auto mb-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><circle cx="12" cy="13" r="3" stroke="currentColor" stroke-width="1.5"></circle></svg>
-                            <p>Click "Start Scanner" to begin</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="scanner-processing" class="text-center py-4 hidden">
-                    <div class="animate-spin w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto mb-2"></div>
-                    <p class="text-gray-400 text-sm">Enhancing document...</p>
-                </div>
-
-                <div class="flex gap-3 mb-4">
-                    <button type="button" id="start-scanner-camera" onclick="startScannerCamera()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded transition-all">Start Scanner</button>
-                    <button type="button" id="scan-page" onclick="scanPage()" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded transition-all" style="display:none;">Scan Page</button>
-                </div>
-
-                <div class="mb-4">
-                    <p class="text-sm text-gray-400 mb-2">Pages scanned: <span id="scanner-page-count" class="text-white font-bold">0</span></p>
-                    <div id="scanner-thumbnails" class="flex gap-2 flex-wrap"></div>
-                </div>
-
-                <button type="button" id="finish-scanning" onclick="finishScanning()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded transition-all mb-4" style="display:none;">Finish & Create PDF</button>
-                <input type="hidden" id="scanner-data" name="scanner_data">
-            </div>
-
-            <!-- COMMON FIELDS -->
-            <div id="common-fields">
-
-                <div class="mb-6 bg-slate-700/30 rounded p-5 border border-slate-600">
-                    <label class="block text-sm font-bold text-gray-300 mb-3 text-center">Number of Copies</label>
-                    <div class="flex items-center justify-center space-x-6">
-                        <button type="button" onclick="adjustCopies(-1)" class="w-12 h-12 flex items-center justify-center rounded-full bg-slate-600 text-white hover:bg-red-500/80 transition-colors text-2xl font-bold shadow-lg">-</button>
-                        <input type="number" id="copies" name="copies" value="1" min="1" max="100" class="w-24 text-center bg-slate-800 text-white text-3xl font-extrabold border-2 border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 price-trigger" onchange="calculatePrice()">
-                        <button type="button" onclick="adjustCopies(1)" class="w-12 h-12 flex items-center justify-center rounded-full bg-slate-600 text-white hover:bg-green-500/80 transition-colors text-2xl font-bold shadow-lg">+</button>
-                    </div>
-                    <p class="text-xs text-gray-500 text-center mt-3">Adjust the number of physical copies you need.</p>
-                </div>
-
-                <div class="mb-6" id="page-count-container">
-                    <label for="page_count" class="block text-sm font-bold text-gray-300 mb-2"><span id="page-count-label">Total Number of Pages</span></label>
-                    <input type="number" class="w-full bg-slate-700 border border-slate-600 rounded px-4 py-3 text-white price-trigger" id="page_count" name="page_count" min="1" value="1" required>
-                    <p class="text-xs text-gray-500 mt-1">Automatically calculated from your files. Adjust if needed.</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-300 mb-2">Print Type</label>
-                        <div class="space-y-2">
-                            <label class="flex items-center p-3 border border-slate-600 rounded cursor-pointer hover:bg-slate-700/50 has-[:checked]:bg-indigo-500/10 has-[:checked]:border-indigo-500">
-                                <input type="radio" class="price-trigger h-4 w-4 text-indigo-500" name="is_color" value="False" checked>
-                                <span class="ml-3 text-sm font-medium text-gray-300">Black and White</span>
-                            </label>
-                            <label class="flex items-center p-3 border border-slate-600 rounded cursor-pointer hover:bg-slate-700/50 has-[:checked]:bg-indigo-500/10 has-[:checked]:border-indigo-500">
-                                <input type="radio" class="price-trigger h-4 w-4 text-indigo-500" name="is_color" value="True">
-                                <span class="ml-3 text-sm font-medium text-gray-300">Color</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div id="double-sided-option">
-                        <label class="block text-sm font-bold text-gray-300 mb-2">Paper Options</label>
-                        <label class="flex items-center p-3 border border-slate-600 rounded cursor-pointer hover:bg-slate-700/50 has-[:checked]:bg-indigo-500/10 has-[:checked]:border-indigo-500 h-full">
-                            <input type="checkbox" class="price-trigger h-4 w-4 text-indigo-500 rounded" id="double_sided" name="is_double_sided">
-                            <span class="ml-3 text-sm font-medium text-gray-300">Double Sided</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="mb-6" id="binding-option">
-                    <label for="binding" class="block text-sm font-bold text-gray-300 mb-2">Binding / Finishing</label>
-                    <select class="price-trigger w-full bg-slate-700 border border-slate-600 rounded px-4 py-3 text-white" id="binding" name="binding">
-                        <option value="none" selected>No Binding</option>
-                        <option value="staple">Staple (Corner)</option>
-                        <option value="spiral">Spiral Binding (+1,000 UGX)</option>
-                    </select>
-                </div>
-
-                <div class="mb-6">
-                    <label for="station" class="block text-sm font-bold text-gray-300 mb-2">Printing Station</label>
-                    <select class="w-full bg-slate-700 border border-slate-600 rounded px-4 py-3 text-white" id="station" name="station" required>
-                        <option value="" disabled selected>Where should we print it?</option>
-                        {% for station in stations %}
-                        <option value="{{ station.id }}">{{ station.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="mb-6 bg-slate-700/30 rounded p-5 border border-slate-600">
-                    <label class="block text-sm font-bold text-gray-300 mb-3">How do you want to get it?</label>
-                    <div class="grid grid-cols-2 gap-3 mb-4">
-                        <label class="flex items-center justify-center p-3 border-2 border-slate-600 rounded cursor-pointer hover:border-indigo-500 has-[:checked]:bg-indigo-500/10 has-[:checked]:border-indigo-500">
-                            <input type="radio" class="delivery-trigger h-4 w-4 text-indigo-500" name="delivery_type" value="pickup" checked>
-                            <span class="ml-2 text-sm font-semibold text-gray-300">Pickup (Free)</span>
-                        </label>
-                        <label class="flex items-center justify-center p-3 border-2 border-slate-600 rounded cursor-pointer hover:border-indigo-500 has-[:checked]:bg-indigo-500/10 has-[:checked]:border-indigo-500">
-                            <input type="radio" class="delivery-trigger h-4 w-4 text-indigo-500" name="delivery_type" value="delivery">
-                            <span class="ml-2 text-sm font-semibold text-gray-300">Deliver to Me</span>
-                        </label>
-                    </div>
-
-                    <div id="delivery-zone-container" class="hidden">
-                        <select class="price-trigger w-full bg-slate-700 border border-slate-600 rounded px-4 py-3 text-white" id="delivery_zone" name="delivery_zone">
-                            <option value="" disabled selected>Choose a zone...</option>
-                            {% for zone in delivery_zones %}
-                            <option value="{{ zone.id }}" data-fee="{{ zone.delivery_fee }}">{{ zone.name }} (+{{ zone.delivery_fee|default:0 }} UGX)</option>
-                            {% endfor %}
+                    <div class="ph-field">
+                        <label for="scanner-paper-size" class="ph-label">Paper size</label>
+                        <select id="scanner-paper-size" class="ph-select" onchange="document.getElementById('paper_size').value=this.value;">
+                            <option value="A4" selected>A4</option>
+                            <option value="4x6">4 × 6</option>
                         </select>
                     </div>
-                </div>
 
-                <div class="mb-6">
-                    <label for="discount_code" class="block text-sm font-bold text-gray-300 mb-2">Discount Code (Optional)</label>
-                    <div class="flex gap-2">
-                        <input type="text" class="flex-1 bg-slate-700 border border-slate-600 rounded px-4 py-3 text-white uppercase" id="discount_code" name="discount_code" placeholder="Enter code (e.g., HEC10)" style="text-transform: uppercase;">
-                        <button type="button" id="apply-discount" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded">Apply</button>
+                    <div class="ph-scanner-frame">
+                        <video id="scanner-video" autoplay playsinline></video>
+                        <div id="scanner-placeholder" class="ph-camera-placeholder">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                <path d="M4 8V5a2 2 0 0 1 2-2h3M20 8V5a2 2 0 0 0-2-2h-3M4 16v3a2 2 0 0 0 2 2h3M20 16v3a2 2 0 0 1-2 2h-3"/>
+                                <path d="M7 8h10v8H7z"/>
+                            </svg>
+                            <p>Your camera preview will appear here.<br>Position the page clearly inside the frame.</p>
+                        </div>
                     </div>
-                    <div id="discount-message" class="text-sm mt-2 hidden"></div>
-                    <input type="hidden" id="discount_amount" name="discount_amount" value="0">
-                </div>
 
-                <div class="mb-6">
-                    <label for="notes" class="block text-sm font-bold text-gray-300 mb-2">Special Instructions (Optional)</label>
-                    <textarea class="w-full bg-slate-700 border border-slate-600 rounded px-4 py-3 text-white" id="notes" name="notes" rows="3" placeholder="Any special instructions?"></textarea>
-                </div>
+                    <div class="ph-btn-row">
+                        <button type="button" id="start-scanner-camera" onclick="startScannerCamera()" class="ph-btn ph-btn-primary">Start camera</button>
+                        <button type="button" id="scan-page" onclick="scanPage()" class="ph-btn ph-btn-green" style="display:none;">Capture page</button>
+                    </div>
 
-                <div class="bg-indigo-500/10 border border-indigo-500/20 rounded p-6 text-center mb-8">
-                    <p class="text-sm font-bold text-indigo-400 uppercase">Estimated Total</p>
-                    <p class="text-4xl font-extrabold text-white mt-2" id="live-price">0 UGX</p>
-                </div>
+                    <div id="scanner-processing" class="ph-status" style="display:none;">Processing and enhancing page…</div>
 
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-4 rounded transition-all text-lg">
-                    Submit Order - <span id="submit-price">0 UGX</span>
-                </button>
+                    <div class="ph-field" style="margin-top:20px;">
+                        <label class="ph-label">Captured pages <span id="scanner-page-count">0</span></label>
+                        <div id="scanner-thumbnails" class="ph-thumbnails"></div>
+                        <p class="ph-hint">You can remove individual pages before creating your PDF.</p>
+                    </div>
+
+                    <div id="scan-result" class="ph-status" role="status" aria-live="polite"></div>
+                    <button type="button" id="finish-scanning" onclick="finishScanning()" class="ph-btn ph-btn-orange" style="display:none;width:100%;margin-top:10px;">Create PDF from scanned pages</button>
+                </section>
+
+                <!-- PRINT SETTINGS -->
+                <section id="common-fields">
+                    <div class="ph-card">
+                        <div class="ph-card-heading">
+                            <div class="ph-step">02</div>
+                            <div>
+                                <h2>Configure your print job</h2>
+                                <p>Choose the number of copies, page count, colour and finishing.</p>
+                            </div>
+                        </div>
+
+                        <div class="ph-two-col">
+                            <div class="ph-field">
+                                <label for="copies" class="ph-label">Number of copies</label>
+                                <div class="ph-counter">
+                                    <button type="button" onclick="adjustCopies(-1)" aria-label="Decrease copies">−</button>
+                                    <input type="number" id="copies" name="copies" value="1" min="1" max="100" inputmode="numeric">
+                                    <button type="button" onclick="adjustCopies(1)" aria-label="Increase copies">+</button>
+                                </div>
+                                <p class="ph-hint">Physical sets you need, up to 100.</p>
+                            </div>
+
+                            <div class="ph-field" id="page-count-container">
+                                <label for="page_count" class="ph-label" id="page-count-label">Total number of pages</label>
+                                <input type="number" id="page_count" name="page_count" class="ph-input" min="1" value="1" required>
+                                <p class="ph-hint" id="page-count-hint">Calculated from your files where possible. You can adjust it.</p>
+                            </div>
+                        </div>
+
+                        <div class="ph-two-col">
+                            <div class="ph-field">
+                                <label class="ph-label">Print colour</label>
+                                <div class="ph-option-grid">
+                                    <label class="ph-option">
+                                        <input type="radio" name="is_color" value="False" checked>
+                                        <span>Black & white</span>
+                                    </label>
+                                    <label class="ph-option">
+                                        <input type="radio" name="is_color" value="True">
+                                        <span>Colour</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="ph-field" id="double-sided-option">
+                                <label class="ph-label">Paper sides</label>
+                                <label class="ph-option" style="height:47px;">
+                                    <input type="checkbox" id="double_sided" name="is_double_sided">
+                                    <span>Print both sides</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="ph-field" id="binding-option">
+                            <label for="binding" class="ph-label">Binding / finishing</label>
+                            <select id="binding" name="binding" class="ph-select">
+                                <option value="none" selected>No binding</option>
+                                <option value="staple">Staple (corner)</option>
+                                <option value="spiral">Spiral binding (+{{ spiral_binding_fee|default:1000 }} UGX)</option>
+                            </select>
+                        </div>
+
+                        <div class="ph-field">
+                            <label for="station" class="ph-label">Printing station</label>
+                            <select id="station" name="station" class="ph-select" required>
+                                <option value="" disabled selected>Choose where to print</option>
+                                {% for station in stations %}
+                                <option value="{{ station.id }}">{{ station.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- COLLECTION AND DELIVERY -->
+                    <div class="ph-card">
+                        <div class="ph-card-heading">
+                            <div class="ph-step">03</div>
+                            <div>
+                                <h2>Collection or delivery</h2>
+                                <p>Choose how you want to receive your completed order.</p>
+                            </div>
+                        </div>
+
+                        <div class="ph-option-grid" style="margin-bottom:15px;">
+                            <label class="ph-option">
+                                <input type="radio" name="delivery_type" value="pickup" checked>
+                                <span>Pickup · Free</span>
+                            </label>
+                            <label class="ph-option">
+                                <input type="radio" name="delivery_type" value="delivery">
+                                <span>Deliver to me</span>
+                            </label>
+                        </div>
+
+                        <div id="delivery-zone-container" class="ph-field ph-hidden">
+                            <label for="delivery_zone" class="ph-label">Delivery zone</label>
+                            <select id="delivery_zone" name="delivery_zone" class="ph-select">
+                                <option value="" disabled selected>Choose a delivery zone</option>
+                                {% for zone in delivery_zones %}
+                                <option value="{{ zone.id }}" data-fee="{{ zone.delivery_fee|default:0 }}">{{ zone.name }} (+{{ zone.delivery_fee|default:0 }} UGX)</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="ph-field">
+                            <label for="discount_code" class="ph-label">Discount code</label>
+                            <div class="ph-discount-row">
+                                <input type="text" id="discount_code" name="discount_code" class="ph-input" placeholder="e.g. HEC10" autocomplete="off">
+                                <button type="button" id="apply-discount" class="ph-btn ph-btn-primary">Apply</button>
+                            </div>
+                            <div id="discount-message" role="status" aria-live="polite"></div>
+                            <input type="hidden" id="discount_amount" name="discount_amount" value="0">
+                        </div>
+
+                        <div class="ph-field">
+                            <label for="notes" class="ph-label">Special instructions <span style="font-weight:500;color:var(--ph-muted);">(optional)</span></label>
+                            <textarea id="notes" name="notes" class="ph-textarea" rows="3" placeholder="Any instructions for your printing order?"></textarea>
+                        </div>
+                    </div>
+                </section>
             </div>
-        </form>
-    </div>
+
+            <!-- LIVE ORDER SUMMARY -->
+            <aside class="ph-sidebar">
+                <div class="ph-summary">
+                    <div class="ph-summary-heading">
+                        <div class="ph-summary-label">Your order</div>
+                        <h2>Order summary</h2>
+                    </div>
+
+                    <div class="ph-summary-total">
+                        <div class="ph-total-label">Estimated total</div>
+                        <div class="ph-total" id="live-price">0 UGX</div>
+                    </div>
+
+                    <hr class="ph-summary-divider">
+
+                    <div class="ph-summary-lines">
+                        <div class="ph-summary-line"><span>Service</span><strong id="summary-service">Document printing</strong></div>
+                        <div class="ph-summary-line"><span>Pages per copy</span><strong id="summary-pages">1</strong></div>
+                        <div class="ph-summary-line"><span>Copies</span><strong id="summary-copies">1</strong></div>
+                        <div class="ph-summary-line"><span>Print type</span><strong id="summary-colour">Black & white</strong></div>
+                        <div class="ph-summary-line"><span>Collection</span><strong id="summary-delivery">Pickup</strong></div>
+                        <div class="ph-summary-line"><span>Delivery fee</span><strong id="summary-delivery-fee">0 UGX</strong></div>
+                        <div class="ph-summary-line"><span>Discount</span><strong id="summary-discount">0 UGX</strong></div>
+                    </div>
+
+                    <hr class="ph-summary-divider">
+
+                    <div class="ph-summary-checkout">
+                        <button type="submit" id="submit-order" class="ph-btn ph-btn-orange">
+                            Submit order · <span id="submit-price">0 UGX</span>
+                        </button>
+                        <p class="ph-summary-note">This is an estimate. Your order will be submitted to PrintHub for processing.</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </form>
 </div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-const BASE_PRICE_BW = {{ base_price_bw|default:200 }},
-      COLOR_SURCHARGE = {{ color_surcharge|default:100 }},
-      SPIRAL_FEE = {{ spiral_binding_fee|default:1000 }},
-      PASSPORT_PRICE_PER_COPY = 1000;
+const BASE_PRICE_BW = {{ base_price_bw|default:200 }};
+const COLOR_SURCHARGE = {{ color_surcharge|default:100 }};
+const SPIRAL_FEE = {{ spiral_binding_fee|default:1000 }};
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-let currentMode = 'document', bgColor = '#ffffff', passportStream = null, analysisTimer = null, scannerStream = null, scannedPages = [];
+let currentMode = 'document';
 let selectedFiles = [];
+let scannerStream = null;
+let scannedPages = [];
+let discountApplied = false;
+let discountValue = 0;
+let processingFiles = false;
 
-const infoTexts = {
-    document: '<strong>Upload your files</strong> - PDF, Word, PowerPoint, or images',
-    passport: '<strong>Take or Upload a passport photo</strong>',
-    scanner: '<strong>Scan documents</strong> - Server-powered enhancement'
-};
+const $ = id => document.getElementById(id);
 
-document.getElementById('file-input').addEventListener('change', function(e) {
-    const newFiles = Array.from(e.target.files);
-    newFiles.forEach(file => {
-        if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
-            selectedFiles.push(file);
+const fileInput = $('file-input');
+const pageCountInput = $('page_count');
+const copiesInput = $('copies');
+const deliveryZoneSelect = $('delivery_zone');
+const discountCodeInput = $('discount_code');
+const discountAmountInput = $('discount_amount');
+const calculatedPriceInput = $('calculated_price');
+
+function getCSRF() {
+    return document.querySelector('[name="csrfmiddlewaretoken"]').value;
+}
+
+function formatMoney(value) {
+    return Math.round(value).toLocaleString() + ' UGX';
+}
+
+function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    })[char]);
+}
+
+function setStatus(message, type = '') {
+    $('page-count-status').textContent = message;
+    $('page-count-status').className = 'ph-status' + (type ? ' ' + type : '');
+}
+
+/* SERVICE WIDGETS */
+
+function switchMode(mode) {
+    if (!['document', 'scanner'].includes(mode)) return;
+
+    if (currentMode !== mode) stopScannerCamera();
+
+    currentMode = mode;
+
+    $('order_type').value = mode === 'scanner' ? 'scanned' : 'document';
+    $('paper_size').value = mode === 'scanner'
+        ? $('scanner-paper-size').value
+        : 'A4';
+
+    $('document-mode').classList.toggle('ph-hidden', mode !== 'document');
+    $('scanner-mode').classList.toggle('ph-hidden', mode !== 'scanner');
+
+    $('service-document').classList.toggle('active', mode === 'document');
+    $('service-scanner').classList.toggle('active', mode === 'scanner');
+
+    $('service-document').setAttribute(
+        'aria-pressed', String(mode === 'document')
+    );
+    $('service-scanner').setAttribute(
+        'aria-pressed', String(mode === 'scanner')
+    );
+
+    $('choice-document').textContent =
+        mode === 'document' ? '● Selected service' : '● Choose service';
+
+    $('choice-scanner').textContent =
+        mode === 'scanner' ? '● Selected service' : '● Choose service';
+
+    $('page-count-label').textContent =
+        mode === 'scanner' ? 'Number of scanned pages' : 'Total number of pages';
+
+    $('page-count-hint').textContent =
+        mode === 'scanner'
+            ? 'Updated as you scan pages.'
+            : 'Calculated from your files where possible. You can adjust it.';
+
+    calculatePrice();
+}
+
+/* DOCUMENT UPLOAD */
+
+fileInput.addEventListener('change', function () {
+    addFiles(Array.from(this.files || []));
+    this.value = '';
+});
+
+function addFiles(files) {
+    let rejected = [];
+
+    files.forEach(file => {
+        if (file.size > MAX_FILE_SIZE) {
+            rejected.push(file.name + ' exceeds 10 MB');
+            return;
         }
+
+        const allowed = /\.(pdf|pptx|docx|doc|txt|png|jpe?g)$/i.test(file.name);
+
+        if (!allowed) {
+            rejected.push(file.name + ' is not a supported file type');
+            return;
+        }
+
+        const duplicate = selectedFiles.some(existing =>
+            existing.name === file.name &&
+            existing.size === file.size &&
+            existing.lastModified === file.lastModified
+        );
+
+        if (!duplicate) selectedFiles.push(file);
     });
-    e.target.value = '';
+
     renderFileList();
-    processAllFiles();
+
+    if (rejected.length) {
+        setStatus(rejected.join(' · '), 'error');
+    }
+
+    if (selectedFiles.length) processAllFiles();
+}
+
+const dropzone = $('dropzone');
+
+['dragenter', 'dragover'].forEach(eventName => {
+    dropzone.addEventListener(eventName, event => {
+        event.preventDefault();
+        dropzone.classList.add('dragover');
+    });
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    dropzone.addEventListener(eventName, event => {
+        event.preventDefault();
+        dropzone.classList.remove('dragover');
+    });
+});
+
+dropzone.addEventListener('drop', event => {
+    addFiles(Array.from(event.dataTransfer.files || []));
 });
 
 function removeFile(index) {
@@ -851,615 +967,632 @@ function removeFile(index) {
 }
 
 function renderFileList() {
-    const listContainer = document.getElementById('file-list');
+    const list = $('file-list');
 
-    if (selectedFiles.length === 0) {
-        listContainer.innerHTML = '';
-        document.getElementById('dropzone-text').innerText = 'Drag and drop your files here or click to browse';
-        document.getElementById('page-count-status').textContent = '';
-        document.getElementById('preview-container').classList.add('hidden');
+    if (!selectedFiles.length) {
+        list.innerHTML = '';
+        $('dropzone-text').textContent = 'Drop your files here or browse';
+        setStatus('');
         return;
     }
 
-    document.getElementById('dropzone-text').innerText = `${selectedFiles.length} file(s) selected. Click to add more.`;
+    $('dropzone-text').textContent =
+        selectedFiles.length + ' file(s) selected · Click to add more';
 
-    listContainer.innerHTML = selectedFiles.map((file, index) => `
-        <div class="flex items-center justify-between bg-slate-700/50 rounded p-2 mb-2 border border-slate-600">
-            <div class="flex items-center space-x-2 overflow-hidden">
-                <svg class="w-5 h-5 text-indigo-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                <span class="text-sm text-gray-300 truncate">${file.name}</span>
-                <span class="text-xs text-gray-500">(${formatFileSize(file.size)})</span>
+    list.innerHTML = selectedFiles.map((file, index) => {
+        const extension = file.name.split('.').pop().toUpperCase();
+
+        return `
+            <div class="ph-file">
+                <div class="ph-file-icon">${escapeHTML(extension.slice(0, 4))}</div>
+                <div class="ph-file-details">
+                    <div class="ph-file-name">${escapeHTML(file.name)}</div>
+                    <div class="ph-file-meta">${formatFileSize(file.size)}</div>
+                </div>
+                <button type="button" class="ph-remove"
+                    aria-label="Remove ${escapeHTML(file.name)}"
+                    onclick="removeFile(${index})">×</button>
             </div>
-            <button type="button" onclick="removeFile(${index})" class="text-red-400 hover:text-red-300 ml-2 flex-shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-        </div>
-    `).join('');
+        `;
+    }).join('');
+}
+
+async function estimatePages(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+
+    if (ext === 'pdf') {
+        try {
+            const buffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({
+                data: new Uint8Array(buffer)
+            }).promise;
+
+            return pdf.numPages;
+        } catch (error) {
+            return Math.max(1, Math.ceil(file.size / 3000));
+        }
+    }
+
+    if (['jpg', 'jpeg', 'png'].includes(ext)) return 1;
+
+    if (ext === 'txt') {
+        const text = await file.text();
+        const lines = text.split('\n').length;
+        return Math.max(1, Math.ceil(lines / 50));
+    }
+
+    if (ext === 'docx') {
+        try {
+            const buffer = await file.arrayBuffer();
+            const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+            const words = result.value.trim().split(/\s+/).filter(Boolean).length;
+            return Math.max(1, Math.ceil(words / 500));
+        } catch (error) {
+            return Math.max(1, Math.ceil(file.size / 3000));
+        }
+    }
+
+    if (ext === 'pptx') {
+        try {
+            const buffer = await file.arrayBuffer();
+            const zip = await JSZip.loadAsync(buffer);
+            const slides = Object.keys(zip.files).filter(name =>
+                /^ppt\/slides\/slide\d+\.xml$/.test(name)
+            );
+            return Math.max(1, slides.length);
+        } catch (error) {
+            return Math.max(1, Math.ceil(file.size / 3000));
+        }
+    }
+
+    // DOC and other supported formats need an approximate page estimate.
+    return Math.max(1, Math.ceil(file.size / 3000));
 }
 
 async function processAllFiles() {
-    if (selectedFiles.length === 0) {
-        document.getElementById('page_count').value = 1;
+    if (currentMode !== 'document') {
         calculatePrice();
         return;
     }
 
-    let totalPages = 0;
-    document.getElementById('page-count-status').textContent = `⏳ Reading ${selectedFiles.length} file(s)...`;
+    if (!selectedFiles.length) {
+        pageCountInput.value = 1;
+        calculatePrice();
+        return;
+    }
 
-    for (let file of selectedFiles) {
-        const ext = file.name.split('.').pop().toLowerCase();
+    processingFiles = true;
+    setStatus('Reading document files…');
 
-        if (ext === 'pdf') {
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const typedarray = new Uint8Array(arrayBuffer);
-                const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                totalPages += pdf.numPages;
-            } catch (e) {
-                totalPages += Math.max(1, Math.ceil(file.size / 3000));
-            }
-        } else if (['jpg', 'jpeg', 'png'].includes(ext)) {
-            totalPages += 1;
-        } else if (ext === 'txt') {
-            const text = await file.text();
-            totalPages += Math.max(1, Math.ceil(text.split('\n').length / 50));
-        } else if (ext === 'docx') {
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const result = await mammoth.extractRawText({arrayBuffer: arrayBuffer});
-                const words = result.value.split(/\s+/).length;
-                totalPages += Math.max(1, Math.ceil(words / 500));
-            } catch (e) {
-                totalPages += Math.max(1, Math.ceil(file.size / 3000));
-            }
-        } else if (ext === 'pptx') {
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const zip = await JSZip.loadAsync(arrayBuffer);
-                const slides = Object.keys(zip.files).filter(name => name.startsWith('ppt/slides/slide') && name.endsWith('.xml'));
-                totalPages += Math.max(1, Math.ceil(slides.length / 2));
-            } catch (e) {
-                totalPages += Math.max(1, Math.ceil(file.size / 3000));
-            }
-        } else {
-            totalPages += Math.max(1, Math.ceil(file.size / 3000));
+    const filesAtStart = [...selectedFiles];
+
+    try {
+        let totalPages = 0;
+
+        for (const file of filesAtStart) {
+            totalPages += await estimatePages(file);
         }
-    }
 
-    document.getElementById('page_count').value = totalPages;
-    document.getElementById('page-count-status').textContent = `✅ ${totalPages} total page(s) across ${selectedFiles.length} file(s)`;
-    document.getElementById('preview-container').classList.add('hidden');
-    calculatePrice();
-}
+        // Ignore an outdated calculation if the file selection changed.
+        const selectionStillMatches =
+            filesAtStart.length === selectedFiles.length &&
+            filesAtStart.every((file, index) => file === selectedFiles[index]);
 
-function syncPassportValues() {
-    if (currentMode === 'passport') {
-        let copies = parseInt(document.getElementById('copies').value) || 6;
-        document.getElementById('page_count').value = copies;
-        document.getElementById('passport-copies').value = copies;
-    }
-}
+        if (!selectionStillMatches) return;
 
-function setBgColor(c, btn) {
-    bgColor = c;
-    document.getElementById('bg-color').value = c;
+        pageCountInput.value = Math.max(1, totalPages);
 
-    document.querySelectorAll('#passport-mode .grid-cols-4 button').forEach(b => {
-        b.classList.remove('border-indigo-400', 'ring-2', 'ring-indigo-300');
-        b.classList.add('border-slate-600');
-    });
-
-    btn.classList.remove('border-slate-600');
-    btn.classList.add('border-indigo-400', 'ring-2', 'ring-indigo-300');
-}
-
-function switchPassportInput(mode) {
-    const uploadContainer = document.getElementById('passport-upload-container');
-    const cameraContainer = document.getElementById('passport-camera-container');
-    const btnUpload = document.getElementById('btn-passport-upload');
-    const btnCamera = document.getElementById('btn-passport-camera');
-
-    stopPassportCamera();
-
-    if (mode === 'upload') {
-        uploadContainer.style.display = 'block';
-        cameraContainer.style.display = 'none';
-        btnUpload.className = 'passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-indigo-600 text-white transition-all';
-        btnCamera.className = 'passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-slate-700 text-gray-400 transition-all';
-    } else {
-        uploadContainer.style.display = 'none';
-        cameraContainer.style.display = 'block';
-        btnCamera.className = 'passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-indigo-600 text-white transition-all';
-        btnUpload.className = 'passport-toggle-btn py-3 rounded-lg font-bold text-sm bg-slate-700 text-gray-400 transition-all';
-    }
-}
-
-function handlePassportUpload(input) {
-    if (input.files && input.files[0]) {
-        const file = input.files[0];
-        document.getElementById('passport-file-name').innerText = file.name;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('passport-upload-preview').src = e.target.result;
-            document.getElementById('passport-upload-preview').classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
-
-        selectedFiles = [file];
-        document.getElementById('passport-data').value = '';
+        setStatus(
+            `✓ ${totalPages} estimated page(s) across ${selectedFiles.length} file(s)`,
+            'success'
+        );
+    } catch (error) {
+        setStatus('Some page counts could not be read. Please check the page total.', 'error');
+    } finally {
+        processingFiles = false;
         calculatePrice();
     }
 }
+
+/* COPY CONTROLS */
 
 function adjustCopies(amount) {
-    const input = document.getElementById('copies');
-    let val = parseInt(input.value) || 1;
-    val += amount;
-
-    if (val < 1) val = 1;
-    if (val > 100) val = 100;
-
-    input.value = val;
+    const current = parseInt(copiesInput.value, 10) || 1;
+    copiesInput.value = Math.min(100, Math.max(1, current + amount));
     calculatePrice();
 }
 
-function switchMode(mode) {
-    currentMode = mode;
-    document.getElementById('order_type').value = mode === 'passport' ? 'passport' : mode === 'scanner' ? 'scanned' : 'document';
-    document.getElementById('document-mode').style.display = mode === 'document' ? 'block' : 'none';
-    document.getElementById('passport-mode').style.display = mode === 'passport' ? 'block' : 'none';
-    document.getElementById('scanner-mode').style.display = mode === 'scanner' ? 'block' : 'none';
-    document.getElementById('mode-info-text').innerHTML = infoTexts[mode];
+copiesInput.addEventListener('input', () => {
+    let value = parseInt(copiesInput.value, 10);
 
-    ['btn-document', 'btn-passport', 'btn-scanner'].forEach(id => {
-        const b = document.getElementById(id);
-        b.classList.remove('bg-indigo-600', 'text-white');
-        b.classList.add('bg-slate-700', 'text-gray-400');
-    });
+    if (!Number.isFinite(value)) value = 1;
 
-    const ab = document.getElementById('btn-' + mode);
-    ab.classList.remove('bg-slate-700', 'text-gray-400');
-    ab.classList.add('bg-indigo-600', 'text-white');
-
-    stopPassportCamera();
-    stopScannerCamera();
-
-    if (mode === 'passport') {
-        document.querySelector('input[name="passport_size"][value="4x6"]').checked = true;
-        document.getElementById('paper_size').value = '4x6';
-        document.querySelector('input[name="is_color"][value="True"]').checked = true;
-        document.getElementById('binding-option').style.opacity = '0.4';
-        document.getElementById('binding-option').style.pointerEvents = 'none';
-        document.getElementById('double-sided-option').style.opacity = '0.4';
-        document.getElementById('double-sided-option').style.pointerEvents = 'none';
-
-        document.getElementById('copies').value = 6;
-        document.getElementById('page-count-label').innerText = 'Number of Photos';
-        document.getElementById('page-count-container').style.display = 'none';
-
-        switchPassportInput('upload');
-    } else if (mode === 'scanner') {
-        document.getElementById('paper_size').value = 'A4';
-        document.getElementById('binding-option').style.opacity = '1';
-        document.getElementById('binding-option').style.pointerEvents = 'auto';
-        document.getElementById('double-sided-option').style.opacity = '1';
-        document.getElementById('double-sided-option').style.pointerEvents = 'auto';
-        document.getElementById('page_count').min = 1;
-        document.getElementById('page_count').step = 1;
-        document.getElementById('page-count-label').innerText = 'Number of Pages';
-        document.getElementById('page-count-container').style.display = 'block';
-        document.getElementById('copies').value = 1;
-    } else {
-        document.getElementById('paper_size').value = 'A4';
-        document.getElementById('binding-option').style.opacity = '1';
-        document.getElementById('binding-option').style.pointerEvents = 'auto';
-        document.getElementById('double-sided-option').style.opacity = '1';
-        document.getElementById('double-sided-option').style.pointerEvents = 'auto';
-        document.getElementById('page_count').min = 1;
-        document.getElementById('page_count').step = 1;
-        document.getElementById('page-count-label').innerText = 'Total Number of Pages';
-        document.getElementById('page-count-container').style.display = 'block';
-        document.getElementById('copies').value = 1;
-    }
-
+    copiesInput.value = Math.min(100, Math.max(1, value));
     calculatePrice();
-}
+});
 
-function formatFileSize(bytes) {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / 1048576).toFixed(1) + ' MB';
-}
-
-async function startPassportCamera() {
-    try {
-        passportStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'user', width: 640, height: 480}});
-        const v = document.getElementById('passport-video');
-        v.srcObject = passportStream;
-        v.style.display = 'block';
-        document.getElementById('passport-placeholder').style.display = 'none';
-        document.getElementById('face-guide').style.display = 'block';
-        document.getElementById('passport-analysis').style.display = 'block';
-        document.getElementById('start-passport-camera').style.display = 'none';
-        document.getElementById('capture-passport').style.display = 'block';
-        startAnalysis(v);
-    } catch (e) {
-        alert('Camera access denied.');
-    }
-}
-
-function startAnalysis(video) {
-    analysisTimer = setInterval(async () => {
-        const c = document.createElement('canvas');
-        c.width = video.videoWidth || 640;
-        c.height = video.videoHeight || 480;
-        const ctx = c.getContext('2d');
-        ctx.drawImage(video, 0, 0);
-        const dataUrl = c.toDataURL('image/jpeg', 0.7);
-
-        try {
-            const res = await fetch('/orders/api/analyze-passport/', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCSRF()},
-                body: JSON.stringify({image: dataUrl})
-            });
-
-            const data = await res.json();
-
-            if (data.success) {
-                const a = data.analysis;
-                updateCheck('check-position', a.face_position.status === 'pass', a.face_position.label, 'Not centered');
-                updateCheck('check-brightness', a.brightness.status === 'pass', a.brightness.label, 'Adjust lighting');
-                updateCheck('check-expression', a.expression.status === 'pass', a.expression.label, 'Not neutral');
-                updateCheck('check-eyes', a.eyes.status === 'pass', a.eyes.label, 'Not visible');
-                updateCheck('check-background', a.background.status === 'pass', a.background.label, 'Not uniform');
-                updateCheck('check-overall', a.overall.status === 'pass', a.overall.label, 'Keep adjusting');
-                document.getElementById('face-guide').style.borderColor = a.overall.status === 'pass' ? '#22c55e' : '#eab308';
-            }
-        } catch (e) {}
-    }, 800);
-}
-
-function updateCheck(id, pass, good, bad) {
-    const e = document.getElementById(id);
-    e.textContent = pass ? good : bad;
-    e.className = pass ? 'text-green-400' : 'text-red-400';
-}
-
-async function capturePassport() {
-    if (analysisTimer) {
-        clearInterval(analysisTimer);
-        analysisTimer = null;
-    }
-
-    const v = document.getElementById('passport-video');
-    const c = document.createElement('canvas');
-    c.width = v.videoWidth || 640;
-    c.height = v.videoHeight || 480;
-    c.getContext('2d').drawImage(v, 0, 0);
-    const dataUrl = c.toDataURL('image/jpeg', 0.9);
-
-    document.getElementById('passport-processing').classList.remove('hidden');
-    document.getElementById('capture-passport').style.display = 'none';
-
-    try {
-        const res = await fetch('/orders/api/process-passport/', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCSRF()},
-            body: JSON.stringify({
-                image: dataUrl,
-                bg_color: bgColor,
-                size: document.querySelector('input[name="passport_size"]:checked').value
-            })
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-            const pc = document.getElementById('passport-canvas');
-            const img = new Image();
-
-            img.onload = () => {
-                pc.width = img.width;
-                pc.height = img.height;
-                pc.getContext('2d').drawImage(img, 0, 0);
-                pc.style.display = 'block';
-                v.style.display = 'none';
-                document.getElementById('face-guide').style.display = 'none';
-                document.getElementById('passport-analysis').style.display = 'none';
-                document.getElementById('passport-processing').classList.add('hidden');
-                document.getElementById('retake-passport').style.display = 'block';
-                document.getElementById('passport-data').value = data.processed_image;
-
-                syncPassportValues();
-                createPassportFile(data.processed_image);
-                calculatePrice();
-            };
-
-            img.src = data.processed_image;
-        }
-    } catch (e) {
-        alert('Processing failed.');
-    }
-}
-
-function createPassportFile(dataUrl) {
-    fetch(dataUrl).then(r => r.blob()).then(b => {
-        const f = new File([b], 'passport-photo.jpg', {type: 'image/jpeg'});
-        selectedFiles = [f];
-        document.getElementById('passport-file-name').innerText = 'passport-photo.jpg (Captured)';
-        document.getElementById('passport-upload-preview').classList.add('hidden');
-    });
-}
-
-function retakePassport() {
-    document.getElementById('passport-canvas').style.display = 'none';
-    document.getElementById('passport-video').style.display = 'block';
-    document.getElementById('face-guide').style.display = 'block';
-    document.getElementById('passport-analysis').style.display = 'block';
-    document.getElementById('capture-passport').style.display = 'block';
-    document.getElementById('retake-passport').style.display = 'none';
-
-    ['check-position', 'check-brightness', 'check-expression', 'check-eyes', 'check-background', 'check-overall'].forEach(id => {
-        document.getElementById(id).textContent = '-';
-        document.getElementById(id).className = 'text-yellow-400';
-    });
-
-    startAnalysis(document.getElementById('passport-video'));
-}
-
-function stopPassportCamera() {
-    if (passportStream) {
-        passportStream.getTracks().forEach(t => t.stop());
-        passportStream = null;
-    }
-
-    if (analysisTimer) {
-        clearInterval(analysisTimer);
-        analysisTimer = null;
-    }
-}
+/* SCANNER CAMERA */
 
 async function startScannerCamera() {
-    try {
-        scannerStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'environment', width: {ideal: 1920}, height: {ideal: 1080}}});
-        const v = document.getElementById('scanner-video');
-        v.srcObject = scannerStream;
-        v.style.display = 'block';
-        document.getElementById('scanner-placeholder').style.display = 'none';
-        document.getElementById('start-scanner-camera').style.display = 'none';
-        document.getElementById('scan-page').style.display = 'block';
-    } catch (e) {
-        alert('Camera access denied.');
-    }
-}
-
-async function scanPage() {
-    const v = document.getElementById('scanner-video');
-    const c = document.createElement('canvas');
-    c.width = v.videoWidth || 1920;
-    c.height = v.videoHeight || 1080;
-    c.getContext('2d').drawImage(v, 0, 0);
-    const dataUrl = c.toDataURL('image/jpeg', 0.85);
-
-    document.getElementById('scanner-processing').classList.remove('hidden');
-
-    try {
-        const res = await fetch('/orders/api/process-scan/', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCSRF()},
-            body: JSON.stringify({image: dataUrl})
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-            scannedPages.push(data.processed_image);
-            updateScannerThumbs();
-            document.getElementById('scanner-page-count').textContent = scannedPages.length;
-            document.getElementById('finish-scanning').style.display = 'block';
-            document.getElementById('page_count').value = scannedPages.length;
-            calculatePrice();
-        }
-
-        document.getElementById('scanner-processing').classList.add('hidden');
-    } catch (e) {
-        document.getElementById('scanner-processing').classList.add('hidden');
-    }
-}
-
-function updateScannerThumbs() {
-    document.getElementById('scanner-thumbnails').innerHTML = scannedPages.map((p, i) => `
-        <div class="relative">
-            <img src="${p}" class="h-20 rounded border border-slate-600">
-            <span class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-400 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center cursor-pointer" onclick="deleteScannedPage(${i})">x</span>
-            <p class="text-xs text-gray-400 text-center mt-1">Page ${i + 1}</p>
-        </div>
-    `).join('');
-}
-
-function deleteScannedPage(i) {
-    scannedPages.splice(i, 1);
-    updateScannerThumbs();
-    document.getElementById('scanner-page-count').textContent = scannedPages.length;
-    document.getElementById('page_count').value = scannedPages.length || 1;
-
-    if (scannedPages.length === 0) {
-        document.getElementById('finish-scanning').style.display = 'none';
-    }
-
-    calculatePrice();
-}
-
-async function finishScanning() {
-    if (scannedPages.length === 0) {
-        alert('No pages scanned.');
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Camera access requires a supported browser and a secure connection (HTTPS).');
         return;
     }
 
-    const {jsPDF} = window.jspdf;
-    const pdf = new jsPDF('p', 'mm', 'a4');
+    try {
+        stopScannerCamera();
 
-    for (let i = 0; i < scannedPages.length; i++) {
-        if (i > 0) pdf.addPage();
+        scannerStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: { ideal: 'environment' },
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
+            },
+            audio: false
+        });
 
-        const img = new Image();
-        img.src = scannedPages[i];
-        await new Promise(r => { img.onload = r; });
-        pdf.addImage(img, 'JPEG', 0, 0, 210, 297);
+        const video = $('scanner-video');
+        video.srcObject = scannerStream;
+        video.style.display = 'block';
+        $('scanner-placeholder').style.display = 'none';
+
+        await video.play();
+
+        $('start-scanner-camera').style.display = 'none';
+        $('scan-page').style.display = 'inline-flex';
+    } catch (error) {
+        stopScannerCamera();
+        alert('Unable to access the camera. Allow camera permission and try again.');
     }
-
-    const blob = pdf.output('blob');
-    const f = new File([blob], 'scanned-document.pdf', {type: 'application/pdf'});
-
-    selectedFiles = [f];
-
-    switchMode('document');
-    document.getElementById('page_count').value = scannedPages.length;
-    document.getElementById('dropzone-text').innerText = 'scanned-document.pdf (' + scannedPages.length + ' pages)';
-    document.getElementById('dropzone-text').classList.add('font-bold');
-    calculatePrice();
 }
 
 function stopScannerCamera() {
     if (scannerStream) {
-        scannerStream.getTracks().forEach(t => t.stop());
+        scannerStream.getTracks().forEach(track => track.stop());
         scannerStream = null;
     }
-}
 
-function getCSRF() {
-    return document.querySelector('[name=csrfmiddlewaretoken]').value;
-}
+    const video = $('scanner-video');
 
-const pageCountInput = document.getElementById('page_count'),
-      livePrice = document.getElementById('live-price'),
-      submitPrice = document.getElementById('submit-price'),
-      priceTriggers = document.querySelectorAll('.price-trigger'),
-      deliveryZoneSelect = document.getElementById('delivery_zone'),
-      discountCodeInput = document.getElementById('discount_code'),
-      applyDiscountBtn = document.getElementById('apply-discount'),
-      discountMessage = document.getElementById('discount-message'),
-      discountAmountInput = document.getElementById('discount_amount'),
-      calculatedPriceInput = document.getElementById('calculated_price');
-
-let discountApplied = false, discountValue = 0;
-
-document.querySelectorAll('.delivery-trigger').forEach(t => t.addEventListener('change', function() {
-    document.getElementById('delivery-zone-container').classList.toggle('hidden', this.value !== 'delivery');
-    if (this.value !== 'delivery') deliveryZoneSelect.value = '';
-    calculatePrice();
-}));
-
-function calculatePrice() {
-    let p = parseInt(pageCountInput.value) || 0;
-    let copies = parseInt(document.getElementById('copies').value) || 1;
-    let c = document.querySelector('input[name="is_color"]:checked')?.value === 'True';
-    let d = document.getElementById('double_sided').checked;
-    let b = document.getElementById('binding').value;
-    let df = 0;
-    let t = 0;
-
-    if ((document.querySelector('input[name="delivery_type"]:checked')?.value || 'pickup') === 'delivery') {
-        const o = deliveryZoneSelect.options[deliveryZoneSelect.selectedIndex];
-        if (o) df = parseInt(o.getAttribute('data-fee')) || 0;
+    if (video) {
+        video.pause();
+        video.srcObject = null;
+        video.style.display = 'none';
     }
 
-    if (currentMode === 'document' || currentMode === 'scanner') {
-        let effectivePages = d ? Math.ceil(p / 2) : p;
-        let pricePerPage = BASE_PRICE_BW + (c ? COLOR_SURCHARGE : 0);
-        t = effectivePages * pricePerPage * copies;
-        if (b === 'spiral') t += SPIRAL_FEE * copies;
-    } else if (currentMode === 'passport') {
-        t = copies * PASSPORT_PRICE_PER_COPY;
-    }
-
-    t += df;
-
-    if (discountApplied) t = Math.max(0, t - discountValue);
-
-    calculatedPriceInput.value = t;
-    livePrice.innerText = t.toLocaleString() + ' UGX';
-    submitPrice.innerText = t.toLocaleString() + ' UGX';
+    if ($('scanner-placeholder')) $('scanner-placeholder').style.display = 'flex';
+    if ($('start-scanner-camera')) $('start-scanner-camera').style.display = 'inline-flex';
+    if ($('scan-page')) $('scan-page').style.display = 'none';
 }
 
-applyDiscountBtn.addEventListener('click', function() {
-    const code = discountCodeInput.value.trim().toUpperCase();
+async function scanPage() {
+    const video = $('scanner-video');
 
-    if (!code) {
-        showDiscountMsg('Enter a code.', 'error');
+    if (!scannerStream || !video.videoWidth) {
+        alert('Start the camera and wait for the preview before capturing a page.');
         return;
     }
 
-    fetch('{% url "validate_discount_code" %}', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCSRF()},
-        body: 'code=' + encodeURIComponent(code) + '&order_total=' + calculateRawTotal()
-    }).then(r => r.json()).then(data => {
-        if (data.valid) {
-            discountApplied = true;
-            discountValue = data.savings;
-            discountAmountInput.value = data.savings;
-            showDiscountMsg('Discount applied! Save ' + data.savings.toLocaleString() + ' UGX', 'success');
-            applyDiscountBtn.innerText = 'Remove';
-            applyDiscountBtn.classList.add('bg-red-600');
-        } else {
-            showDiscountMsg(data.error, 'error');
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+
+    const image = canvas.toDataURL('image/jpeg', 0.85);
+    $('scanner-processing').style.display = 'block';
+    $('scan-page').disabled = true;
+    $('scan-page').textContent = 'Processing…';
+
+    try {
+        const response = await fetch('/orders/api/process-scan/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRF()
+            },
+            body: JSON.stringify({ image })
+        });
+
+        if (!response.ok) throw new Error('The scanner server returned an error.');
+
+        const data = await response.json();
+
+        if (!data.success || !data.processed_image) {
+            throw new Error(data.error || 'The scanned page could not be processed.');
         }
 
+        scannedPages.push(data.processed_image);
+        updateScannerThumbs();
+
+        $('scanner-page-count').textContent = scannedPages.length;
+        $('finish-scanning').style.display = 'inline-flex';
+        $('scan-result').textContent = 'Page ' + scannedPages.length + ' captured successfully.';
+        $('scan-result').className = 'ph-status success';
+
+        pageCountInput.value = scannedPages.length;
+        $('order_type').value = 'scanned';
         calculatePrice();
-    }).catch(() => showDiscountMsg('Error.', 'error'));
+    } catch (error) {
+        $('scan-result').textContent = error.message || 'Scanning failed. Please try again.';
+        $('scan-result').className = 'ph-status error';
+    } finally {
+        $('scanner-processing').style.display = 'none';
+        $('scan-page').disabled = false;
+        $('scan-page').textContent = 'Capture page';
+    }
+}
+
+function updateScannerThumbs() {
+    $('scanner-thumbnails').innerHTML = scannedPages.map((page, index) => `
+        <div class="ph-thumb">
+            <img src="${page}" alt="Scanned page ${index + 1}">
+            <button type="button" onclick="deleteScannedPage(${index})"
+                aria-label="Delete page ${index + 1}">×</button>
+            <p>Page ${index + 1}</p>
+        </div>
+    `).join('');
+}
+
+function deleteScannedPage(index) {
+    scannedPages.splice(index, 1);
+    updateScannerThumbs();
+
+    $('scanner-page-count').textContent = scannedPages.length;
+    $('finish-scanning').style.display =
+        scannedPages.length ? 'inline-flex' : 'none';
+
+    $('scan-result').textContent = scannedPages.length
+        ? 'You can continue scanning or create the PDF.'
+        : 'No pages scanned yet.';
+
+    pageCountInput.value = Math.max(1, scannedPages.length);
+
+    // A previous generated PDF is no longer valid after a page is removed.
+    selectedFiles = selectedFiles.filter(file => file.name !== 'scanned-document.pdf');
+    calculatePrice();
+}
+
+async function finishScanning() {
+    if (!scannedPages.length) {
+        alert('Scan at least one page before creating a PDF.');
+        return;
+    }
+
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+        alert('The PDF library did not load. Refresh the page and try again.');
+        return;
+    }
+
+    const button = $('finish-scanning');
+    button.disabled = true;
+    button.textContent = 'Creating PDF…';
+
+    try {
+        const { jsPDF } = window.jspdf;
+        const paperSize = $('scanner-paper-size').value.toLowerCase();
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: paperSize === '4x6' ? [101.6, 152.4] : 'a4'
+        });
+
+        for (let index = 0; index < scannedPages.length; index++) {
+            if (index > 0) pdf.addPage();
+
+            const image = await loadImage(scannedPages[index]);
+            const width = pdf.internal.pageSize.getWidth();
+            const height = pdf.internal.pageSize.getHeight();
+
+            // Fit the image inside the page without distorting its proportions.
+            const ratio = Math.min(
+                width / image.width,
+                height / image.height
+            );
+
+            const imageWidth = image.width * ratio;
+            const imageHeight = image.height * ratio;
+            const x = (width - imageWidth) / 2;
+            const y = (height - imageHeight) / 2;
+
+            pdf.addImage(image, 'JPEG', x, y, imageWidth, imageHeight);
+        }
+
+        const blob = pdf.output('blob');
+
+        if (blob.size > MAX_FILE_SIZE) {
+            throw new Error('The scanned PDF exceeds the 10 MB file limit.');
+        }
+
+        const pdfFile = new File(
+            [blob],
+            'scanned-document.pdf',
+            { type: 'application/pdf', lastModified: Date.now() }
+        );
+
+        selectedFiles = selectedFiles.filter(
+            file => file.name !== 'scanned-document.pdf'
+        );
+        selectedFiles.push(pdfFile);
+
+        $('order_type').value = 'scanned';
+        $('paper_size').value = $('scanner-paper-size').value;
+        pageCountInput.value = scannedPages.length;
+
+        $('scan-result').textContent =
+            `✓ PDF ready: ${scannedPages.length} page(s). Your scanned document will be attached to this order.`;
+        $('scan-result').className = 'ph-status success';
+
+        calculatePrice();
+    } catch (error) {
+        alert(error.message || 'Could not create the PDF. Please try again.');
+    } finally {
+        button.disabled = false;
+        button.textContent = 'Create PDF from scanned pages';
+    }
+}
+
+function loadImage(source) {
+    return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error('A scanned page could not be loaded.'));
+        image.src = source;
+    });
+}
+
+/* DELIVERY */
+
+document.querySelectorAll('input[name="delivery_type"]').forEach(input => {
+    input.addEventListener('change', function () {
+        const delivery = this.value === 'delivery';
+
+        $('delivery-zone-container').classList.toggle('ph-hidden', !delivery);
+        deliveryZoneSelect.required = delivery;
+
+        if (!delivery) deliveryZoneSelect.value = '';
+
+        calculatePrice();
+    });
 });
 
+deliveryZoneSelect.addEventListener('change', calculatePrice);
+
+/* PRICE CALCULATION */
+
+function getDeliveryFee() {
+    const deliveryType = document.querySelector(
+        'input[name="delivery_type"]:checked'
+    )?.value;
+
+    if (deliveryType !== 'delivery') return 0;
+
+    const option = deliveryZoneSelect.options[deliveryZoneSelect.selectedIndex];
+
+    return option ? Math.max(0, Number(option.dataset.fee) || 0) : 0;
+}
+
 function calculateRawTotal() {
-    let p = parseInt(pageCountInput.value) || 0;
-    let copies = parseInt(document.getElementById('copies').value) || 1;
-    let c = document.querySelector('input[name="is_color"]:checked')?.value === 'True';
-    let d = document.getElementById('double_sided').checked;
-    let b = document.getElementById('binding').value;
+    const pages = Math.max(1, parseInt(pageCountInput.value, 10) || 1);
+    const copies = Math.min(100, Math.max(1, parseInt(copiesInput.value, 10) || 1));
+    const isColor = document.querySelector('input[name="is_color"]:checked')?.value === 'True';
+    const doubleSided = $('double_sided').checked;
+    const binding = $('binding').value;
 
-    if (currentMode === 'passport') {
-        return 0;
-    }
+    const effectivePages = doubleSided ? Math.ceil(pages / 2) : pages;
+    const pricePerPage = BASE_PRICE_BW + (isColor ? COLOR_SURCHARGE : 0);
 
-    return (Math.ceil(p / (d ? 2 : 1)) * (BASE_PRICE_BW + (c ? COLOR_SURCHARGE : 0)) + (b === 'spiral' ? SPIRAL_FEE : 0)) * copies;
+    let total = effectivePages * pricePerPage * copies;
+
+    if (binding === 'spiral') total += SPIRAL_FEE * copies;
+
+    return total + getDeliveryFee();
 }
 
-function showDiscountMsg(m, t) {
-    discountMessage.innerText = m;
-    discountMessage.classList.remove('hidden');
-    discountMessage.className = 'text-sm mt-2 font-medium ' + (t === 'success' ? 'text-green-400' : 'text-red-400');
+function calculatePrice() {
+    const pages = Math.max(1, parseInt(pageCountInput.value, 10) || 1);
+    const copies = Math.min(100, Math.max(1, parseInt(copiesInput.value, 10) || 1));
+    const isColor = document.querySelector('input[name="is_color"]:checked')?.value === 'True';
+    const doubleSided = $('double_sided').checked;
+    const binding = $('binding').value;
+    const deliveryFee = getDeliveryFee();
+
+    const effectivePages = doubleSided ? Math.ceil(pages / 2) : pages;
+    const pricePerPage = BASE_PRICE_BW + (isColor ? COLOR_SURCHARGE : 0);
+
+    let total = effectivePages * pricePerPage * copies;
+
+    if (binding === 'spiral') total += SPIRAL_FEE * copies;
+
+    total += deliveryFee;
+
+    const discount = discountApplied
+        ? Math.min(discountValue, total)
+        : 0;
+
+    total = Math.max(0, total - discount);
+
+    calculatedPriceInput.value = Math.round(total);
+    $('live-price').textContent = formatMoney(total);
+    $('submit-price').textContent = formatMoney(total);
+
+    $('summary-service').textContent =
+        currentMode === 'scanner' ? 'Scan & photocopy' : 'Document printing';
+
+    $('summary-pages').textContent = pages;
+    $('summary-copies').textContent = copies;
+    $('summary-colour').textContent = isColor ? 'Colour' : 'Black & white';
+
+    const deliveryType = document.querySelector(
+        'input[name="delivery_type"]:checked'
+    )?.value || 'pickup';
+
+    $('summary-delivery').textContent =
+        deliveryType === 'delivery' ? 'Delivery' : 'Pickup';
+
+    $('summary-delivery-fee').textContent = formatMoney(deliveryFee);
+    $('summary-discount').textContent = '− ' + formatMoney(discount);
+
+    $('order_type').value = currentMode === 'scanner' ? 'scanned' : 'document';
+
+    return total;
 }
+
+document.querySelectorAll(
+    'input[name="is_color"], #double_sided, #binding'
+).forEach(input => input.addEventListener('change', calculatePrice));
 
 pageCountInput.addEventListener('input', calculatePrice);
-priceTriggers.forEach(t => t.addEventListener('change', calculatePrice));
-calculatePrice();
 
-document.getElementById('upload-form').addEventListener('submit', function(e) {
-    if (selectedFiles.length > 0) {
-        const dt = new DataTransfer();
-        selectedFiles.forEach(file => dt.items.add(file));
-        const fileInput = document.getElementById('file-input');
-        fileInput.files = dt.files;
-        fileInput.name = 'files';
+/* DISCOUNT VALIDATION */
+
+function showDiscountMessage(message, success) {
+    $('discount-message').textContent = message;
+    $('discount-message').style.color = success ? 'var(--ph-green)' : '#B42318';
+}
+
+$('apply-discount').addEventListener('click', async function () {
+    const code = discountCodeInput.value.trim().toUpperCase();
+
+    if (discountApplied) {
+        discountApplied = false;
+        discountValue = 0;
+        discountAmountInput.value = '0';
+        discountCodeInput.disabled = false;
+        discountCodeInput.value = '';
+        this.textContent = 'Apply';
+        showDiscountMessage('Discount removed.', true);
+        calculatePrice();
+        return;
     }
 
-    if (currentMode === 'passport') {
-        document.getElementById('order_type').value = 'passport';
-        document.querySelector('input[name="is_color"][value="True"]').checked = true;
-        document.getElementById('calculated_price').value = '0';
-    } else if (currentMode === 'scanner') {
-        document.getElementById('order_type').value = 'scanned';
-    } else {
-        document.getElementById('order_type').value = 'document';
+    if (!code) {
+        showDiscountMessage('Enter a discount code first.', false);
+        return;
+    }
+
+    this.disabled = true;
+    this.textContent = 'Checking…';
+
+    try {
+        const response = await fetch('{% url "validate_discount_code" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCSRF()
+            },
+            body: new URLSearchParams({
+                code,
+                order_total: String(calculateRawTotal())
+            })
+        });
+
+        if (!response.ok) throw new Error('Discount validation failed.');
+
+        const data = await response.json();
+
+        if (data.valid) {
+            discountApplied = true;
+            discountValue = Math.max(0, Number(data.savings) || 0);
+            discountAmountInput.value = discountValue;
+            discountCodeInput.value = code;
+            discountCodeInput.disabled = true;
+
+            this.textContent = 'Remove';
+            showDiscountMessage(
+                'Discount applied! You save ' + formatMoney(discountValue) + '.',
+                true
+            );
+        } else {
+            showDiscountMessage(data.error || 'This discount code is invalid.', false);
+        }
+    } catch (error) {
+        showDiscountMessage('Could not validate the code. Please try again.', false);
+    } finally {
+        this.disabled = false;
+        if (!discountApplied) this.textContent = 'Apply';
+        calculatePrice();
+    }
+});
+
+/* SUBMIT ORDER */
+
+$('upload-form').addEventListener('submit', function (event) {
+    if (processingFiles) {
+        event.preventDefault();
+        alert('Please wait while your document page counts are calculated.');
+        return;
+    }
+
+    if (!selectedFiles.length) {
+        event.preventDefault();
+
+        if (currentMode === 'scanner') {
+            alert('Scan pages and create the PDF before submitting your order.');
+        } else {
+            alert('Please select at least one document to upload.');
+        }
+
+        return;
+    }
+
+    if (currentMode === 'scanner' && scannedPages.length === 0) {
+        event.preventDefault();
+        alert('No scanned pages are available. Please scan your document again.');
+        return;
+    }
+
+    if (currentMode === 'scanner' &&
+        !selectedFiles.some(file => file.name === 'scanned-document.pdf')) {
+        event.preventDefault();
+        alert('Create the scanned PDF before submitting your order.');
+        return;
     }
 
     if (currentMode === 'document' && selectedFiles.length === 0) {
-        e.preventDefault();
-        alert('Please select at least one document to upload.');
+        event.preventDefault();
+        alert('Please select at least one document.');
+        return;
     }
+
+    const deliveryType = document.querySelector(
+        'input[name="delivery_type"]:checked'
+    )?.value;
+
+    if (deliveryType === 'delivery' && !deliveryZoneSelect.value) {
+        event.preventDefault();
+        deliveryZoneSelect.focus();
+        alert('Please choose a delivery zone.');
+        return;
+    }
+
+    if (!$('station').value) {
+        event.preventDefault();
+        $('station').focus();
+        alert('Please select a printing station.');
+        return;
+    }
+
+    // Attach the actual selected/generated files to the form submission.
+    const dataTransfer = new DataTransfer();
+
+    selectedFiles.forEach(file => dataTransfer.items.add(file));
+
+    fileInput.files = dataTransfer.files;
+    fileInput.name = 'files';
+
+    $('order_type').value = currentMode === 'scanner' ? 'scanned' : 'document';
+    $('paper_size').value = currentMode === 'scanner'
+        ? $('scanner-paper-size').value
+        : 'A4';
+
+    calculatePrice();
 });
+
+// Initial state
+switchMode('document');
+calculatePrice();
+
+window.addEventListener('pagehide', stopScannerCamera);
 </script>
+
 {% endblock %}
