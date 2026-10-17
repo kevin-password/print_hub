@@ -4,19 +4,18 @@
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
 
-    <title>{% block title %}PrintHub — Kabale University Printing Services{% endblock %}</title>
-    <meta name="description" content="{% block description %}Upload your documents, pay with MTN or Airtel Mobile Money, and pick up at your nearest campus station. Fast, reliable printing for students at Kabale University.{% endblock %}">
-    <meta name="keywords" content="printing, Kabale University, student printing, document upload, MTN payment, Airtel payment, print shop, campus printing, passport photo, document printing, Kabale">
+    <title>{% block title %}PrintHub — Printing Made Simple{% endblock %}</title>
+    <meta name="description" content="{% block description %}Upload documents, pay with MTN or Airtel Mobile Money, and get your printing done with PrintHub at Kabale University.{% endblock %}">
+    <meta name="keywords" content="PrintHub, printing, Kabale University, document printing, student printing, MTN Mobile Money, Airtel Money">
     <meta name="robots" content="index, follow">
     <meta name="author" content="PrintHub">
     <link rel="canonical" href="{{ request.build_absolute_uri }}">
 
-    <!-- Open Graph -->
-    <meta property="og:title" content="{% block og_title %}PrintHub — Kabale University Printing Services{% endblock %}">
-    <meta property="og:description" content="{% block og_description %}Upload your documents, pay with MTN or Airtel, and pick up at your nearest campus station.{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}PrintHub — Printing Made Simple{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Upload documents, pay conveniently, and get your printing done with PrintHub.{% endblock %}">
     <meta property="og:image" content="{% block og_image %}https://www.printhubug.com/orders/live-board-preview.png{% endblock %}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -25,21 +24,19 @@
     <meta property="og:site_name" content="PrintHub">
     <meta property="og:locale" content="en_US">
 
-    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{% block twitter_title %}PrintHub — Kabale University Printing{% endblock %}">
-    <meta name="twitter:description" content="{% block twitter_description %}Upload your documents, pay with MTN or Airtel, and pick up at your nearest campus station.{% endblock %}">
+    <meta name="twitter:title" content="{% block twitter_title %}PrintHub — Printing Made Simple{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Simple, convenient printing for students at Kabale University.{% endblock %}">
     <meta name="twitter:image" content="{% block twitter_image %}https://www.printhubug.com/orders/live-board-preview.png{% endblock %}">
     <meta name="twitter:site" content="@printhub">
 
-    <!-- Structured data -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "PrintHub",
         "url": "https://www.printhubug.com",
-        "description": "Fast, reliable printing services for students at Kabale University.",
+        "description": "Convenient printing services for students at Kabale University.",
         "potentialAction": {
             "@type": "SearchAction",
             "target": "https://www.printhubug.com/track/?order_id={search_term_string}",
@@ -48,7 +45,6 @@
     }
     </script>
 
-    <!-- Icons and PWA -->
     <link rel="icon" type="image/svg+xml" href="{% static 'icon.svg' %}">
     <link rel="shortcut icon" href="{% static 'icon.svg' %}">
     <link rel="apple-touch-icon" href="{% static 'icon.svg' %}">
@@ -58,33 +54,20 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="PrintHub">
 
-    <!-- Theme initialization: before rendering -->
     <script>
     (function () {
-        let saved = 'light';
-
+        let theme = 'light';
         try {
-            saved = localStorage.getItem('theme') || 'light';
-        } catch (e) {}
+            theme = localStorage.getItem('theme') || 'light';
+        } catch (error) {}
 
-        if (saved !== 'dark' && saved !== 'light') saved = 'light';
+        if (!['light', 'dark'].includes(theme)) theme = 'light';
 
-        document.documentElement.setAttribute('data-theme', saved);
-
-        if (saved === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-
-        const meta = document.getElementById('meta-theme-color');
-        if (meta) {
-            meta.setAttribute('content', saved === 'dark' ? '#0B1220' : '#F8F9FC');
-        }
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.classList.toggle('dark', theme === 'dark');
     })();
     </script>
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -103,34 +86,28 @@
                         sans: ['Inter', 'Segoe UI', 'system-ui', 'sans-serif']
                     },
                     boxShadow: {
-                        soft: '0 4px 20px rgba(14,33,72,0.055)',
-                        elevated: '0 12px 30px rgba(14,33,72,0.11)'
+                        soft: '0 4px 24px rgba(14,33,72,.055)',
+                        elevated: '0 16px 40px rgba(14,33,72,.10)'
                     }
                 }
             }
         };
     </script>
 
-    <!-- Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* ==========================================
-           PRINTHUB DESIGN SYSTEM
-           ========================================== */
-
         :root {
             color-scheme: light;
 
             --ph-navy: #0E2148;
-            --ph-navy-deep: #08162F;
+            --ph-deep: #08162F;
             --ph-orange: #F0631E;
             --ph-orange-hover: #D94E12;
-            --ph-cream: #F5F0E6;
 
-            --ph-bg: #F8F9FC;
+            --ph-bg: #F7F8FC;
             --ph-surface: #FFFFFF;
             --ph-surface-alt: #F1F4F9;
             --ph-text: #17233B;
@@ -142,28 +119,29 @@
             --ph-danger: #DC2626;
             --ph-info: #1D4ED8;
 
-            --ph-radius: 14px;
-            --ph-shadow: 0 4px 20px rgba(14,33,72,.055);
-            --ph-shadow-hover: 0 12px 30px rgba(14,33,72,.11);
+            --ph-radius: 16px;
+            --ph-shadow: 0 4px 24px rgba(14,33,72,.055);
+            --ph-shadow-hover: 0 14px 36px rgba(14,33,72,.10);
+            --ph-nav-height: 76px;
         }
 
         html[data-theme="dark"] {
             color-scheme: dark;
 
-            --ph-bg: #0B1220;
-            --ph-surface: #131E30;
-            --ph-surface-alt: #1A2940;
+            --ph-bg: #0A1020;
+            --ph-surface: #111B2D;
+            --ph-surface-alt: #19263A;
             --ph-text: #F1F5F9;
-            --ph-muted: #A1AEC2;
-            --ph-border: #29364B;
+            --ph-muted: #A4B0C3;
+            --ph-border: #29374C;
 
             --ph-success: #4ADE80;
             --ph-warning: #FBBF24;
             --ph-danger: #F87171;
             --ph-info: #60A5FA;
 
-            --ph-shadow: 0 4px 20px rgba(0,0,0,.15);
-            --ph-shadow-hover: 0 12px 30px rgba(0,0,0,.25);
+            --ph-shadow: 0 4px 24px rgba(0,0,0,.15);
+            --ph-shadow-hover: 0 14px 36px rgba(0,0,0,.28);
         }
 
         *, *::before, *::after {
@@ -172,17 +150,19 @@
 
         html {
             scroll-behavior: smooth;
-            scroll-padding-top: 90px;
+            scroll-padding-top: 100px;
         }
 
         body {
             margin: 0;
+            min-height: 100vh;
             background: var(--ph-bg) !important;
             color: var(--ph-text) !important;
             font-family: Inter, "Segoe UI", system-ui, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
             -webkit-font-smoothing: antialiased;
             text-rendering: optimizeLegibility;
-            line-height: 1.6;
             transition: background-color .2s ease, color .2s ease;
         }
 
@@ -208,29 +188,48 @@
         }
 
         :focus-visible {
-            outline: 3px solid rgba(240,99,30,.7);
+            outline: 3px solid rgba(240,99,30,.72);
             outline-offset: 3px;
         }
 
-        /* Navigation */
+        [hidden] {
+            display: none !important;
+        }
+
+        .ph-skip-link {
+            position: fixed;
+            z-index: 1000;
+            top: 8px;
+            left: 8px;
+            padding: 10px 16px;
+            background: var(--ph-navy);
+            color: white;
+            border-radius: 10px;
+            transform: translateY(-150%);
+        }
+
+        .ph-skip-link:focus {
+            transform: translateY(0);
+        }
+
+        /* ── Navigation ───────────────────────────── */
+
         .ph-navbar {
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(255,255,255,.94);
+            background: color-mix(in srgb, var(--ph-surface) 92%, transparent);
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
             border-bottom: 1px solid var(--ph-border);
-            box-shadow: 0 2px 12px rgba(14,33,72,.035);
-        }
-
-        html[data-theme="dark"] .ph-navbar {
-            background: rgba(11,18,32,.94);
-            box-shadow: 0 2px 12px rgba(0,0,0,.12);
         }
 
         .ph-navbar-inner {
-            min-height: 72px;
+            min-height: var(--ph-nav-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 22px;
         }
 
         .ph-brand {
@@ -249,9 +248,10 @@
 
         .ph-brand-name {
             color: var(--ph-navy);
-            font-size: 1.35rem;
+            font-size: 1.38rem;
             font-weight: 800;
-            letter-spacing: -.055em;
+            letter-spacing: -.065em;
+            line-height: 1;
         }
 
         html[data-theme="dark"] .ph-brand-name {
@@ -262,67 +262,87 @@
             color: var(--ph-orange);
         }
 
-        .ph-nav-links {
+        .ph-desktop-nav {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
+            min-width: 0;
         }
 
         .ph-nav-link {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 7px;
-            padding: 9px 11px;
-            border-radius: 9px;
+            gap: 8px;
+            min-height: 42px;
+            padding: 9px 12px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
             color: var(--ph-muted);
             text-decoration: none;
-            font-size: .82rem;
+            font-size: .84rem;
             font-weight: 600;
             white-space: nowrap;
-            transition: background .18s, color .18s;
+            cursor: pointer;
+            transition: background .18s ease, color .18s ease;
         }
 
-        .ph-nav-link:hover {
-            color: var(--ph-orange);
-            background: rgba(240,99,30,.07);
+        .ph-nav-link:hover,
+        .ph-nav-link[aria-expanded="true"] {
+            color: var(--ph-text);
+            background: var(--ph-surface-alt);
+        }
+
+        .ph-nav-link svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        .ph-nav-divider {
+            width: 1px;
+            height: 26px;
+            margin: 0 7px;
+            background: var(--ph-border);
         }
 
         .ph-btn-primary {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            min-height: 42px;
+            gap: 9px;
+            min-height: 44px;
             padding: 10px 17px;
             border: 1px solid transparent;
-            border-radius: 10px;
+            border-radius: 11px;
             background: var(--ph-orange);
             color: #FFFFFF !important;
             text-decoration: none;
-            font-weight: 700;
             font-size: .875rem;
+            font-weight: 700;
+            line-height: 1.3;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(240,99,30,.15);
-            transition: background .2s, transform .2s, box-shadow .2s;
+            box-shadow: 0 4px 12px rgba(240,99,30,.15);
+            transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
         }
 
         .ph-btn-primary:hover {
             background: var(--ph-orange-hover);
             color: #FFFFFF !important;
             transform: translateY(-1px);
-            box-shadow: 0 7px 16px rgba(240,99,30,.23);
+            box-shadow: 0 8px 18px rgba(240,99,30,.22);
         }
 
         .ph-btn-primary svg {
-            width: 17px;
-            height: 17px;
+            width: 18px;
+            height: 18px;
             flex-shrink: 0;
         }
 
-        .ph-theme-toggle {
-            width: 40px;
-            height: 40px;
+        .ph-icon-btn {
+            width: 42px;
+            height: 42px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -332,101 +352,245 @@
             background: var(--ph-surface);
             color: var(--ph-text);
             cursor: pointer;
-            transition: border-color .2s, color .2s, background .2s;
+            transition: border-color .18s, background .18s, color .18s;
         }
 
-        .ph-theme-toggle:hover {
+        .ph-icon-btn:hover {
             border-color: var(--ph-orange);
             color: var(--ph-orange);
         }
 
-        .theme-toggle-btn {
+        .ph-icon-btn svg {
+            width: 19px;
+            height: 19px;
+        }
+
+        .ph-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        /* Staff navigation is grouped into a dropdown. */
+        .ph-nav-dropdown {
+            position: relative;
+        }
+
+        .ph-nav-dropdown-panel {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            width: 245px;
+            padding: 8px;
             background: var(--ph-surface);
             border: 1px solid var(--ph-border);
-            color: var(--ph-text);
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            font-size: 19px;
-            transition: all .2s;
+            border-radius: 15px;
+            box-shadow: var(--ph-shadow-hover);
+            z-index: 150;
         }
 
-        .theme-toggle-btn:hover {
-            border-color: var(--ph-orange);
+        .ph-dropdown-heading {
+            padding: 9px 11px 6px;
+            color: var(--ph-muted);
+            font-size: .7rem;
+            font-weight: 800;
+            letter-spacing: .09em;
+            text-transform: uppercase;
+        }
+
+        .ph-nav-dropdown-panel a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 11px;
+            border-radius: 9px;
+            color: var(--ph-text);
+            text-decoration: none;
+            font-size: .84rem;
+            font-weight: 550;
+        }
+
+        .ph-nav-dropdown-panel a:hover {
+            background: var(--ph-surface-alt);
             color: var(--ph-orange);
         }
 
-        /* Mobile navigation */
+        /* ── Notifications ────────────────────────── */
+
+        #notification-bell {
+            position: relative;
+        }
+
+        #notification-toggle {
+            position: relative;
+        }
+
+        #notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 19px;
+            height: 19px;
+            padding: 0 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--ph-surface);
+            border-radius: 999px;
+            background: #DC2626;
+            color: #FFFFFF;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        #notification-dropdown {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            width: min(370px, calc(100vw - 28px));
+            max-height: min(440px, calc(100dvh - 110px));
+            overflow-y: auto;
+            background: var(--ph-surface);
+            color: var(--ph-text);
+            border: 1px solid var(--ph-border);
+            border-radius: 16px;
+            box-shadow: var(--ph-shadow-hover);
+            z-index: 200;
+        }
+
+        .ph-notification-header {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            padding: 15px 17px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            background: var(--ph-surface);
+            border-bottom: 1px solid var(--ph-border);
+        }
+
+        .ph-notification-header button {
+            color: var(--ph-orange);
+            background: none;
+            border: 0;
+            cursor: pointer;
+            font-size: .77rem;
+            font-weight: 700;
+        }
+
+        /* ── Mobile navigation ────────────────────── */
+
         .ph-mobile-menu {
             background: var(--ph-surface);
             border-top: 1px solid var(--ph-border);
-            box-shadow: 0 14px 28px rgba(14,33,72,.08);
+            box-shadow: 0 18px 28px rgba(14,33,72,.08);
+        }
+
+        .ph-mobile-menu-inner {
+            max-height: calc(100dvh - 66px);
+            overflow-y: auto;
+            padding: 14px 16px 22px;
+        }
+
+        .ph-mobile-section {
+            padding: 10px 10px 6px;
+            color: var(--ph-muted);
+            font-size: .7rem;
+            font-weight: 800;
+            letter-spacing: .09em;
+            text-transform: uppercase;
         }
 
         .ph-mobile-menu a {
             display: flex;
             align-items: center;
-            gap: 10px;
-            min-height: 44px;
-            padding: 10px 12px;
+            gap: 11px;
+            min-height: 46px;
+            padding: 11px 12px;
             border-radius: 10px;
             color: var(--ph-text);
-            font-size: .925rem;
-            font-weight: 550;
             text-decoration: none;
-            transition: background .2s, color .2s;
+            font-size: .9rem;
+            font-weight: 550;
+            transition: background .18s, color .18s;
         }
 
         .ph-mobile-menu a:hover {
             color: var(--ph-orange);
-            background: rgba(240,99,30,.07);
+            background: var(--ph-surface-alt);
         }
 
         .ph-mobile-menu form button {
-            min-height: 44px;
+            width: 100%;
+            min-height: 46px;
+            padding: 11px 12px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--ph-danger);
+            text-align: left;
+            font-weight: 650;
+            cursor: pointer;
         }
 
-        /* Existing Tailwind pages */
-        .bg-slate-900 {
-            background-color: var(--ph-bg);
+        .ph-mobile-menu form button:hover {
+            background: var(--ph-surface-alt);
         }
 
-        .bg-slate-800 {
-            background-color: var(--ph-surface);
+        .ph-mobile-divider {
+            height: 1px;
+            margin: 9px 0;
+            background: var(--ph-border);
         }
 
-        html[data-theme="light"] .bg-slate-900 {
+        /* ── Main content and shared surfaces ─────── */
+
+        main {
+            min-width: 0;
+            min-height: calc(100vh - var(--ph-nav-height));
+        }
+
+        .ph-card {
+            background: var(--ph-surface);
+            border: 1px solid var(--ph-border);
+            border-radius: var(--ph-radius);
+            box-shadow: var(--ph-shadow);
+            transition: border-color .2s, box-shadow .2s, transform .2s;
+        }
+
+        .ph-card-hover:hover {
+            border-color: rgba(240,99,30,.35);
+            box-shadow: var(--ph-shadow-hover);
+            transform: translateY(-2px);
+        }
+
+        /* Keep older Tailwind pages compatible with the theme. */
+        html[data-theme="light"] .bg-slate-900,
+        html[data-theme="light"] .bg-gray-900 {
             background-color: var(--ph-bg) !important;
         }
 
-        html[data-theme="light"] .bg-slate-800 {
+        html[data-theme="light"] .bg-slate-800,
+        html[data-theme="light"] .bg-gray-800 {
             background-color: var(--ph-surface) !important;
         }
 
-        html[data-theme="light"] .bg-slate-800\/50 {
-            background-color: rgba(255,255,255,.96) !important;
-        }
-
+        html[data-theme="light"] .bg-slate-800\/50,
         html[data-theme="light"] .bg-slate-800\/80,
         html[data-theme="light"] .bg-slate-800\/95 {
-            background-color: rgba(255,255,255,.98) !important;
+            background-color: var(--ph-surface) !important;
         }
 
-        html[data-theme="light"] .bg-slate-700 {
+        html[data-theme="light"] .bg-slate-700,
+        html[data-theme="light"] .bg-slate-700\/50 {
             background-color: #E8EDF5 !important;
         }
 
-        html[data-theme="light"] .bg-slate-700\/50 {
-            background-color: #F2F5FA !important;
-        }
-
         html[data-theme="light"] .bg-slate-900\/50 {
-            background-color: rgba(248,249,252,.8) !important;
+            background-color: rgba(247,248,252,.88) !important;
         }
 
         html[data-theme="light"] .bg-white\/5 {
@@ -452,9 +616,6 @@
             border-color: #CDD5E2 !important;
         }
 
-        /* Preserve white text on strong coloured buttons.
-           Do not globally recolour .text-white: alerts, overlays,
-           branded buttons and dark panels may require white text. */
         html[data-theme="light"] .text-gray-200 {
             color: #334155 !important;
         }
@@ -464,10 +625,7 @@
         }
 
         html[data-theme="light"] .text-gray-400,
-        html[data-theme="light"] .text-slate-400 {
-            color: #64748B !important;
-        }
-
+        html[data-theme="light"] .text-slate-400,
         html[data-theme="light"] .text-gray-500 {
             color: #64748B !important;
         }
@@ -558,7 +716,7 @@
             color: var(--ph-text);
         }
 
-        /* Keep coloured buttons readable in light mode */
+        /* Recolour common primary actions without recolouring all white text. */
         html[data-theme="light"] .bg-blue-600,
         html[data-theme="light"] .bg-indigo-600 {
             background-color: var(--ph-orange) !important;
@@ -579,25 +737,10 @@
             color: #FFFFFF !important;
         }
 
-        /* Cards and panels */
-        .ph-card {
-            background: var(--ph-surface);
-            border: 1px solid var(--ph-border);
-            border-radius: var(--ph-radius);
-            box-shadow: var(--ph-shadow);
-            transition: border-color .2s, box-shadow .2s, transform .2s;
-        }
-
-        .ph-card-hover:hover {
-            border-color: rgba(240,99,30,.35);
-            box-shadow: var(--ph-shadow-hover);
-            transform: translateY(-2px);
-        }
-
         /* Forms */
-        input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
-        select,
-        textarea {
+        main input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+        main select,
+        main textarea {
             accent-color: var(--ph-orange);
         }
 
@@ -632,85 +775,187 @@
             color: #F1F5F9 !important;
         }
 
-        /* Notifications */
-        #notification-dropdown {
+        /* ── Django messages ──────────────────────── */
+
+        .ph-messages {
+            width: min(100% - 32px, 1280px);
+            margin: 22px auto 0;
+            display: grid;
+            gap: 10px;
+        }
+
+        .ph-message {
+            padding: 13px 16px;
+            border: 1px solid var(--ph-border);
+            border-radius: 12px;
+            font-size: .88rem;
+            font-weight: 550;
+        }
+
+        /* ── Footer ───────────────────────────────── */
+
+        .ph-footer {
+            margin-top: 64px;
             background: var(--ph-surface);
-            border-color: var(--ph-border);
-            border-radius: 14px;
-            box-shadow: var(--ph-shadow-hover);
-            overflow: hidden;
+            border-top: 1px solid var(--ph-border);
         }
 
-        html[data-theme="light"] #notification-dropdown .text-white {
-            color: var(--ph-text) !important;
+        .ph-footer-inner {
+            width: min(100% - 32px, 1280px);
+            margin: 0 auto;
+            padding: 28px 0;
         }
 
-        html[data-theme="light"] #notification-dropdown .text-gray-400,
-        html[data-theme="light"] #notification-dropdown .text-gray-500 {
-            color: var(--ph-muted) !important;
+        .ph-footer-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            padding-bottom: 22px;
+            border-bottom: 1px solid var(--ph-border);
         }
 
-        /* Messages */
-        main {
-            min-width: 0;
-        }
-
-        /* Footer */
-        footer {
-            background: var(--ph-surface) !important;
-            border-color: var(--ph-border) !important;
-        }
-
-        html[data-theme="light"] footer p,
-        html[data-theme="light"] footer span {
+        .ph-footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px 20px;
+            padding-top: 18px;
             color: var(--ph-muted);
+            font-size: .8rem;
         }
 
-        /* PWA install banner */
+        .ph-footer-bottom p {
+            margin: 0;
+        }
+
+        .ph-footer-tagline {
+            color: var(--ph-muted);
+            font-size: .83rem;
+        }
+
+        /* ── PWA install banner ───────────────────── */
+
         #pwa-install-banner {
-            background: var(--ph-surface);
-            border-color: var(--ph-border);
-            box-shadow: 0 -8px 30px rgba(14,33,72,.09);
+            padding: 16px;
             padding-bottom: max(16px, env(safe-area-inset-bottom));
+            background: var(--ph-surface);
+            color: var(--ph-text);
+            border-color: var(--ph-border);
+            box-shadow: 0 -8px 30px rgba(14,33,72,.10);
         }
 
-        html[data-theme="light"] #pwa-install-banner .text-white {
-            color: var(--ph-navy) !important;
-        }
+        /* ── Responsive ───────────────────────────── */
 
-        /* Scrollbars */
-        * {
-            scrollbar-width: thin;
-            scrollbar-color: #A8B3C5 transparent;
-        }
-
-        /* Responsive */
-        @media (max-width: 767px) {
+        @media (max-width: 1100px) {
             .ph-navbar-inner {
-                min-height: 64px;
+                gap: 12px;
+            }
+
+            .ph-nav-link {
+                padding: 9px;
+                font-size: .8rem;
+            }
+
+            .ph-brand-name {
+                font-size: 1.25rem;
             }
 
             .ph-brand img {
-                width: 36px;
-                height: 36px;
+                width: 38px;
+                height: 38px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            :root {
+                --ph-nav-height: 66px;
+            }
+
+            .ph-navbar-inner {
+                gap: 8px;
+            }
+
+            .ph-brand {
+                gap: 7px;
+            }
+
+            .ph-brand img {
+                width: 35px;
+                height: 35px;
             }
 
             .ph-brand-name {
                 font-size: 1.2rem;
             }
 
-            #mobile-menu {
-                max-height: calc(100dvh - 64px);
-                overflow-y: auto;
+            .ph-icon-btn {
+                width: 39px;
+                height: 39px;
+                border-radius: 11px;
+            }
+
+            .ph-nav-actions {
+                gap: 6px;
+            }
+
+            .ph-btn-primary.ph-mobile-upload {
+                min-height: 39px;
+                padding: 8px 11px;
+                gap: 6px;
+                border-radius: 10px;
+                font-size: .78rem;
+            }
+
+            #notification-dropdown {
+                position: fixed;
+                top: 72px;
+                right: 12px;
+                width: calc(100vw - 24px);
+                max-height: calc(100dvh - 92px);
+            }
+
+            .ph-footer {
+                margin-top: 42px;
+            }
+
+            .ph-footer-top {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .ph-footer-bottom {
+                align-items: flex-start;
+                flex-direction: column;
             }
 
             main {
                 overflow-wrap: break-word;
             }
+        }
 
-            #pwa-install-banner {
-                padding-left: 16px;
-                padding-right: 16px;
+        @media (max-width: 380px) {
+            .ph-brand-name {
+                font-size: 1.08rem;
+            }
+
+            .ph-brand img {
+                width: 31px;
+                height: 31px;
+            }
+
+            .ph-nav-actions {
+                gap: 4px;
+            }
+
+            .ph-icon-btn {
+                width: 36px;
+                height: 36px;
+            }
+
+            .ph-btn-primary.ph-mobile-upload {
+                padding: 8px;
             }
         }
 
@@ -731,227 +976,231 @@
 </head>
 
 <body class="min-h-screen overflow-x-hidden">
+    <a href="#main-content" class="ph-skip-link">Skip to main content</a>
 
-    <!-- NAVIGATION -->
-    <nav class="ph-navbar">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="ph-navbar-inner flex justify-between items-center">
+    <!-- PRIMARY NAVIGATION -->
+    <header class="ph-navbar">
+        <nav aria-label="Main navigation">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="ph-navbar-inner">
 
-                <!-- Brand -->
-                <a href="/" class="ph-brand" aria-label="PrintHub home">
-                    <img src="{% static 'icon.svg' %}" alt="PrintHub Logo">
-                    <span class="ph-brand-name">Print<span>Hub</span></span>
-                </a>
-
-                <div class="flex items-center gap-2">
-
-                    <!-- Theme toggle -->
-                    <button
-                        type="button"
-                        class="theme-toggle-btn"
-                        onclick="toggleTheme()"
-                        title="Switch colour theme"
-                        aria-label="Switch colour theme"
-                        id="themeBtn">
-                        <svg id="theme-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <circle cx="12" cy="12" r="4"></circle>
-                            <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path>
-                        </svg>
-                    </button>
-
-                    <!-- Notifications -->
-                    {% if user.is_authenticated %}
-                    <div class="relative" id="notification-bell">
-                        <button
-                            type="button"
-                            onclick="toggleNotifications()"
-                            class="p-2 rounded-xl transition-colors hover:bg-orange-50 relative"
-                            aria-label="Notifications"
-                            aria-expanded="false"
-                            id="notification-toggle">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                            </svg>
-                            <span id="notification-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full min-w-5 h-5 px-1 flex items-center justify-center font-bold">0</span>
-                        </button>
-
-                        <div id="notification-dropdown" class="hidden absolute right-0 mt-3 w-[calc(100vw-32px)] max-w-sm border rounded-xl z-50 max-h-96 overflow-y-auto">
-                            <div class="p-4 border-b flex justify-between items-center">
-                                <span class="font-bold text-sm">Notifications</span>
-                                <button type="button" onclick="markAllRead()" class="text-sm font-semibold" style="color:var(--ph-orange)">Mark all read</button>
-                            </div>
-                            <div id="notification-list" class="divide-y">
-                                <div class="p-5 text-center text-sm" style="color:var(--ph-muted)">Loading notifications…</div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Mobile quick action -->
-                    <a href="{% url 'upload' %}" class="md:hidden ph-btn-primary !min-h-[38px] !px-3 !py-2 !text-xs">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                        </svg>
-                        Upload
+                    <a href="/" class="ph-brand" aria-label="PrintHub home">
+                        <img src="{% static 'icon.svg' %}" alt="" aria-hidden="true">
+                        <span class="ph-brand-name">Print<span>Hub</span></span>
                     </a>
 
-                    <!-- Mobile menu button -->
-                    <button
-                        id="mobile-menu-btn"
-                        type="button"
-                        class="md:hidden p-2 rounded-xl"
-                        aria-label="Open main menu"
-                        aria-expanded="false"
-                        aria-controls="mobile-menu">
-                        <svg id="hamburger-icon" class="block h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        </svg>
-                        <svg id="close-icon" class="hidden h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-
-                    <!-- Desktop navigation -->
-                    <div class="hidden md:flex items-center gap-1">
-
-                        <a href="{% url 'upload' %}" class="ph-btn-primary mx-1">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                            </svg>
-                            Place an Order
-                        </a>
-
+                    <div class="ph-desktop-nav hidden md:flex">
                         {% if user.is_authenticated %}
-
                             <a href="{% url 'dashboard' %}" class="ph-nav-link">My Orders</a>
-                            <a href="{% url 'my_doc_requests' %}" class="ph-nav-link">My Requests</a>
+                            <a href="{% url 'my_doc_requests' %}" class="ph-nav-link">Requests</a>
+                            <a href="{% url 'create_document_request' %}" class="ph-nav-link">Hire a Writer</a>
 
-                            <a href="{% url 'create_document_request' %}" class="ph-nav-link">
-                                Hire Writer
-                            </a>
+                            {% if user.is_staff or user.role == 'agent' or user.role == 'admin' %}
+                                <div class="ph-nav-dropdown" id="staff-nav-dropdown">
+                                    <button
+                                        type="button"
+                                        class="ph-nav-link"
+                                        id="staff-nav-toggle"
+                                        aria-expanded="false"
+                                        aria-controls="staff-nav-panel">
+                                        Workspace
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                            <path d="m7 10 5 5 5-5"/>
+                                        </svg>
+                                    </button>
 
-                            {% if user.is_staff or user.role == 'agent' %}
-                                <a href="{% url 'agent_dashboard' %}" class="ph-nav-link">Agent</a>
-                                <a href="{% url 'admin_doc_requests' %}" class="ph-nav-link">Doc Requests</a>
-                                <a href="{% url 'admin_approve_payments' %}" class="ph-nav-link">Payments</a>
-                            {% endif %}
+                                    <div id="staff-nav-panel" class="ph-nav-dropdown-panel hidden">
+                                        <div class="ph-dropdown-heading">Staff workspace</div>
 
-                            {% if user.is_staff or user.role == 'admin' %}
-                                <a href="{% url 'admin_dashboard' %}" class="ph-nav-link">Admin</a>
-                                <a href="{% url 'financial_dashboard' %}" class="ph-nav-link">Finances</a>
+                                        {% if user.is_staff or user.role == 'agent' %}
+                                            <a href="{% url 'agent_dashboard' %}">Agent dashboard</a>
+                                            <a href="{% url 'admin_doc_requests' %}">Document requests</a>
+                                            <a href="{% url 'admin_approve_payments' %}">Payment approvals</a>
+                                        {% endif %}
+
+                                        {% if user.is_staff or user.role == 'admin' %}
+                                            <a href="{% url 'admin_dashboard' %}">Admin dashboard</a>
+                                            <a href="{% url 'financial_dashboard' %}">Financial reports</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             {% endif %}
 
                             <a href="{% url 'referrals:dashboard' %}" class="ph-nav-link">Refer &amp; Earn</a>
-
-                            <form method="POST" action="{% url 'logout' %}" class="inline">
-                                {% csrf_token %}
-                                <button type="submit" class="ph-nav-link">Logout</button>
-                            </form>
-
                         {% else %}
-
                             <a href="{% url 'track_order' %}" class="ph-nav-link">Track Order</a>
-                            <a href="{% url 'login' %}" class="ph-nav-link">Login</a>
-                            <a href="{% url 'register' %}" class="ph-btn-primary ml-1">Get Started</a>
-
                         {% endif %}
+                    </div>
+
+                    <div class="ph-nav-actions">
+                        <button
+                            type="button"
+                            class="ph-icon-btn"
+                            onclick="toggleTheme()"
+                            id="themeBtn"
+                            title="Switch to dark theme"
+                            aria-label="Switch to dark theme">
+                            <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="4"></circle>
+                                <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path>
+                            </svg>
+                        </button>
+
+                        {% if user.is_authenticated %}
+                            <div id="notification-bell">
+                                <button
+                                    type="button"
+                                    id="notification-toggle"
+                                    class="ph-icon-btn"
+                                    onclick="toggleNotifications()"
+                                    aria-label="Notifications"
+                                    aria-expanded="false"
+                                    aria-controls="notification-dropdown">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+                                        <path d="M10 21h4"/>
+                                    </svg>
+                                    <span id="notification-badge" class="hidden">0</span>
+                                </button>
+
+                                <div id="notification-dropdown" class="hidden" role="region" aria-label="Notifications">
+                                    <div class="ph-notification-header">
+                                        <strong>Notifications</strong>
+                                        <button type="button" onclick="markAllRead()">Mark all read</button>
+                                    </div>
+                                    <div id="notification-list" aria-live="polite">
+                                        <div class="p-5 text-center text-sm" style="color:var(--ph-muted)">Loading notifications…</div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <a href="{% url 'upload' %}" class="ph-btn-primary ph-mobile-upload md:hidden">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M12 16V4m-5 5 5-5 5 5"/>
+                                <path d="M4 16v4h16v-4"/>
+                            </svg>
+                            Upload
+                        </a>
+
+                        <div class="hidden md:flex items-center gap-2">
+                            <a href="{% url 'upload' %}" class="ph-btn-primary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M12 5v14M5 12h14"/>
+                                </svg>
+                                Place an Order
+                            </a>
+
+                            {% if user.is_authenticated %}
+                                <form method="POST" action="{% url 'logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="ph-nav-link">Log out</button>
+                                </form>
+                            {% else %}
+                                <a href="{% url 'login' %}" class="ph-nav-link">Log in</a>
+                                <a href="{% url 'register' %}" class="ph-nav-link">Sign up</a>
+                            {% endif %}
+                        </div>
+
+                        <button
+                            id="mobile-menu-btn"
+                            type="button"
+                            class="ph-icon-btn md:hidden"
+                            aria-label="Open main menu"
+                            aria-expanded="false"
+                            aria-controls="mobile-menu">
+                            <svg id="hamburger-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                                <path d="M4 7h16M4 12h16M4 17h16"/>
+                            </svg>
+                            <svg id="close-icon" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+                                <path d="m6 6 12 12M18 6 6 18"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Mobile navigation panel -->
-        <div id="mobile-menu" class="ph-mobile-menu hidden md:hidden">
-            <div class="px-4 pt-4 pb-5 space-y-1">
+            <!-- MOBILE MENU -->
+            <div id="mobile-menu" class="ph-mobile-menu hidden md:hidden">
+                <div class="ph-mobile-menu-inner">
+                    <div class="ph-mobile-section">Printing</div>
+                    <a href="{% url 'upload' %}">Place an Order</a>
 
-                <a href="{% url 'upload' %}">
-                    <span style="color:var(--ph-orange)">＋</span> Place an Order
-                </a>
+                    {% if user.is_authenticated %}
+                        <div class="ph-mobile-section">Your account</div>
+                        <a href="{% url 'dashboard' %}">My Orders</a>
+                        <a href="{% url 'my_doc_requests' %}">My Document Requests</a>
+                        <a href="{% url 'create_document_request' %}">Hire a Writer</a>
+                        <a href="{% url 'referrals:dashboard' %}">Refer &amp; Earn</a>
 
-                {% if user.is_authenticated %}
+                        {% if user.is_staff or user.role == 'agent' or user.role == 'admin' %}
+                            <div class="ph-mobile-divider"></div>
+                            <div class="ph-mobile-section">Staff workspace</div>
 
-                    <a href="{% url 'dashboard' %}">My Orders</a>
-                    <a href="{% url 'my_doc_requests' %}">My Document Requests</a>
-                    <a href="{% url 'create_document_request' %}">Hire a Writer</a>
+                            {% if user.is_staff or user.role == 'agent' %}
+                                <a href="{% url 'agent_dashboard' %}">Agent Dashboard</a>
+                                <a href="{% url 'admin_doc_requests' %}">Document Requests</a>
+                                <a href="{% url 'admin_approve_payments' %}">Payment Approvals</a>
+                            {% endif %}
 
-                    {% if user.is_staff or user.role == 'agent' %}
-                        <a href="{% url 'agent_dashboard' %}">Agent Dashboard</a>
-                        <a href="{% url 'admin_doc_requests' %}">Document Requests</a>
-                        <a href="{% url 'admin_approve_payments' %}">Payments</a>
+                            {% if user.is_staff or user.role == 'admin' %}
+                                <a href="{% url 'admin_dashboard' %}">Admin Dashboard</a>
+                                <a href="{% url 'financial_dashboard' %}">Financial Reports</a>
+                            {% endif %}
+                        {% endif %}
+
+                        <div class="ph-mobile-divider"></div>
+                        <form method="POST" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit">Log out</button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'track_order' %}">Track an Order</a>
+                        <a href="{% url 'login' %}">Log in</a>
+                        <a href="{% url 'register' %}">Create an Account</a>
                     {% endif %}
-
-                    {% if user.is_staff or user.role == 'admin' %}
-                        <a href="{% url 'admin_dashboard' %}">Admin Dashboard</a>
-                        <a href="{% url 'financial_dashboard' %}">Finances</a>
-                    {% endif %}
-
-                    <a href="{% url 'referrals:dashboard' %}">Refer &amp; Earn</a>
-
-                    <div class="border-t my-3" style="border-color:var(--ph-border)"></div>
-
-                    <form method="POST" action="{% url 'logout' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="w-full text-left px-3 py-2 rounded-xl font-semibold" style="color:var(--ph-danger)">
-                            Logout
-                        </button>
-                    </form>
-
-                {% else %}
-
-                    <a href="{% url 'track_order' %}">Track Order</a>
-                    <a href="{% url 'login' %}">Login</a>
-                    <a href="{% url 'register' %}" class="ph-btn-primary !text-white !justify-center mt-3">Create Account</a>
-
-                {% endif %}
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
+    </header>
 
     <!-- DJANGO MESSAGES -->
     {% if messages %}
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-5 space-y-3" aria-live="polite">
-        {% for message in messages %}
-        <div class="px-4 py-3 rounded-xl border text-sm font-medium
-            {% if 'success' in message.tags %}
-                bg-green-50 border-green-200 text-green-800
-            {% elif 'error' in message.tags %}
-                bg-red-50 border-red-200 text-red-800
-            {% elif 'warning' in message.tags %}
-                bg-amber-50 border-amber-200 text-amber-800
-            {% else %}
-                bg-blue-50 border-blue-200 text-blue-800
-            {% endif %}">
-            {{ message }}
+        <div class="ph-messages" aria-live="polite" aria-atomic="false">
+            {% for message in messages %}
+                <div class="ph-message
+                    {% if 'success' in message.tags %}
+                        bg-green-50 border-green-200 text-green-800
+                    {% elif 'error' in message.tags %}
+                        bg-red-50 border-red-200 text-red-800
+                    {% elif 'warning' in message.tags %}
+                        bg-amber-50 border-amber-200 text-amber-800
+                    {% else %}
+                        bg-blue-50 border-blue-200 text-blue-800
+                    {% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
     {% endif %}
 
-    <!-- MAIN CONTENT -->
-    <main class="min-h-[calc(100vh-4rem)]">
+    <!-- PAGE CONTENT -->
+    <main id="main-content" class="min-h-[calc(100vh-4rem)]">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- FOOTER -->
-    <footer class="mt-16 border-t">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-5 mb-6 pb-6 border-b" style="border-color:var(--ph-border)">
-
-                <a href="/" class="ph-brand">
+    <!-- CLEAN FOOTER: NO PARTNERS SECTION -->
+    <footer class="ph-footer">
+        <div class="ph-footer-inner">
+            <div class="ph-footer-top">
+                <a href="/" class="ph-brand" aria-label="PrintHub home">
                     <img src="{% static 'icon.svg' %}" alt="" aria-hidden="true">
                     <span class="ph-brand-name">Print<span>Hub</span></span>
                 </a>
-
-                <div class="flex flex-wrap justify-center items-center gap-4">
-                    <span class="text-sm" style="color:var(--ph-muted)">Our partner</span>
-                    <a href="https://mxxeagency.netlify.app/" target="_blank" rel="noopener noreferrer" class="text-sm font-semibold hover:underline" style="color:var(--ph-orange)">
-                        Mxxe Agency
-                    </a>
-                </div>
+                <p class="ph-footer-tagline">Less hassle. Better printing.</p>
             </div>
 
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-2 text-sm" style="color:var(--ph-muted)">
+            <div class="ph-footer-bottom">
                 <p>&copy; {% now "Y" %} PrintHub. All rights reserved.</p>
                 <p>Printing made simple.</p>
             </div>
@@ -959,10 +1208,10 @@
     </footer>
 
     <!-- PWA INSTALL BANNER -->
-    <div id="pwa-install-banner" class="hidden fixed bottom-0 left-0 right-0 border-t p-4 z-[200]">
+    <div id="pwa-install-banner" class="hidden fixed bottom-0 left-0 right-0 border-t z-[200]">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
             <div class="flex items-center gap-3 min-w-0">
-                <img src="{% static 'icon.svg' %}" alt="PrintHub" class="h-10 w-10 object-contain flex-shrink-0">
+                <img src="{% static 'icon.svg' %}" alt="" class="h-10 w-10 object-contain flex-shrink-0">
                 <div class="min-w-0">
                     <p class="font-bold text-sm" style="color:var(--ph-text)">Install PrintHub</p>
                     <p class="text-xs" style="color:var(--ph-muted)">Add PrintHub to your home screen</p>
@@ -975,60 +1224,58 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT -->
     <script>
-        /* ==========================================
-           THEME MANAGEMENT
-           ========================================== */
+        /* ── Theme management ─────────────────────── */
 
         function applyTheme(theme) {
+            if (!['light', 'dark'].includes(theme)) theme = 'light';
+
             const html = document.documentElement;
             const button = document.getElementById('themeBtn');
             const icon = document.getElementById('theme-icon');
             const meta = document.getElementById('meta-theme-color');
 
-            html.setAttribute('data-theme', theme);
+            html.dataset.theme = theme;
             html.classList.toggle('dark', theme === 'dark');
 
             if (button) {
-                button.setAttribute(
-                    'aria-label',
-                    theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'
-                );
-                button.setAttribute(
-                    'title',
-                    theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'
-                );
+                const label = theme === 'dark'
+                    ? 'Switch to light theme'
+                    : 'Switch to dark theme';
+
+                button.setAttribute('aria-label', label);
+                button.setAttribute('title', label);
             }
 
             if (icon) {
                 icon.innerHTML = theme === 'dark'
                     ? '<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6.5 6.5 0 0 0 8.268 8.268c.344-.215.825-.003.803.401z"/>'
-                    : '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path>';
+                    : '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l-1.42 1.42m11.3-11.3 1.42-1.42"></path>';
             }
 
             if (meta) {
-                meta.setAttribute('content', theme === 'dark' ? '#0B1220' : '#F8F9FC');
+                meta.setAttribute(
+                    'content',
+                    theme === 'dark' ? '#0A1020' : '#F7F8FC'
+                );
             }
         }
 
         function toggleTheme() {
-            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const current = document.documentElement.dataset.theme || 'light';
             const next = current === 'dark' ? 'light' : 'dark';
 
             applyTheme(next);
 
             try {
                 localStorage.setItem('theme', next);
-            } catch (e) {}
+            } catch (error) {}
         }
 
-        applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+        applyTheme(document.documentElement.dataset.theme || 'light');
 
 
-        /* ==========================================
-           MOBILE NAVIGATION
-           ========================================== */
+        /* ── Mobile navigation ───────────────────── */
 
         document.addEventListener('DOMContentLoaded', function () {
             const button = document.getElementById('mobile-menu-btn');
@@ -1036,55 +1283,90 @@
             const hamburger = document.getElementById('hamburger-icon');
             const close = document.getElementById('close-icon');
 
-            if (!button || !menu) return;
-
             function closeMenu() {
+                if (!button || !menu) return;
+
                 menu.classList.add('hidden');
-                if (hamburger) hamburger.classList.remove('hidden');
-                if (close) close.classList.add('hidden');
+                hamburger?.classList.remove('hidden');
+                close?.classList.add('hidden');
                 button.setAttribute('aria-expanded', 'false');
                 button.setAttribute('aria-label', 'Open main menu');
             }
 
-            button.addEventListener('click', function () {
-                const isOpening = menu.classList.contains('hidden');
+            if (button && menu) {
+                button.addEventListener('click', function () {
+                    const opening = menu.classList.contains('hidden');
 
-                menu.classList.toggle('hidden', !isOpening);
+                    menu.classList.toggle('hidden', !opening);
+                    hamburger?.classList.toggle('hidden', opening);
+                    close?.classList.toggle('hidden', !opening);
 
-                if (hamburger) hamburger.classList.toggle('hidden', isOpening);
-                if (close) close.classList.toggle('hidden', !isOpening);
+                    button.setAttribute('aria-expanded', String(opening));
+                    button.setAttribute(
+                        'aria-label',
+                        opening ? 'Close main menu' : 'Open main menu'
+                    );
+                });
 
-                button.setAttribute('aria-expanded', String(isOpening));
-                button.setAttribute(
-                    'aria-label',
-                    isOpening ? 'Close main menu' : 'Open main menu'
-                );
-            });
+                menu.querySelectorAll('a').forEach(function (link) {
+                    link.addEventListener('click', closeMenu);
+                });
 
-            menu.querySelectorAll('a').forEach(function (link) {
-                link.addEventListener('click', closeMenu);
-            });
+                document.addEventListener('click', function (event) {
+                    if (
+                        !menu.classList.contains('hidden') &&
+                        !menu.contains(event.target) &&
+                        !button.contains(event.target)
+                    ) {
+                        closeMenu();
+                    }
+                });
+            }
+
+            /* Desktop staff dropdown */
+            const staffButton = document.getElementById('staff-nav-toggle');
+            const staffPanel = document.getElementById('staff-nav-panel');
+
+            function closeStaffMenu() {
+                if (!staffButton || !staffPanel) return;
+                staffPanel.classList.add('hidden');
+                staffButton.setAttribute('aria-expanded', 'false');
+            }
+
+            if (staffButton && staffPanel) {
+                staffButton.addEventListener('click', function () {
+                    const opening = staffPanel.classList.contains('hidden');
+                    staffPanel.classList.toggle('hidden', !opening);
+                    staffButton.setAttribute('aria-expanded', String(opening));
+                });
+
+                staffPanel.querySelectorAll('a').forEach(function (link) {
+                    link.addEventListener('click', closeStaffMenu);
+                });
+
+                document.addEventListener('click', function (event) {
+                    const wrapper = document.getElementById('staff-nav-dropdown');
+                    if (wrapper && !wrapper.contains(event.target)) {
+                        closeStaffMenu();
+                    }
+                });
+            }
 
             document.addEventListener('keydown', function (event) {
-                if (event.key === 'Escape') closeMenu();
-            });
-
-            document.addEventListener('click', function (event) {
-                if (!menu.classList.contains('hidden') &&
-                    !menu.contains(event.target) &&
-                    !button.contains(event.target)) {
+                if (event.key === 'Escape') {
                     closeMenu();
+                    closeStaffMenu();
+                    closeNotifications();
                 }
             });
         });
 
 
-        /* ==========================================
-           NOTIFICATIONS
-           ========================================== */
+        /* ── Notification centre ─────────────────── */
 
         let prevCount = 0;
         let notificationRequestInProgress = false;
+        let notificationPollTimer = null;
 
         function playNotificationSound() {
             try {
@@ -1100,18 +1382,24 @@
 
                 oscillator.type = 'sine';
                 oscillator.frequency.setValueAtTime(800, ctx.currentTime);
-                oscillator.frequency.setValueAtTime(1000, ctx.currentTime + 0.1);
+                oscillator.frequency.setValueAtTime(1000, ctx.currentTime + .1);
+                gain.gain.setValueAtTime(.12, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(.01, ctx.currentTime + .25);
 
-                gain.gain.setValueAtTime(0.15, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-
-                oscillator.start(ctx.currentTime);
-                oscillator.stop(ctx.currentTime + 0.3);
-
+                oscillator.start();
+                oscillator.stop(ctx.currentTime + .25);
                 oscillator.onended = function () {
                     ctx.close().catch(function () {});
                 };
-            } catch (e) {}
+            } catch (error) {}
+        }
+
+        function closeNotifications() {
+            const dropdown = document.getElementById('notification-dropdown');
+            const button = document.getElementById('notification-toggle');
+
+            dropdown?.classList.add('hidden');
+            button?.setAttribute('aria-expanded', 'false');
         }
 
         function toggleNotifications() {
@@ -1122,8 +1410,7 @@
 
             const opening = dropdown.classList.contains('hidden');
             dropdown.classList.toggle('hidden', !opening);
-
-            if (button) button.setAttribute('aria-expanded', String(opening));
+            button?.setAttribute('aria-expanded', String(opening));
 
             if (opening) fetchNotifications();
         }
@@ -1141,6 +1428,7 @@
 
         async function fetchNotifications() {
             const bell = document.getElementById('notification-bell');
+
             if (!bell || notificationRequestInProgress) return;
 
             notificationRequestInProgress = true;
@@ -1179,15 +1467,14 @@
                     : [];
 
                 if (notifications.length === 0) {
-                    list.innerHTML =
-                        '<div class="p-5 text-center text-sm" style="color:var(--ph-muted)">No new notifications</div>';
+                    const empty = document.createElement('div');
+                    empty.className = 'p-5 text-center text-sm';
+                    empty.style.color = 'var(--ph-muted)';
+                    empty.textContent = 'You’re all caught up.';
+                    list.replaceChildren(empty);
                     return;
                 }
 
-                /*
-                 * Use DOM APIs and textContent rather than injecting server-provided
-                 * notification titles and messages through innerHTML.
-                 */
                 list.replaceChildren();
 
                 notifications.forEach(function (notification) {
@@ -1197,7 +1484,8 @@
                     const created = document.createElement('p');
 
                     const rawLink = String(notification.link || '#');
-                    const safeLink = rawLink.startsWith('/') &&
+                    const safeLink =
+                        rawLink.startsWith('/') &&
                         !rawLink.startsWith('//') &&
                         !rawLink.startsWith('/\\');
 
@@ -1220,13 +1508,15 @@
                     link.append(title, message, created);
 
                     link.addEventListener('click', function () {
-                        if (notification.id != null) markRead(notification.id);
+                        if (notification.id != null) {
+                            markRead(notification.id);
+                        }
                     });
 
                     list.appendChild(link);
                 });
             } catch (error) {
-                /* Notification failures must not break the page. */
+                /* Notifications should never prevent the page from working. */
             } finally {
                 notificationRequestInProgress = false;
             }
@@ -1242,7 +1532,7 @@
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
-            } catch (e) {}
+            } catch (error) {}
         }
 
         async function markAllRead() {
@@ -1258,18 +1548,20 @@
 
                 if (!response.ok) return;
 
-                const badge = document.getElementById('notification-badge');
+                document.getElementById('notification-badge')?.classList.add('hidden');
+
                 const list = document.getElementById('notification-list');
 
-                if (badge) badge.classList.add('hidden');
-
                 if (list) {
-                    list.innerHTML =
-                        '<div class="p-5 text-center text-sm" style="color:var(--ph-muted)">No new notifications</div>';
+                    const empty = document.createElement('div');
+                    empty.className = 'p-5 text-center text-sm';
+                    empty.style.color = 'var(--ph-muted)';
+                    empty.textContent = 'You’re all caught up.';
+                    list.replaceChildren(empty);
                 }
 
                 prevCount = 0;
-            } catch (e) {}
+            } catch (error) {}
         }
 
         document.addEventListener('click', function (event) {
@@ -1279,20 +1571,24 @@
 
             if (bell && dropdown && !bell.contains(event.target)) {
                 dropdown.classList.add('hidden');
-                if (button) button.setAttribute('aria-expanded', 'false');
+                button?.setAttribute('aria-expanded', 'false');
             }
         });
 
-        /* Poll only on pages with the authenticated notification interface. */
         if (document.getElementById('notification-bell')) {
             fetchNotifications();
-            window.setInterval(fetchNotifications, 15000);
+
+            notificationPollTimer = window.setInterval(function () {
+                if (!document.hidden) fetchNotifications();
+            }, 15000);
+
+            document.addEventListener('visibilitychange', function () {
+                if (!document.hidden) fetchNotifications();
+            });
         }
 
 
-        /* ==========================================
-           WEB PUSH SUBSCRIPTIONS
-           ========================================== */
+        /* ── Web Push subscriptions ───────────────── */
 
         async function subscribeToPush() {
             try {
@@ -1312,7 +1608,6 @@
                 if (!vapidKey) return;
 
                 const registration = await navigator.serviceWorker.ready;
-
                 if (!registration.pushManager) return;
 
                 let subscription = await registration.pushManager.getSubscription();
@@ -1352,7 +1647,7 @@
                     })
                 });
             } catch (error) {
-                /* Push permission may be denied or unavailable. */
+                /* Push may be unsupported or permission may be denied. */
             }
         }
 
@@ -1363,9 +1658,7 @@
         {% endif %}
 
 
-        /* ==========================================
-           PWA INSTALLATION
-           ========================================== */
+        /* ── PWA installation ────────────────────── */
 
         let deferredPrompt = null;
 
@@ -1373,8 +1666,7 @@
             event.preventDefault();
             deferredPrompt = event;
 
-            const banner = document.getElementById('pwa-install-banner');
-            if (banner) banner.classList.remove('hidden');
+            document.getElementById('pwa-install-banner')?.classList.remove('hidden');
         });
 
         async function installPWA() {
@@ -1384,35 +1676,28 @@
 
             try {
                 await deferredPrompt.userChoice;
-            } catch (e) {}
+            } catch (error) {}
 
             deferredPrompt = null;
-
-            const banner = document.getElementById('pwa-install-banner');
-            if (banner) banner.classList.add('hidden');
+            document.getElementById('pwa-install-banner')?.classList.add('hidden');
         }
 
         function dismissPWA() {
-            const banner = document.getElementById('pwa-install-banner');
-            if (banner) banner.classList.add('hidden');
+            document.getElementById('pwa-install-banner')?.classList.add('hidden');
         }
 
         window.addEventListener('appinstalled', function () {
             deferredPrompt = null;
-
-            const banner = document.getElementById('pwa-install-banner');
-            if (banner) banner.classList.add('hidden');
+            document.getElementById('pwa-install-banner')?.classList.add('hidden');
         });
 
 
-        /* ==========================================
-           SERVICE WORKER
-           ========================================== */
+        /* ── Service worker ──────────────────────── */
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function () {
                 navigator.serviceWorker.register('/sw.js').catch(function () {
-                    /* The site remains usable if PWA registration fails. */
+                    /* The website remains usable if registration fails. */
                 });
             });
         }
@@ -1423,6 +1708,5 @@
     {% endif %}
 
     {% block extra_scripts %}{% endblock %}
-
 </body>
 </html>
