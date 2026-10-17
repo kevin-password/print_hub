@@ -2,305 +2,1261 @@
 {% load static %}
 {% load humanize %}
 
-{% block title %}PrintHub - Fast Printing for Kabale University Students{% endblock %}
+{% block title %}PrintHub | Simple, Reliable Campus Printing{% endblock %}
 
-{% block description %}Upload your documents, pay with MTN or Airtel Mobile Money, and pick up prints at your nearest campus station. Fast, reliable printing for students at Kabale University.{% endblock %}
+{% block description %}Order prints online with PrintHub. Upload documents, choose your print settings, pay with MTN or Airtel Mobile Money, and collect at a Kabale University station.{% endblock %}
 
-{% block keywords %}printing, Kabale University, student printing, document upload, MTN payment, Airtel payment, print shop, campus printing, Kabale{% endblock %}
+{% block keywords %}PrintHub, printing, Kabale University, student printing, online printing, MTN Mobile Money, Airtel Money, document printing, Kabale Uganda{% endblock %}
 
-{% block og_title %}PrintHub — Fast Printing for Kabale University Students{% endblock %}
-
-{% block og_description %}Upload your documents, pay with MTN or Airtel, and pick up prints at your nearest campus station. Fast, reliable printing for students.{% endblock %}
-
+{% block og_title %}PrintHub — Printing Made Simple{% endblock %}
+{% block og_description %}Order prints online, pay conveniently, and track your order through PrintHub at Kabale University.{% endblock %}
 {% block og_image %}https://www.printhubug.com/static/og-image.png{% endblock %}
+{% block twitter_title %}PrintHub — Printing Made Simple{% endblock %}
+{% block twitter_description %}Upload documents, order prints, pay conveniently, and track your order online.{% endblock %}
 
-{% block twitter_title %}PrintHub — Fast Printing for Kabale University{% endblock %}
-
-{% block twitter_description %}Upload documents, pay with MTN or Airtel, and pick up prints at campus. Fast, reliable printing for students.{% endblock %}
-
-{% block content %}
-<div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-8">
-    
-    <!-- Hero Section -->
-    <div class="text-center mb-6 sm:mb-10">
-        <h1 class="text-3xl sm:text-4xl font-bold text-white mb-3">PrintHub Live Board</h1>
-        <p class="text-gray-400 text-sm sm:text-base max-w-2xl mx-auto">Real-time status of all active print orders at Kabale University stations.</p>
-        
-        <!-- Welcome message for logged-in users -->
-        {% if user.is_authenticated %}
-        <div class="mt-4 inline-block bg-green-500/10 border border-green-500/30 rounded-xl px-6 py-2">
-            <p class="text-green-400 text-sm">
-                Welcome back, <strong>{{ user.first_name|default:user.username }}</strong>!
-                <a href="{% url 'dashboard' %}" class="text-blue-400 hover:text-blue-300 underline ml-2">Go to dashboard</a>
-            </p>
-        </div>
-        {% endif %}
-        
-        <!-- Login/Register for guests -->
-        {% if not user.is_authenticated %}
-        <div class="mt-4 flex justify-center gap-3 flex-wrap">
-            <a href="{% url 'login' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-all text-sm font-medium">
-                Login
-            </a>
-            <a href="{% url 'register' %}" class="bg-slate-700 hover:bg-slate-600 text-white px-6 py-2 rounded-lg transition-all text-sm font-medium">
-                Create Account
-            </a>
-        </div>
-        {% endif %}
-        
-        <!-- Quick Stats -->
-        <div class="flex justify-center gap-4 sm:gap-8 mt-6">
-            <div class="text-center">
-                <p class="text-2xl sm:text-3xl font-bold text-white" id="stat-active">--</p>
-                <p class="text-gray-500 text-xs">Active</p>
-            </div>
-            <div class="text-center">
-                <p class="text-2xl sm:text-3xl font-bold text-green-400" id="stat-ready">--</p>
-                <p class="text-gray-500 text-xs">Ready</p>
-            </div>
-            <div class="text-center">
-                <p class="text-2xl sm:text-3xl font-bold text-red-400" id="stat-critical">--</p>
-                <p class="text-gray-500 text-xs">Critical</p>
-            </div>
-            <div class="text-center">
-                <p class="text-2xl sm:text-3xl font-bold text-gray-400" id="stat-total">--</p>
-                <p class="text-gray-500 text-xs">Total</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Announcement Banner -->
-    {% if announcement %}
-    <div id="announcement-banner" class="mb-6">
-        <div class="bg-blue-600 text-white p-4 rounded shadow flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <svg class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-                </svg>
-                <div>
-                    <p class="font-bold text-lg">{{ announcement.title|default:'Announcement' }}</p>
-                    <p class="text-sm opacity-90">{{ announcement.message }}</p>
-                </div>
-            </div>
-            <button onclick="document.getElementById('announcement-banner').remove()" class="text-white/70 hover:text-white text-xl">&times;</button>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- System Pause Banner -->
-    <div id="pause-banner" class="hidden mb-6">
-        <div class="bg-red-600 border border-red-500 text-white p-4 rounded shadow flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <svg class="h-8 w-8 animate-pulse text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <div>
-                    <p class="font-bold text-lg">System Paused</p>
-                    <p id="pause-reason-text" class="text-sm opacity-90"></p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Status Bar -->
-    <div class="flex items-center justify-between mb-4 text-xs text-gray-500">
-        <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse" id="status-dot"></span>
-            <span id="update-text">Auto-updating every 10s</span>
-        </div>
-        <span id="last-updated"></span>
-    </div>
-
-    <!-- Desktop Table -->
-    <div class="hidden md:block bg-slate-800/50 border border-white/10 rounded overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse min-w-[700px]">
-                <thead>
-                    <tr class="bg-slate-900/50 border-b border-white/10">
-                        <th class="px-4 py-3 sm:px-6 sm:py-4 text-xs font-semibold text-gray-300 uppercase tracking-wider">Order ID</th>
-                        <th class="px-4 py-3 sm:px-6 sm:py-4 text-xs font-semibold text-gray-300 uppercase tracking-wider">Client</th>
-                        <th class="px-4 py-3 sm:px-6 sm:py-4 text-xs font-semibold text-gray-300 uppercase tracking-wider">Station</th>
-                        <th class="px-4 py-3 sm:px-6 sm:py-4 text-xs font-semibold text-gray-300 uppercase tracking-wider">File</th>
-                        <th class="px-4 py-3 sm:px-6 sm:py-4 text-xs font-semibold text-gray-300 uppercase tracking-wider">Pages / Copies</th>
-                        <th class="px-4 py-3 sm:px-6 sm:py-4 text-xs font-semibold text-gray-300 uppercase tracking-wider">Status</th>
-                        <th class="px-4 py-3 sm:px-6 sm:py-4 text-xs font-semibold text-gray-300 uppercase tracking-wider">Time Left</th>
-                        <th class="px-4 py-3 sm:px-6 sm:py-4 text-xs font-semibold text-gray-300 uppercase tracking-wider">Priority</th>
-                    </tr>
-                </thead>
-                <tbody id="desktop-board-body" class="divide-y divide-white/5">
-                    <tr><td colspan="8" class="px-3 py-8 text-center text-gray-500">Loading orders...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Mobile Cards -->
-    <div id="mobile-board-body" class="md:hidden space-y-4">
-        <div class="text-center text-gray-500 py-8">Loading orders...</div>
-    </div>
-
-    <!-- ─── PRINTING SERVICES IN KABALE SECTION ─────────────── -->
-    <div class="mt-8 p-6 bg-blue-500/10 border border-blue-500/30 rounded-xl">
-        <h2 class="text-xl font-bold text-white mb-2">Printing Services in Kabale</h2>
-        <p class="text-gray-300 text-sm">
-            PrintHub provides fast, reliable printing services for students and residents in Kabale, Uganda.
-            Upload your documents online, pay with MTN or Airtel Mobile Money, and pick up your prints at campus stations.
-        </p>
-        <div class="mt-4 flex flex-wrap gap-3">
-            <span class="px-3 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full">Kabale University</span>
-            <span class="px-3 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full">Student Printing</span>
-            <span class="px-3 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full">Campus Printing</span>
-            <span class="px-3 py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full">Kabale</span>
-        </div>
-        <div class="mt-4">
-            <a href="{% url 'kabale' %}" class="text-blue-400 hover:text-blue-300 text-sm underline font-medium">
-                Learn more about our printing services in Kabale →
-            </a>
-        </div>
-    </div>
-
-    <!-- Call to Action -->
-    <div class="text-center mt-8 sm:mt-12 pb-8">
-        <p class="text-gray-400 mb-4">Need something printed?</p>
-        <div class="flex justify-center gap-4 flex-wrap">
-            {% if user.is_authenticated %}
-                <a href="{% url 'upload' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded transition-all">
-                    Place an Order
-                </a>
-            {% else %}
-                <a href="{% url 'login' %}?next=/upload/" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded transition-all">
-                    Login to Place Order
-                </a>
-                <a href="{% url 'register' %}" class="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3 rounded transition-all">
-                    Create Account
-                </a>
-            {% endif %}
-            <a href="{% url 'track_order' %}" class="bg-slate-700 hover:bg-slate-600 text-white font-bold px-6 py-3 rounded transition-all">
-                Track Order
-            </a>
-        </div>
-    </div>
-</div>
-
-<script>
-    function updateBoard() {
-        fetch("/api/live-board/")
-            .then(response => response.json())
-            .then(data => {
-                const desktopBody = document.getElementById('desktop-board-body');
-                const mobileBody = document.getElementById('mobile-board-body');
-                
-                desktopBody.innerHTML = '';
-                mobileBody.innerHTML = '';
-
-                const pauseBanner = document.getElementById('pause-banner');
-                const pauseReasonText = document.getElementById('pause-reason-text');
-                if (data.system_paused) {
-                    pauseBanner.classList.remove('hidden');
-                    pauseReasonText.textContent = data.pause_reason || 'Unforeseen circumstances';
-                } else {
-                    pauseBanner.classList.add('hidden');
-                }
-
-                let activeCount = 0, readyCount = 0, criticalCount = 0;
-                data.orders.forEach(order => {
-                    if (order.status_raw !== 'cancelled') activeCount++;
-                    if (order.status_raw === 'ready') readyCount++;
-                    if (order.priority_level === 'critical' || order.priority_level === 'overdue') criticalCount++;
-                });
-                
-                document.getElementById('stat-active').textContent = activeCount;
-                document.getElementById('stat-ready').textContent = readyCount;
-                document.getElementById('stat-critical').textContent = criticalCount;
-                
-                // 🛠️ FIX: Properly handle 0 active orders
-                document.getElementById('stat-total').textContent = (data.total_active !== undefined ? data.total_active : data.orders.length);
-                document.getElementById('last-updated').textContent = 'Updated: ' + new Date().toLocaleTimeString();
-
-                if (data.orders.length === 0) {
-                    desktopBody.innerHTML = '<tr><td colspan="8" class="px-3 py-8 text-center text-gray-500">No active orders at the moment.</td></tr>';
-                    mobileBody.innerHTML = '<div class="text-center text-gray-500 py-8">No active orders at the moment.</div>';
-                    return;
-                }
-
-                data.orders.forEach(order => {
-                    let priorityClass = 'text-green-400';
-                    if (order.priority_level === 'high') priorityClass = 'text-yellow-400';
-                    else if (order.priority_level === 'urgent') priorityClass = 'text-orange-400';
-                    else if (order.priority_level === 'critical') priorityClass = 'text-red-400 animate-pulse';
-                    else if (order.priority_level === 'overdue') priorityClass = 'text-red-600 font-bold animate-pulse';
-                    else if (order.priority_level === 'postponed') priorityClass = 'text-yellow-500 font-bold animate-pulse';
-                    else if (order.priority_level === 'cancelled') priorityClass = 'text-gray-500 line-through';
-
-                    let statusClass = 'text-gray-300';
-                    if (order.status_raw === 'ready') statusClass = 'text-blue-400 font-semibold';
-                    else if (order.status_raw === 'printing') statusClass = 'text-purple-400';
-                    else if (order.status_raw === 'cancelled') statusClass = 'text-red-500 line-through font-bold';
-                    
-                    let rowOpacity = order.status_raw === 'cancelled' ? 'opacity-50' : '';
-                    let strikeThrough = order.status_raw === 'cancelled' ? 'line-through' : '';
-
-                    // 🛠️ FIX: Show Copies Multiplier!
-                    let copiesDisplay = '';
-                    if (order.copies && order.copies > 1) {
-                        copiesDisplay = ` <span class="text-blue-400 font-bold">(x${order.copies})</span>`;
-                    }
-
-                    const row = document.createElement('tr');
-                    row.className = `hover:bg-white/5 transition-colors ${rowOpacity}`;
-                    row.innerHTML = `
-                        <td class="px-4 py-3 text-xs sm:text-sm text-white font-mono whitespace-nowrap ${strikeThrough}">#${order.id}</td>
-                        <td class="px-4 py-3 text-xs sm:text-sm text-gray-300 whitespace-nowrap ${strikeThrough}">${order.client}</td>
-                        <td class="px-4 py-3 text-xs sm:text-sm text-gray-300 whitespace-nowrap">${order.station}</td>
-                        <td class="px-4 py-3 text-xs sm:text-sm text-gray-400 max-w-[120px] truncate" title="${order.file_name || ''}">${order.file_name || '--'}</td>
-                        <td class="px-4 py-3 text-xs sm:text-sm text-gray-300 whitespace-nowrap">${order.page_count || '--'}${copiesDisplay}${order.is_color ? ' <span class="text-purple-400">C</span>' : ''}</td>
-                        <td class="px-4 py-3 text-xs sm:text-sm ${statusClass} whitespace-nowrap">${order.status}</td>
-                        <td class="px-4 py-3 text-xs sm:text-sm font-mono ${priorityClass} whitespace-nowrap">${order.time_left}</td>
-                        <td class="px-4 py-3 text-xs sm:text-sm font-bold ${priorityClass} whitespace-nowrap">${order.priority}</td>
-                    `;
-                    desktopBody.appendChild(row);
-
-                    const card = document.createElement('div');
-                    card.className = `bg-slate-800/80 border border-white/10 rounded p-4 ${rowOpacity}`;
-                    card.innerHTML = `
-                        <div class="flex justify-between items-start mb-3 border-b border-white/10 pb-3">
-                            <div>
-                                <span class="text-white font-bold text-lg font-mono ${strikeThrough}">#${order.id}</span>
-                                <span class="text-gray-400 text-sm ml-2 ${strikeThrough}">${order.client}</span>
-                            </div>
-                            <span class="px-2 py-1 rounded text-xs font-bold ${statusClass} bg-white/10 whitespace-nowrap">${order.status}</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3 text-sm">
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase">Station</p>
-                                <p class="text-gray-300 font-medium">${order.station}</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase">File</p>
-                                <p class="text-gray-300 truncate">${order.file_name || '--'}</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase">Pages / Copies</p>
-                                <p class="text-gray-300">${order.page_count || '--'} ${copiesDisplay} ${order.is_color ? '(Color)' : ''}</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase">Priority</p>
-                                <p class="font-bold ${priorityClass}">${order.priority}</p>
-                            </div>
-                            <div class="col-span-2 bg-black/20 rounded p-3 text-center mt-2">
-                                <p class="text-gray-500 text-xs uppercase mb-1">Time Left</p>
-                                <p class="text-2xl font-mono font-bold ${priorityClass}">${order.time_left}</p>
-                            </div>
-                        </div>
-                    `;
-                    mobileBody.appendChild(card);
-                });
-            })
-            .catch(error => console.error('Error fetching board data:', error));
+{% block extra_head %}
+<style>
+    .ph-home {
+        --ph-ink: #0E2148;
+        --ph-ink-soft: #344563;
+        --ph-orange: #F0631E;
+        --ph-orange-hover: #D95013;
+        --ph-muted: #64748B;
+        --ph-line: #E2E8F0;
+        --ph-surface: #FFFFFF;
+        --ph-subtle: #F8FAFC;
+        color: var(--ph-ink);
     }
 
-    updateBoard();
-    // 🛠️ FIX: Changed from 3000 (3s) to 10000 (10s) to respect server cache and reduce spam
-    setInterval(updateBoard, 10000); 
+    .ph-home * { box-sizing: border-box; }
+
+    .ph-home .ph-shell {
+        width: min(100% - 32px, 1180px);
+        margin-inline: auto;
+    }
+
+    .ph-home .ph-card {
+        background: var(--ph-surface);
+        border: 1px solid var(--ph-line);
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(14, 33, 72, .045);
+    }
+
+    .ph-home .ph-muted { color: var(--ph-muted); }
+
+    .ph-home .ph-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        min-height: 48px;
+        padding: 12px 20px;
+        border: 1px solid var(--ph-orange);
+        border-radius: 12px;
+        background: var(--ph-orange);
+        color: #fff;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background .18s ease, transform .18s ease;
+    }
+
+    .ph-home .ph-primary:hover {
+        background: var(--ph-orange-hover);
+        transform: translateY(-1px);
+    }
+
+    .ph-home .ph-secondary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        min-height: 48px;
+        padding: 12px 20px;
+        border: 1px solid #CBD5E1;
+        border-radius: 12px;
+        background: #fff;
+        color: var(--ph-ink);
+        font-weight: 700;
+        text-decoration: none;
+        transition: background .18s ease, border-color .18s ease;
+    }
+
+    .ph-home .ph-secondary:hover {
+        background: #F8FAFC;
+        border-color: #94A3B8;
+    }
+
+    .ph-home .ph-focus:focus-visible,
+    .ph-home a:focus-visible,
+    .ph-home button:focus-visible,
+    .ph-home input:focus-visible,
+    .ph-home select:focus-visible {
+        outline: 3px solid rgba(240, 99, 30, .45);
+        outline-offset: 3px;
+    }
+
+    .ph-home .ph-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 11px;
+        border: 1px solid #FED7AA;
+        border-radius: 999px;
+        background: #FFF7ED;
+        color: #9A3412;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .04em;
+    }
+
+    .ph-home .ph-dot {
+        width: 8px;
+        height: 8px;
+        flex: 0 0 8px;
+        border-radius: 999px;
+        background: #16A34A;
+    }
+
+    .ph-home .ph-stat {
+        min-width: 0;
+        padding: 18px;
+        border: 1px solid var(--ph-line);
+        border-radius: 16px;
+        background: #fff;
+    }
+
+    .ph-home .ph-stat-number {
+        margin-top: 8px;
+        font-size: clamp(25px, 3vw, 34px);
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -.04em;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .ph-home .ph-stat-label {
+        color: var(--ph-muted);
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .ph-home .ph-board-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 18px;
+        border-bottom: 1px solid var(--ph-line);
+    }
+
+    .ph-home .ph-control {
+        width: 100%;
+        min-height: 44px;
+        padding: 10px 12px;
+        border: 1px solid #CBD5E1;
+        border-radius: 10px;
+        background: #fff;
+        color: var(--ph-ink);
+        font: inherit;
+        font-size: 14px;
+    }
+
+    .ph-home .ph-control::placeholder { color: #94A3B8; }
+
+    .ph-home .ph-table-wrap { overflow-x: auto; }
+
+    .ph-home .ph-table {
+        width: 100%;
+        min-width: 650px;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .ph-home .ph-table th {
+        padding: 13px 18px;
+        background: #F8FAFC;
+        color: #64748B;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .ph-home .ph-table td {
+        padding: 16px 18px;
+        border-top: 1px solid #F1F5F9;
+        color: var(--ph-ink-soft);
+        font-size: 13px;
+        vertical-align: middle;
+    }
+
+    .ph-home .ph-table tbody tr:hover { background: #FAFBFD; }
+
+    .ph-home .ph-order-id {
+        color: var(--ph-ink);
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .ph-home .ph-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 9px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1.2;
+        white-space: nowrap;
+    }
+
+    .ph-home .ph-status-ready { background: #DCFCE7; color: #166534; }
+    .ph-home .ph-status-printing { background: #EDE9FE; color: #5B21B6; }
+    .ph-home .ph-status-pending { background: #FEF3C7; color: #92400E; }
+    .ph-home .ph-status-processing { background: #DBEAFE; color: #1D4ED8; }
+    .ph-home .ph-status-cancelled { background: #F1F5F9; color: #64748B; }
+    .ph-home .ph-status-default { background: #F1F5F9; color: #475569; }
+
+    .ph-home .ph-mobile-order {
+        padding: 17px;
+        border: 1px solid var(--ph-line);
+        border-radius: 16px;
+        background: #fff;
+    }
+
+    .ph-home .ph-mobile-order + .ph-mobile-order { margin-top: 12px; }
+
+    .ph-home .ph-mobile-meta {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 15px;
+        margin-top: 17px;
+    }
+
+    .ph-home .ph-meta-label {
+        margin-bottom: 4px;
+        color: var(--ph-muted);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+    }
+
+    .ph-home .ph-meta-value {
+        color: var(--ph-ink);
+        font-size: 13px;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+
+    .ph-home .ph-empty {
+        padding: 42px 18px;
+        text-align: center;
+    }
+
+    .ph-home .ph-empty-icon {
+        display: grid;
+        width: 48px;
+        height: 48px;
+        margin: 0 auto 12px;
+        place-items: center;
+        border-radius: 15px;
+        background: #F1F5F9;
+        color: var(--ph-ink);
+    }
+
+    .ph-home .ph-connection {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--ph-muted);
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .ph-home .ph-connection-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #94A3B8;
+    }
+
+    .ph-home .ph-connection.is-online .ph-connection-dot { background: #16A34A; }
+    .ph-home .ph-connection.is-error .ph-connection-dot { background: #DC2626; }
+
+    .ph-home .ph-notice {
+        padding: 16px;
+        border: 1px solid #BFDBFE;
+        border-radius: 14px;
+        background: #EFF6FF;
+        color: #1E3A8A;
+    }
+
+    .ph-home .ph-pause {
+        border-color: #FECACA;
+        background: #FEF2F2;
+        color: #991B1B;
+    }
+
+    .ph-home .ph-how-card {
+        padding: 22px;
+        border: 1px solid var(--ph-line);
+        border-radius: 16px;
+        background: #fff;
+    }
+
+    .ph-home .ph-step {
+        display: grid;
+        width: 40px;
+        height: 40px;
+        margin-bottom: 15px;
+        place-items: center;
+        border-radius: 13px;
+        background: #FFF1E8;
+        color: #C2410C;
+        font-weight: 800;
+    }
+
+    .ph-home .ph-help-link {
+        color: var(--ph-ink);
+        font-weight: 700;
+        text-decoration: underline;
+        text-decoration-color: #FDBA74;
+        text-underline-offset: 4px;
+    }
+
+    @media (min-width: 640px) {
+        .ph-home .ph-shell { width: min(100% - 48px, 1180px); }
+        .ph-home .ph-board-toolbar { padding: 22px; }
+    }
+
+    @media (max-width: 639px) {
+        .ph-home .ph-shell { width: min(100% - 24px, 1180px); }
+        .ph-home .ph-primary,
+        .ph-home .ph-secondary { width: 100%; }
+        .ph-home .ph-stat { padding: 14px 12px; }
+        .ph-home .ph-board-toolbar { align-items: stretch; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .ph-home *,
+        .ph-home *::before,
+        .ph-home *::after {
+            scroll-behavior: auto !important;
+            animation-duration: .01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: .01ms !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="ph-home bg-white">
+    <div class="ph-shell py-7 sm:py-10 lg:py-14">
+
+        <!-- HERO -->
+        <section class="grid items-center gap-9 lg:grid-cols-2 lg:gap-14 mb-12 sm:mb-16">
+            <div>
+                <div class="ph-eyebrow mb-5">
+                    <span class="ph-dot" aria-hidden="true"></span>
+                    PRINTING AT KABALE UNIVERSITY
+                </div>
+
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight"
+                    style="color:#0E2148;">
+                    Printing made
+                    <span style="color:#F0631E;">simple.</span>
+                </h1>
+
+                <p class="mt-5 max-w-xl text-base sm:text-lg leading-8"
+                   style="color:#64748B;">
+                    Upload your documents, choose how you want them printed, pay conveniently, and collect when they're ready. Less waiting around. More time for what matters.
+                </p>
+
+                <div class="mt-7 flex flex-col sm:flex-row gap-3">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'upload' %}" class="ph-primary">
+                            <svg width="19" height="19" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path d="M12 16V4m0 0L7 9m5-5 5 5"/>
+                                <path d="M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5"/>
+                            </svg>
+                            Place an Order
+                        </a>
+                        <a href="{% url 'dashboard' %}" class="ph-secondary">
+                            My Orders
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'register' %}" class="ph-primary">
+                            Get Started
+                            <span aria-hidden="true">→</span>
+                        </a>
+                        <a href="{% url 'track_order' %}" class="ph-secondary">
+                            Track an Order
+                        </a>
+                    {% endif %}
+                </div>
+
+                <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm"
+                     style="color:#64748B;">
+                    <span class="inline-flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                             stroke="#16A34A" stroke-width="2.2" aria-hidden="true">
+                            <path d="m5 12 4 4L19 6"/>
+                        </svg>
+                        MTN & Airtel Mobile Money
+                    </span>
+                    <span class="inline-flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                             stroke="#16A34A" stroke-width="2.2" aria-hidden="true">
+                            <path d="m5 12 4 4L19 6"/>
+                        </svg>
+                        Convenient collection
+                    </span>
+                </div>
+            </div>
+
+            <!-- ORDERING PREVIEW -->
+            <div class="ph-card p-5 sm:p-7" style="background:linear-gradient(145deg,#FFFFFF 0%,#F8FAFC 100%);">
+                <div class="flex items-center justify-between gap-3 mb-6">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-widest" style="color:#64748B;">
+                            YOUR PRINTING, ORGANIZED
+                        </p>
+                        <h2 class="mt-2 text-xl sm:text-2xl font-extrabold" style="color:#0E2148;">
+                            From upload to pickup.
+                        </h2>
+                    </div>
+                    <div class="grid place-items-center rounded-2xl"
+                         style="width:52px;height:52px;background:#FFF1E8;color:#F0631E;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                            <path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                            <path d="M6 14h12v7H6zM17 12h.01"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="space-y-5">
+                    <div class="flex items-start gap-4">
+                        <div class="ph-step mb-0 flex-shrink-0">1</div>
+                        <div>
+                            <h3 class="font-bold" style="color:#0E2148;">Upload your document</h3>
+                            <p class="mt-1 text-sm leading-6" style="color:#64748B;">
+                                Submit your file and choose your printing preferences.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="ml-5 h-5 border-l-2 border-dashed" style="border-color:#CBD5E1;"></div>
+                    <div class="flex items-start gap-4">
+                        <div class="ph-step mb-0 flex-shrink-0">2</div>
+                        <div>
+                            <h3 class="font-bold" style="color:#0E2148;">Confirm and pay</h3>
+                            <p class="mt-1 text-sm leading-6" style="color:#64748B;">
+                                Review your order and follow the available payment instructions.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="ml-5 h-5 border-l-2 border-dashed" style="border-color:#CBD5E1;"></div>
+                    <div class="flex items-start gap-4">
+                        <div class="ph-step mb-0 flex-shrink-0">3</div>
+                        <div>
+                            <h3 class="font-bold" style="color:#0E2148;">Track and collect</h3>
+                            <p class="mt-1 text-sm leading-6" style="color:#64748B;">
+                                Follow your order status and collect when it is ready.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- WELCOME -->
+        {% if user.is_authenticated %}
+        <section class="mb-8 rounded-2xl border p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                 style="background:#F0FDF4;border-color:#BBF7D0;">
+            <div>
+                <p class="font-bold" style="color:#166534;">
+                    Welcome back, {{ user.first_name|default:user.username|escape }}!
+                </p>
+                <p class="mt-1 text-sm" style="color:#166534;">
+                    Ready to print something? Your orders are one click away.
+                </p>
+            </div>
+            <a href="{% url 'dashboard' %}" class="ph-secondary" style="min-height:42px;padding:9px 14px;">
+                View My Orders →
+            </a>
+        </section>
+        {% endif %}
+
+        <!-- ANNOUNCEMENT -->
+        {% if announcement %}
+        <section id="announcement-banner" class="ph-notice mb-5" aria-label="Announcement">
+            <div class="flex items-start gap-3">
+                <svg class="flex-shrink-0 mt-1" width="22" height="22" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M3 11v2a2 2 0 0 0 2 2h2l4 5V4l-4 5H5a2 2 0 0 0-2 2Z"/>
+                    <path d="M15 9a4 4 0 0 1 0 6M17 5a9 9 0 0 1 0 14"/>
+                </svg>
+                <div class="flex-1 min-w-0">
+                    <h2 class="font-extrabold">
+                        {{ announcement.title|default:'Announcement'|escape }}
+                    </h2>
+                    <p class="mt-1 text-sm leading-6">{{ announcement.message|escape|linebreaksbr }}</p>
+                </div>
+                <button type="button" id="dismiss-announcement"
+                        class="rounded-lg px-2 py-1 text-xl leading-none"
+                        aria-label="Dismiss announcement">×</button>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- SYSTEM PAUSE -->
+        <section id="pause-banner" class="ph-notice ph-pause mb-5 hidden"
+                 role="status" aria-live="polite">
+            <div class="flex items-start gap-3">
+                <svg class="flex-shrink-0 mt-1" width="23" height="23" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M12 7v6m0 4h.01"/>
+                </svg>
+                <div>
+                    <h2 class="font-extrabold">Ordering operations are temporarily paused</h2>
+                    <p id="pause-reason-text" class="mt-1 text-sm leading-6">
+                        Please check back shortly.
+                    </p>
+                    <p class="mt-2 text-sm">
+                        If you have already placed an order, check your order dashboard for updates.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- LIVE BOARD INTRO -->
+        <section id="live-board" class="scroll-mt-24">
+            <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="ph-dot" aria-hidden="true"></span>
+                        <p class="text-xs font-extrabold uppercase tracking-widest" style="color:#64748B;">
+                            LIVE ORDER UPDATES
+                        </p>
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight" style="color:#0E2148;">
+                        The printing queue
+                    </h2>
+                    <p class="mt-2 text-sm sm:text-base" style="color:#64748B;">
+                        See what's happening at our printing stations.
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <span id="connection-status" class="ph-connection" role="status" aria-live="polite">
+                        <span class="ph-connection-dot" aria-hidden="true"></span>
+                        <span id="connection-label">Connecting…</span>
+                    </span>
+                    <button id="refresh-board" type="button" class="ph-secondary"
+                            style="min-height:40px;padding:8px 12px;font-size:13px;">
+                        <svg id="refresh-icon" width="16" height="16" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M20 7v5h-5M4 17v-5h5"/>
+                            <path d="M5.5 9A7 7 0 0 1 18 6l2 6M4 12l2 6a7 7 0 0 0 12.5-3"/>
+                        </svg>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- STATS -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                <div class="ph-stat">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="ph-stat-label">In the queue</span>
+                        <span class="grid place-items-center rounded-lg" style="width:34px;height:34px;background:#EFF6FF;color:#1D4ED8;">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <p id="stat-active" class="ph-stat-number" style="color:#0E2148;">—</p>
+                    <p class="mt-2 text-xs ph-muted">Orders not cancelled</p>
+                </div>
+
+                <div class="ph-stat">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="ph-stat-label">Ready</span>
+                        <span class="grid place-items-center rounded-lg" style="width:34px;height:34px;background:#DCFCE7;color:#15803D;">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path d="m5 12 4 4L19 6"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <p id="stat-ready" class="ph-stat-number" style="color:#15803D;">—</p>
+                    <p class="mt-2 text-xs ph-muted">Ready for collection</p>
+                </div>
+
+                <div class="ph-stat">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="ph-stat-label">Needs attention</span>
+                        <span class="grid place-items-center rounded-lg" style="width:34px;height:34px;background:#FFF7ED;color:#C2410C;">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path d="M12 9v4m0 4h.01"/><path d="M10.3 3.9 2.5 17.4A1.8 1.8 0 0 0 4 20h16a1.8 1.8 0 0 0 1.5-2.6L13.7 3.9a2 2 0 0 0-3.4 0Z"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <p id="stat-critical" class="ph-stat-number" style="color:#C2410C;">—</p>
+                    <p class="mt-2 text-xs ph-muted">Urgent or overdue</p>
+                </div>
+
+                <div class="ph-stat">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="ph-stat-label">Total shown</span>
+                        <span class="grid place-items-center rounded-lg" style="width:34px;height:34px;background:#F1F5F9;color:#475569;">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+                            </svg>
+                        </span>
+                    </div>
+                    <p id="stat-total" class="ph-stat-number" style="color:#475569;">—</p>
+                    <p class="mt-2 text-xs ph-muted">Orders in this board</p>
+                </div>
+            </div>
+
+            <!-- PUBLIC BOARD -->
+            <div class="ph-card overflow-hidden">
+                <div class="ph-board-toolbar">
+                    <div>
+                        <h3 class="font-extrabold text-lg" style="color:#0E2148;">Current order status</h3>
+                        <p class="mt-1 text-sm ph-muted">
+                            Public overview. Customer names and document filenames are not displayed.
+                        </p>
+                    </div>
+                    <p class="text-xs ph-muted" id="last-updated" aria-live="polite">
+                        Waiting for first update…
+                    </p>
+                </div>
+
+                <!-- Search and filter -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 sm:p-5 border-b"
+                     style="border-color:#E2E8F0;">
+                    <div>
+                        <label for="board-search" class="block text-xs font-bold mb-2" style="color:#475569;">
+                            Find an order or station
+                        </label>
+                        <input id="board-search" class="ph-control" type="search"
+                               placeholder="Search order number or station…"
+                               autocomplete="off">
+                    </div>
+                    <div>
+                        <label for="board-filter" class="block text-xs font-bold mb-2" style="color:#475569;">
+                            Filter by status
+                        </label>
+                        <select id="board-filter" class="ph-control">
+                            <option value="all">All statuses</option>
+                            <option value="pending">Pending</option>
+                            <option value="processing">Processing</option>
+                            <option value="printing">Printing</option>
+                            <option value="ready">Ready for collection</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Desktop table -->
+                <div class="hidden md:block ph-table-wrap">
+                    <table class="ph-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Order</th>
+                                <th scope="col">Station</th>
+                                <th scope="col">Pages / copies</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Estimated time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="desktop-board-body">
+                            <tr>
+                                <td colspan="5">
+                                    <div class="ph-empty">
+                                        <p class="font-bold" style="color:#0E2148;">Loading the live board…</p>
+                                        <p class="mt-1 text-sm ph-muted">Getting the latest order status.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile cards -->
+                <div id="mobile-board-body" class="md:hidden p-3 sm:p-4">
+                    <div class="ph-empty">
+                        <p class="font-bold" style="color:#0E2148;">Loading the live board…</p>
+                        <p class="mt-1 text-sm ph-muted">Getting the latest order status.</p>
+                    </div>
+                </div>
+
+                <!-- Empty / error / filter state -->
+                <div id="board-message" class="hidden border-t" style="border-color:#E2E8F0;" role="status" aria-live="polite">
+                    <div class="ph-empty">
+                        <div class="ph-empty-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                <circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/>
+                            </svg>
+                        </div>
+                        <p id="board-message-title" class="font-bold" style="color:#0E2148;"></p>
+                        <p id="board-message-text" class="mt-1 text-sm ph-muted"></p>
+                        <button id="board-retry" type="button" class="ph-secondary mt-4"
+                                style="min-height:40px;padding:8px 14px;">
+                            Try again
+                        </button>
+                    </div>
+                </div>
+
+                <div class="px-4 sm:px-5 py-4 border-t flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                     style="border-color:#E2E8F0;background:#FAFBFD;">
+                    <p class="text-xs leading-5 ph-muted">
+                        Statuses refresh automatically. Times are estimates and may change as orders progress.
+                    </p>
+                    <a href="{% url 'track_order' %}" class="ph-help-link text-sm">
+                        Need your exact order details? Track your order →
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- HOW IT WORKS -->
+        <section class="mt-14 sm:mt-20">
+            <div class="max-w-2xl mb-7">
+                <p class="text-xs font-extrabold uppercase tracking-widest" style="color:#F0631E;">
+                    SIMPLE BY DESIGN
+                </p>
+                <h2 class="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight" style="color:#0E2148;">
+                    Your prints, in a few steps.
+                </h2>
+                <p class="mt-3 leading-7" style="color:#64748B;">
+                    No unnecessary trips just to submit a document. Place your order online and follow its progress.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <article class="ph-how-card">
+                    <div class="ph-step">01</div>
+                    <h3 class="font-extrabold" style="color:#0E2148;">Upload</h3>
+                    <p class="mt-2 text-sm leading-6 ph-muted">
+                        Submit the document you need printed.
+                    </p>
+                </article>
+
+                <article class="ph-how-card">
+                    <div class="ph-step">02</div>
+                    <h3 class="font-extrabold" style="color:#0E2148;">Choose</h3>
+                    <p class="mt-2 text-sm leading-6 ph-muted">
+                        Select your printing options and collection station.
+                    </p>
+                </article>
+
+                <article class="ph-how-card">
+                    <div class="ph-step">03</div>
+                    <h3 class="font-extrabold" style="color:#0E2148;">Pay</h3>
+                    <p class="mt-2 text-sm leading-6 ph-muted">
+                        Follow the payment instructions provided for your order.
+                    </p>
+                </article>
+
+                <article class="ph-how-card">
+                    <div class="ph-step">04</div>
+                    <h3 class="font-extrabold" style="color:#0E2148;">Collect</h3>
+                    <p class="mt-2 text-sm leading-6 ph-muted">
+                        Track the status and collect once your order is ready.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <!-- KABALE SEO SECTION -->
+        <section class="mt-14 sm:mt-20 rounded-2xl sm:rounded-3xl p-6 sm:p-9"
+                 style="background:#F8FAFC;border:1px solid #E2E8F0;">
+            <p class="text-xs font-extrabold uppercase tracking-widest" style="color:#F0631E;">
+                PRINTING SERVICES IN KABALE
+            </p>
+            <h2 class="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight" style="color:#0E2148;">
+                Campus printing that fits your day.
+            </h2>
+            <p class="mt-4 max-w-3xl text-sm sm:text-base leading-7" style="color:#64748B;">
+                PrintHub helps students and residents in Kabale, Uganda, submit printing orders online, select their print preferences, make payments through supported mobile money options, and follow order progress. Our aim is to make document printing more convenient and collection easier to plan.
+            </p>
+            <div class="mt-5 flex flex-wrap gap-2">
+                <span class="rounded-full px-3 py-2 text-xs font-bold" style="background:#E2E8F0;color:#334155;">Kabale University</span>
+                <span class="rounded-full px-3 py-2 text-xs font-bold" style="background:#E2E8F0;color:#334155;">Online printing orders</span>
+                <span class="rounded-full px-3 py-2 text-xs font-bold" style="background:#E2E8F0;color:#334155;">Mobile money payments</span>
+                <span class="rounded-full px-3 py-2 text-xs font-bold" style="background:#E2E8F0;color:#334155;">Order tracking</span>
+            </div>
+            <a href="{% url 'kabale' %}" class="inline-flex items-center gap-2 mt-5 font-bold text-sm"
+               style="color:#0E2148;text-decoration:underline;text-decoration-color:#F0631E;text-underline-offset:4px;">
+                Learn more about printing in Kabale
+                <span aria-hidden="true">→</span>
+            </a>
+        </section>
+
+        <!-- FINAL CTA -->
+        <section class="mt-14 sm:mt-20 mb-5 overflow-hidden rounded-2xl sm:rounded-3xl p-6 sm:p-10 lg:p-12"
+                 style="background:#0E2148;">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-7">
+                <div class="max-w-2xl">
+                    <p class="text-xs font-extrabold uppercase tracking-widest" style="color:#FDBA74;">
+                        READY WHEN YOU ARE
+                    </p>
+                    <h2 class="mt-3 text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white">
+                        Let's get your documents printed.
+                    </h2>
+                    <p class="mt-3 leading-7 text-sm sm:text-base" style="color:#CBD5E1;">
+                        Start a new order or check the progress of one you've already placed.
+                    </p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3 lg:min-w-[210px]">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'upload' %}" class="ph-primary">
+                            Place an Order →
+                        </a>
+                        <a href="{% url 'dashboard' %}" class="ph-secondary">
+                            My Orders
+                        </a>
+                    {% else %}
+                        <a href="{% url 'register' %}" class="ph-primary">
+                            Create Account →
+                        </a>
+                        <a href="{% url 'login' %}?next=/upload/" class="ph-secondary">
+                            Sign In
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<script>
+(function () {
+    "use strict";
+
+    const API_URL = "/api/live-board/";
+    const REFRESH_INTERVAL = 10000;
+
+    const desktopBody = document.getElementById("desktop-board-body");
+    const mobileBody = document.getElementById("mobile-board-body");
+    const boardMessage = document.getElementById("board-message");
+    const boardMessageTitle = document.getElementById("board-message-title");
+    const boardMessageText = document.getElementById("board-message-text");
+    const searchInput = document.getElementById("board-search");
+    const filterSelect = document.getElementById("board-filter");
+    const refreshButton = document.getElementById("refresh-board");
+    const retryButton = document.getElementById("board-retry");
+    const connectionStatus = document.getElementById("connection-status");
+    const connectionLabel = document.getElementById("connection-label");
+    const lastUpdated = document.getElementById("last-updated");
+    const pauseBanner = document.getElementById("pause-banner");
+    const pauseReasonText = document.getElementById("pause-reason-text");
+
+    let latestOrders = [];
+    let hasLoadedSuccessfully = false;
+    let requestInProgress = false;
+    let timerId = null;
+
+    const numberOrDash = value => {
+        if (value === null || value === undefined || value === "") return "—";
+        return String(value);
+    };
+
+    function safeText(value, fallback = "—") {
+        if (value === null || value === undefined || value === "") return fallback;
+        return String(value);
+    }
+
+    function normalize(value) {
+        return String(value || "").trim().toLowerCase();
+    }
+
+    function isCancelled(order) {
+        return normalize(order.status_raw) === "cancelled" ||
+               normalize(order.priority_level) === "cancelled";
+    }
+
+    function isReady(order) {
+        return normalize(order.status_raw) === "ready";
+    }
+
+    function isCritical(order) {
+        const priority = normalize(order.priority_level);
+        return priority === "critical" || priority === "overdue";
+    }
+
+    function statusClass(order) {
+        const status = normalize(order.status_raw);
+
+        if (status === "ready") return "ph-status-ready";
+        if (status === "printing") return "ph-status-printing";
+        if (status === "pending") return "ph-status-pending";
+        if (["processing", "in_progress", "in progress"].includes(status)) {
+            return "ph-status-processing";
+        }
+        if (status === "cancelled") return "ph-status-cancelled";
+
+        return "ph-status-default";
+    }
+
+    function statusLabel(order) {
+        const raw = safeText(order.status, "Status unavailable");
+        const normalized = normalize(order.status_raw);
+
+        const knownLabels = {
+            ready: "Ready for collection",
+            printing: "Printing",
+            pending: "Pending",
+            processing: "Processing",
+            in_progress: "Processing",
+            cancelled: "Cancelled"
+        };
+
+        return knownLabels[normalized] || raw;
+    }
+
+    function priorityLabel(order) {
+        const priority = normalize(order.priority_level);
+
+        if (priority === "critical" || priority === "overdue") {
+            return "Needs attention";
+        }
+        if (priority === "urgent") return "Urgent";
+        if (priority === "high") return "High priority";
+        if (priority === "postponed") return "Delayed";
+        if (priority === "cancelled") return "Cancelled";
+
+        return "";
+    }
+
+    function createElement(tag, className, text) {
+        const element = document.createElement(tag);
+        if (className) element.className = className;
+        if (text !== undefined && text !== null) {
+            element.textContent = String(text);
+        }
+        return element;
+    }
+
+    function createBadge(order) {
+        return createElement("span", "ph-badge " + statusClass(order), statusLabel(order));
+    }
+
+    function createMeta(label, value) {
+        const wrapper = createElement("div");
+        wrapper.appendChild(createElement("p", "ph-meta-label", label));
+        wrapper.appendChild(createElement("p", "ph-meta-value", value));
+        return wrapper;
+    }
+
+    function createDesktopRow(order) {
+        const row = document.createElement("tr");
+
+        const orderCell = createElement("td");
+        orderCell.appendChild(
+            createElement("span", "ph-order-id", "#" + safeText(order.id, "—"))
+        );
+        row.appendChild(orderCell);
+
+        // Intentionally do not render client names or uploaded filenames.
+        row.appendChild(createElement("td", "", safeText(order.station, "Station not specified")));
+
+        const copies = Number(order.copies) > 1 ? Number(order.copies) : 1;
+        let pageText = numberOrDash(order.page_count);
+
+        if (pageText !== "—") {
+            pageText += " page" + (Number(order.page_count) === 1 ? "" : "s");
+        }
+        pageText += " · " + copies + " cop" + (copies === 1 ? "y" : "ies");
+        if (order.is_color) pageText += " · Colour";
+
+        row.appendChild(createElement("td", "", pageText));
+
+        const statusCell = document.createElement("td");
+        statusCell.appendChild(createBadge(order));
+        row.appendChild(statusCell);
+
+        const timeCell = createElement("td", "", safeText(order.time_left, "Not available"));
+        timeCell.style.fontWeight = "700";
+        timeCell.style.fontVariantNumeric = "tabular-nums";
+        row.appendChild(timeCell);
+
+        return row;
+    }
+
+    function createMobileCard(order) {
+        const card = createElement("article", "ph-mobile-order");
+
+        const header = createElement("div", "flex items-start justify-between gap-3 pb-3");
+        header.style.borderBottom = "1px solid #E2E8F0";
+
+        const heading = createElement("div", "min-w-0");
+        heading.appendChild(
+            createElement("p", "ph-order-id text-lg", "#" + safeText(order.id, "—"))
+        );
+        heading.appendChild(
+            createElement("p", "mt-1 text-sm ph-muted", safeText(order.station, "Station not specified"))
+        );
+
+        header.appendChild(heading);
+        header.appendChild(createBadge(order));
+        card.appendChild(header);
+
+        const copies = Number(order.copies) > 1 ? Number(order.copies) : 1;
+        let pageText = numberOrDash(order.page_count);
+        if (pageText !== "—") {
+            pageText += " page" + (Number(order.page_count) === 1 ? "" : "s");
+        }
+        pageText += " · " + copies + " cop" + (copies === 1 ? "y" : "ies");
+        if (order.is_color) pageText += " · Colour";
+
+        const meta = createElement("div", "ph-mobile-meta");
+        meta.appendChild(createMeta("Pages / copies", pageText));
+        meta.appendChild(createMeta("Estimated time", safeText(order.time_left, "Not available")));
+
+        const attention = priorityLabel(order);
+        if (attention) {
+            meta.appendChild(createMeta("Priority", attention));
+        }
+
+        card.appendChild(meta);
+        return card;
+    }
+
+    function showBoardMessage(title, message, showRetry) {
+        boardMessage.classList.remove("hidden");
+        boardMessageTitle.textContent = title;
+        boardMessageText.textContent = message;
+        retryButton.classList.toggle("hidden", !showRetry);
+    }
+
+    function hideBoardMessage() {
+        boardMessage.classList.add("hidden");
+    }
+
+    function setConnection(state, label) {
+        connectionStatus.classList.remove("is-online", "is-error");
+
+        if (state === "online") connectionStatus.classList.add("is-online");
+        if (state === "error") connectionStatus.classList.add("is-error");
+
+        connectionLabel.textContent = label;
+    }
+
+    function updateStats(data, orders) {
+        const active = orders.filter(order => !isCancelled(order)).length;
+        const ready = orders.filter(isReady).length;
+        const critical = orders.filter(isCritical).length;
+
+        document.getElementById("stat-active").textContent = String(active);
+        document.getElementById("stat-ready").textContent = String(ready);
+        document.getElementById("stat-critical").textContent = String(critical);
+
+        const total = data.total_active !== undefined && data.total_active !== null
+            ? data.total_active
+            : orders.length;
+
+        document.getElementById("stat-total").textContent = String(total);
+    }
+
+    function renderBoard() {
+        const query = normalize(searchInput.value);
+        const statusFilter = normalize(filterSelect.value);
+
+        const filtered = latestOrders.filter(order => {
+            const searchable = [
+                order.id,
+                order.station,
+                order.status,
+                order.status_raw
+            ].map(normalize).join(" ");
+
+            const matchesQuery = !query || searchable.includes(query);
+            const normalizedStatus = normalize(order.status_raw);
+
+            let matchesStatus = statusFilter === "all" || normalizedStatus === statusFilter;
+
+            if (statusFilter === "processing") {
+                matchesStatus = ["processing", "in_progress", "in progress"].includes(normalizedStatus);
+            }
+
+            return matchesQuery && matchesStatus;
+        });
+
+        desktopBody.replaceChildren();
+        mobileBody.replaceChildren();
+        hideBoardMessage();
+
+        if (latestOrders.length === 0) {
+            showBoardMessage(
+                "No orders to display right now",
+                "There are currently no orders in the public live-board feed. Please check again shortly.",
+                false
+            );
+            return;
+        }
+
+        if (filtered.length === 0) {
+            showBoardMessage(
+                "No matching orders",
+                "Try a different order number, station name, or status filter.",
+                false
+            );
+            return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        filtered.forEach(order => fragment.appendChild(createDesktopRow(order)));
+        desktopBody.appendChild(fragment);
+
+        const mobileFragment = document.createDocumentFragment();
+        filtered.forEach(order => mobileFragment.appendChild(createMobileCard(order)));
+        mobileBody.appendChild(mobileFragment);
+    }
+
+    function renderPauseState(data) {
+        if (data.system_paused) {
+            pauseBanner.classList.remove("hidden");
+            pauseReasonText.textContent = safeText(
+                data.pause_reason,
+                "Printing operations are temporarily unavailable. Please check back shortly."
+            );
+        } else {
+            pauseBanner.classList.add("hidden");
+        }
+    }
+
+    async function updateBoard() {
+        if (requestInProgress) return;
+
+        requestInProgress = true;
+        refreshButton.disabled = true;
+        refreshButton.style.opacity = "0.65";
+
+        const refreshIcon = document.getElementById("refresh-icon");
+        refreshIcon.style.transform = "rotate(180deg)";
+
+        try {
+            const response = await fetch(API_URL, {
+                method: "GET",
+                headers: { "Accept": "application/json" },
+                cache: "no-store",
+                credentials: "same-origin"
+            });
+
+            if (!response.ok) {
+                throw new Error("The live board could not be loaded.");
+            }
+
+            const data = await response.json();
+
+            if (!data || !Array.isArray(data.orders)) {
+                throw new Error("The live-board response was not in the expected format.");
+            }
+
+            latestOrders = data.orders;
+            hasLoadedSuccessfully = true;
+
+            updateStats(data, latestOrders);
+            renderPauseState(data);
+            renderBoard();
+
+            const now = new Date();
+            lastUpdated.textContent = "Updated " + now.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            });
+
+            setConnection("online", "Live updates connected");
+        } catch (error) {
+            console.error("PrintHub live board update failed:", error);
+
+            setConnection("error", "Connection issue");
+
+            if (!hasLoadedSuccessfully) {
+                desktopBody.replaceChildren();
+                mobileBody.replaceChildren();
+
+                showBoardMessage(
+                    "We couldn't load the live board",
+                    "Check your connection and try again. You can still use order tracking.",
+                    true
+                );
+            } else {
+                showBoardMessage(
+                    "Showing the last available update",
+                    "The live board could not refresh. Your displayed results may be out of date.",
+                    true
+                );
+            }
+        } finally {
+            requestInProgress = false;
+            refreshButton.disabled = false;
+            refreshButton.style.opacity = "1";
+            refreshIcon.style.transform = "rotate(0deg)";
+        }
+    }
+
+    function scheduleNextUpdate() {
+        if (timerId) window.clearTimeout(timerId);
+
+        timerId = window.setTimeout(async () => {
+            await updateBoard();
+            scheduleNextUpdate();
+        }, REFRESH_INTERVAL);
+    }
+
+    searchInput.addEventListener("input", renderBoard);
+    filterSelect.addEventListener("change", renderBoard);
+
+    refreshButton.addEventListener("click", async () => {
+        await updateBoard();
+        scheduleNextUpdate();
+    });
+
+    retryButton.addEventListener("click", async () => {
+        await updateBoard();
+        scheduleNextUpdate();
+    });
+
+    const dismissAnnouncement = document.getElementById("dismiss-announcement");
+    if (dismissAnnouncement) {
+        dismissAnnouncement.addEventListener("click", () => {
+            const banner = document.getElementById("announcement-banner");
+            if (banner) banner.remove();
+        });
+    }
+
+    // Avoid unnecessary background requests while the tab is hidden.
+    document.addEventListener("visibilitychange", async () => {
+        if (document.hidden) {
+            if (timerId) window.clearTimeout(timerId);
+            timerId = null;
+            return;
+        }
+
+        await updateBoard();
+        scheduleNextUpdate();
+    });
+
+    updateBoard().finally(scheduleNextUpdate);
+})();
 </script>
 {% endblock %}
