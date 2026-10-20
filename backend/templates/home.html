@@ -1,3 +1,4 @@
+
 {% extends 'base.html' %}
 {% load static %}
 {% load humanize %}
@@ -327,9 +328,378 @@
         text-underline-offset: 4px;
     }
 
+    /* =====================================================
+       PRINT HUB DEADLINE ANIMATION
+       Pure HTML and CSS characters. No external assets.
+       ===================================================== */
+
+    .ph-home .ph-doom {
+        --doom-urgency: 0;
+        position: relative;
+        width: 100%;
+        min-width: 190px;
+        max-width: 300px;
+        margin-top: 8px;
+        padding: 8px 9px 7px;
+        overflow: hidden;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        background: linear-gradient(#F8FAFC, #FFF7ED);
+        color: #0E2148;
+        isolation: isolate;
+    }
+
+    .ph-home .ph-doom-scene {
+        position: relative;
+        height: 82px;
+        overflow: hidden;
+        border-radius: 8px;
+        background: linear-gradient(#EAF2FB 0 72%, #D8E2EF 72%);
+    }
+
+    .ph-home .ph-doom-floor {
+        position: absolute;
+        right: 0;
+        bottom: 13px;
+        left: 0;
+        height: 3px;
+        background: #94A3B8;
+    }
+
+    .ph-home .ph-doom-desk {
+        position: absolute;
+        z-index: 4;
+        bottom: 14px;
+        left: 13%;
+        width: 45%;
+        height: 5px;
+        border-radius: 2px;
+        background: #8B5E3C;
+    }
+
+    .ph-home .ph-doom-desk::after {
+        position: absolute;
+        top: 4px;
+        left: 12%;
+        width: 5px;
+        height: 22px;
+        background: #8B5E3C;
+        box-shadow: 105px 0 #8B5E3C;
+        content: "";
+    }
+
+    .ph-home .ph-doom-monitor {
+        position: absolute;
+        z-index: 3;
+        bottom: 19px;
+        left: 29%;
+        width: 36px;
+        height: 26px;
+        border: 3px solid #344563;
+        border-radius: 4px;
+        background: #172B4D;
+        box-shadow: inset 0 0 0 2px #6EA8FE;
+    }
+
+    .ph-home .ph-doom-monitor::after {
+        position: absolute;
+        bottom: -8px;
+        left: 12px;
+        width: 6px;
+        height: 7px;
+        background: #344563;
+        content: "";
+    }
+
+    .ph-home .ph-doom-worker {
+        position: absolute;
+        z-index: 5;
+        bottom: 19px;
+        left: 8%;
+        width: 43px;
+        height: 51px;
+        transform-origin: bottom center;
+    }
+
+    .ph-home .ph-doom-head {
+        position: absolute;
+        top: 2px;
+        left: 15px;
+        width: 17px;
+        height: 18px;
+        border: 2px solid #7C4A2D;
+        border-radius: 45% 45% 42% 42%;
+        background: #E9B58D;
+    }
+
+    .ph-home .ph-doom-hair {
+        position: absolute;
+        top: 0;
+        left: 13px;
+        z-index: 1;
+        width: 19px;
+        height: 8px;
+        border-radius: 8px 8px 3px 3px;
+        background: #334155;
+    }
+
+    .ph-home .ph-doom-body {
+        position: absolute;
+        top: 19px;
+        left: 10px;
+        width: 26px;
+        height: 24px;
+        border: 2px solid #1E3A5F;
+        border-radius: 8px 8px 3px 3px;
+        background: #3B82F6;
+    }
+
+    .ph-home .ph-doom-arm {
+        position: absolute;
+        z-index: 6;
+        top: 26px;
+        left: 28px;
+        width: 25px;
+        height: 6px;
+        border-radius: 6px;
+        background: #E9B58D;
+        transform-origin: 3px center;
+        animation: ph-doom-type .45s ease-in-out infinite alternate;
+    }
+
+    .ph-home .ph-doom-arm-two {
+        top: 33px;
+        left: 27px;
+        animation-delay: -.22s;
+    }
+
+    .ph-home .ph-doom-chair {
+        position: absolute;
+        z-index: 2;
+        bottom: 15px;
+        left: 4%;
+        width: 31px;
+        height: 27px;
+        border: 4px solid #64748B;
+        border-bottom: 0;
+        border-radius: 9px 9px 0 0;
+    }
+
+    .ph-home .ph-doom-keyboard {
+        position: absolute;
+        z-index: 6;
+        bottom: 20px;
+        left: 40%;
+        width: 27px;
+        height: 4px;
+        border-radius: 2px;
+        background: #64748B;
+    }
+
+    .ph-home .ph-doom-reaper {
+        position: absolute;
+        z-index: 7;
+        right: 2%;
+        bottom: 13px;
+        width: 35px;
+        height: 60px;
+    }
+
+    .ph-home .ph-doom-robe {
+        position: absolute;
+        right: 1px;
+        bottom: 0;
+        width: 31px;
+        height: 37px;
+        border-radius: 15px 15px 4px 4px;
+        background: #202938;
+        clip-path: polygon(25% 0, 75% 0, 100% 100%, 0 100%);
+        animation: ph-doom-walk .55s ease-in-out infinite alternate;
+    }
+
+    .ph-home .ph-doom-hood {
+        position: absolute;
+        top: 0;
+        left: 4px;
+        z-index: 2;
+        width: 27px;
+        height: 29px;
+        border-radius: 50% 50% 43% 43%;
+        background: #202938;
+    }
+
+    .ph-home .ph-doom-face {
+        position: absolute;
+        top: 8px;
+        left: 10px;
+        z-index: 3;
+        width: 15px;
+        height: 17px;
+        border-radius: 50% 50% 45% 45%;
+        background: #E2E8F0;
+    }
+
+    .ph-home .ph-doom-face::before {
+        position: absolute;
+        top: 6px;
+        left: 3px;
+        width: 3px;
+        height: 4px;
+        border-radius: 50%;
+        background: #111827;
+        box-shadow: 6px 0 #111827;
+        content: "";
+    }
+
+    .ph-home .ph-doom-scythe {
+        position: absolute;
+        top: 3px;
+        right: -1px;
+        z-index: 4;
+        width: 3px;
+        height: 52px;
+        border-radius: 2px;
+        background: #64748B;
+        transform: rotate(-18deg);
+        transform-origin: top center;
+    }
+
+    .ph-home .ph-doom-scythe::before {
+        position: absolute;
+        top: -3px;
+        left: -12px;
+        width: 16px;
+        height: 13px;
+        border-top: 3px solid #CBD5E1;
+        border-right: 3px solid #CBD5E1;
+        border-radius: 0 100% 0 0;
+        content: "";
+    }
+
+    .ph-home .ph-doom-track {
+        position: relative;
+        height: 6px;
+        margin-top: 7px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #E2E8F0;
+    }
+
+    .ph-home .ph-doom-fill {
+        width: calc(var(--doom-urgency) * 100%);
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #22C55E, #F59E0B 60%, #DC2626);
+        transition: width .8s linear;
+    }
+
+    .ph-home .ph-doom-caption {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 6px;
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .ph-home .ph-doom-time {
+        overflow-wrap: anywhere;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .ph-home .ph-doom-state {
+        color: #64748B;
+        text-align: right;
+    }
+
+    .ph-home .ph-doom.is-critical {
+        border-color: #FDBA74;
+        background: #FFF7ED;
+    }
+
+    .ph-home .ph-doom.is-critical .ph-doom-state {
+        color: #C2410C;
+    }
+
+    .ph-home .ph-doom.is-overdue {
+        border-color: #FCA5A5;
+        background: #FEF2F2;
+    }
+
+    .ph-home .ph-doom.is-overdue .ph-doom-state {
+        color: #B91C1C;
+    }
+
+    .ph-home .ph-doom.is-overdue .ph-doom-fill {
+        width: 100%;
+        background: #DC2626;
+    }
+
+    .ph-home .ph-doom-flames {
+        position: absolute;
+        z-index: 8;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        display: none;
+        height: 29px;
+        pointer-events: none;
+        background:
+            radial-gradient(ellipse at 15% 100%, #F97316 0 20%, transparent 22%),
+            radial-gradient(ellipse at 35% 100%, #FBBF24 0 23%, transparent 25%),
+            radial-gradient(ellipse at 58% 100%, #EF4444 0 25%, transparent 27%),
+            radial-gradient(ellipse at 80% 100%, #F97316 0 22%, transparent 24%);
+        animation: ph-doom-fire .28s ease-in-out infinite alternate;
+    }
+
+    .ph-home .ph-doom.is-overdue .ph-doom-flames {
+        display: block;
+    }
+
+    .ph-home .ph-doom.is-overdue .ph-doom-worker {
+        animation: ph-doom-panic .12s linear infinite alternate;
+    }
+
+    .ph-home .ph-doom.is-overdue .ph-doom-arm {
+        animation-duration: .09s;
+    }
+
+    .ph-home .ph-doom.is-ready .ph-doom-scene {
+        opacity: .55;
+        filter: grayscale(.8);
+    }
+
+    @keyframes ph-doom-type {
+        from { transform: rotate(-15deg) translateY(-1px); }
+        to { transform: rotate(18deg) translateY(2px); }
+    }
+
+    @keyframes ph-doom-walk {
+        from { transform: skewX(-5deg) translateY(0); }
+        to { transform: skewX(5deg) translateY(-2px); }
+    }
+
+    @keyframes ph-doom-panic {
+        from { transform: translateX(-1px) rotate(-1deg); }
+        to { transform: translateX(1px) rotate(1deg); }
+    }
+
+    @keyframes ph-doom-fire {
+        from { transform: scaleY(.8); opacity: .75; }
+        to { transform: scaleY(1.12); opacity: 1; }
+    }
+
     @media (min-width: 640px) {
         .ph-home .ph-shell { width: min(100% - 48px, 1180px); }
         .ph-home .ph-board-toolbar { padding: 22px; }
+    }
+
+    @media (max-width: 767px) {
+        .ph-home .ph-doom {
+            max-width: none;
+            margin-top: 10px;
+        }
     }
 
     @media (max-width: 639px) {
@@ -345,9 +715,8 @@
         .ph-home *::before,
         .ph-home *::after {
             scroll-behavior: auto !important;
-            animation-duration: .01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: .01ms !important;
+            animation: none !important;
+            transition: none !important;
         }
     }
 </style>
@@ -873,6 +1242,19 @@
     let requestInProgress = false;
     let timerId = null;
 
+    /*
+     * Each timer stores:
+     * seconds: current local estimate in seconds.
+     * raw: most recent timer text supplied by the API.
+     * receivedAt: time the API value was received.
+     * initialSeconds: baseline for the urgency animation.
+     *
+     * Keeping timers in Maps prevents a board re-render from
+     * resetting the countdown every time the user filters.
+     */
+    const deadlineTimers = new Map();
+    const deadlineInitial = new Map();
+
     const numberOrDash = value => {
         if (value === null || value === undefined || value === "") return "—";
         return String(value);
@@ -965,6 +1347,348 @@
         return wrapper;
     }
 
+    /* =====================================================
+       DEADLINE PARSER
+       Supported examples:
+       15 min
+       45 sec
+       1h 20m
+       1d 2h 30m
+       00:45
+       01:02:30
+       Overdue 5 min
+       ===================================================== */
+
+    function parseDeadlineSeconds(value) {
+        if (value === null || value === undefined) return null;
+
+        const text = String(value).trim().toLowerCase();
+        if (!text) return null;
+
+        const overdue = /\boverdue\b|\bpast due\b|\bexpired\b|\bbreached\b/.test(text);
+
+        const unitPattern =
+            /(\d+(?:\.\d+)?)\s*(days?|d|hours?|hrs?|h|minutes?|mins?|m|seconds?|secs?|s)\b/g;
+
+        let total = 0;
+        let found = false;
+        let match;
+
+        while ((match = unitPattern.exec(text)) !== null) {
+            found = true;
+
+            const amount = Number(match[1]);
+            const unit = match[2];
+
+            if (/^d/.test(unit)) total += amount * 86400;
+            else if (/^(h|hr)/.test(unit)) total += amount * 3600;
+            else if (/^(m|min)/.test(unit)) total += amount * 60;
+            else total += amount;
+        }
+
+        if (found) {
+            return overdue ? -Math.max(total, 1) : total;
+        }
+
+        /*
+         * Recognize clock formats.
+         * MM:SS and HH:MM:SS are supported.
+         * HH:MM is treated as hours and minutes.
+         */
+        const clock = text.match(/^(\d{1,3}):([0-5]?\d)(?::([0-5]?\d))?$/);
+
+        if (clock) {
+            let seconds;
+
+            if (clock[3] !== undefined) {
+                seconds =
+                    Number(clock[1]) * 3600 +
+                    Number(clock[2]) * 60 +
+                    Number(clock[3]);
+            } else {
+                seconds = Number(clock[1]) * 60 + Number(clock[2]);
+            }
+
+            return overdue ? -Math.max(seconds, 1) : seconds;
+        }
+
+        if (overdue) return -1;
+
+        /*
+         * Do not assume that a bare number means seconds.
+         * Unknown formats remain visible without an invented timer.
+         */
+        return null;
+    }
+
+    function deadlineKey(order) {
+        return String(order.id ?? "");
+    }
+
+    function syncDeadlineTimers(orders) {
+        const receivedAt = Date.now();
+
+        for (const order of orders) {
+            const key = deadlineKey(order);
+            if (!key) continue;
+
+            const rawTime = order.time_left;
+            const seconds = parseDeadlineSeconds(rawTime);
+            const status = normalize(order.status_raw);
+
+            /*
+             * A ready or cancelled order should not keep an active
+             * deadline animation.
+             */
+            if (status === "ready" || status === "cancelled") {
+                deadlineTimers.delete(key);
+                deadlineInitial.delete(key);
+                continue;
+            }
+
+            if (seconds === null) {
+                /*
+                 * Preserve a previously parsed timer only when the
+                 * incoming API value is unchanged. Otherwise discard
+                 * the stale countdown rather than guessing.
+                 */
+                const existing = deadlineTimers.get(key);
+
+                if (!existing || existing.raw !== String(rawTime ?? "")) {
+                    deadlineTimers.delete(key);
+                    deadlineInitial.delete(key);
+                } else {
+                    existing.receivedAt = receivedAt;
+                }
+
+                continue;
+            }
+
+            const raw = String(rawTime ?? "");
+            const existing = deadlineTimers.get(key);
+
+            /*
+             * When the API supplies a fresh time estimate, use it as
+             * the new authoritative value. The countdown then runs
+             * locally until the next API response.
+             */
+            deadlineTimers.set(key, {
+                seconds,
+                raw,
+                receivedAt
+            });
+
+            /*
+             * Keep the original baseline stable for the same order.
+             * A changed timer that represents a new positive estimate
+             * may establish a new baseline if no baseline exists.
+             */
+            if (!deadlineInitial.has(key) && seconds > 0) {
+                deadlineInitial.set(key, seconds);
+            }
+
+            /*
+             * If the API explicitly resets a timer after a status
+             * change, a positive value can become its new baseline.
+             */
+            if (existing && existing.raw !== raw && seconds > 0) {
+                const oldStatus = existing.status || "";
+                const newStatus = status;
+
+                if (oldStatus !== newStatus) {
+                    deadlineInitial.set(key, seconds);
+                }
+            }
+
+            deadlineTimers.get(key).status = status;
+        }
+    }
+
+    function formatCountdown(seconds) {
+        const remaining = Math.max(0, Math.floor(seconds));
+        const hours = Math.floor(remaining / 3600);
+        const minutes = Math.floor((remaining % 3600) / 60);
+        const secs = remaining % 60;
+
+        if (hours > 0) {
+            return hours + "h " + minutes + "m left";
+        }
+
+        if (minutes > 0) {
+            return minutes + "m " + secs + "s left";
+        }
+
+        return secs + "s left";
+    }
+
+    function createDeadlineScene(order) {
+        const key = deadlineKey(order);
+        const timer = deadlineTimers.get(key);
+        const originalTime = safeText(order.time_left, "Not available");
+        const parsed = timer ? timer.seconds : parseDeadlineSeconds(originalTime);
+
+        const scene = createElement("div", "ph-doom");
+        scene.dataset.deadlineKey = key;
+        scene.setAttribute("role", "img");
+        scene.setAttribute(
+            "aria-label",
+            "Animated deadline scene for order " + key +
+            ". Estimated time: " + originalTime
+        );
+
+        const sceneArea = createElement("div", "ph-doom-scene");
+        sceneArea.setAttribute("aria-hidden", "true");
+
+        sceneArea.appendChild(createElement("div", "ph-doom-floor"));
+        sceneArea.appendChild(createElement("div", "ph-doom-chair"));
+
+        const worker = createElement("div", "ph-doom-worker");
+        worker.appendChild(createElement("div", "ph-doom-hair"));
+        worker.appendChild(createElement("div", "ph-doom-head"));
+        worker.appendChild(createElement("div", "ph-doom-body"));
+        worker.appendChild(createElement("div", "ph-doom-arm"));
+        worker.appendChild(createElement("div", "ph-doom-arm ph-doom-arm-two"));
+        sceneArea.appendChild(worker);
+
+        sceneArea.appendChild(createElement("div", "ph-doom-desk"));
+        sceneArea.appendChild(createElement("div", "ph-doom-monitor"));
+        sceneArea.appendChild(createElement("div", "ph-doom-keyboard"));
+
+        const reaper = createElement("div", "ph-doom-reaper");
+        reaper.appendChild(createElement("div", "ph-doom-hood"));
+        reaper.appendChild(createElement("div", "ph-doom-face"));
+        reaper.appendChild(createElement("div", "ph-doom-robe"));
+        reaper.appendChild(createElement("div", "ph-doom-scythe"));
+        sceneArea.appendChild(reaper);
+
+        sceneArea.appendChild(createElement("div", "ph-doom-flames"));
+        scene.appendChild(sceneArea);
+
+        const track = createElement("div", "ph-doom-track");
+        track.appendChild(createElement("div", "ph-doom-fill"));
+        scene.appendChild(track);
+
+        const caption = createElement("div", "ph-doom-caption");
+        caption.appendChild(createElement("span", "ph-doom-time", originalTime));
+
+        const stateLabel = parsed === null
+            ? "ESTIMATE UNAVAILABLE"
+            : parsed < 0
+                ? "OVERDUE"
+                : parsed <= 60
+                    ? "THE REAPER IS CLOSE"
+                    : parsed <= 300
+                        ? "TIME IS RUNNING OUT"
+                        : "WORK IN PROGRESS";
+
+        caption.appendChild(createElement("span", "ph-doom-state", stateLabel));
+        scene.appendChild(caption);
+
+        const status = normalize(order.status_raw);
+
+        if (status === "ready" || status === "cancelled" || isCancelled(order)) {
+            scene.classList.add("is-ready");
+        }
+
+        updateDeadlineScene(scene);
+
+        return scene;
+    }
+
+    function updateDeadlineScene(scene) {
+        const key = scene.dataset.deadlineKey;
+        const timer = deadlineTimers.get(key);
+
+        if (!timer) return;
+
+        const seconds = timer.seconds;
+        const initial = Math.max(deadlineInitial.get(key) || 1, 1);
+        const overdue = seconds < 0;
+        const urgency = overdue
+            ? 1
+            : Math.max(0, Math.min(1, 1 - seconds / initial));
+
+        scene.style.setProperty("--doom-urgency", String(urgency));
+        scene.classList.toggle("is-critical", seconds >= 0 && seconds <= 300);
+        scene.classList.toggle("is-overdue", overdue);
+
+        const timeLabel = scene.querySelector(".ph-doom-time");
+        const stateLabel = scene.querySelector(".ph-doom-state");
+
+        if (!timeLabel || !stateLabel) return;
+
+        if (overdue) {
+            const elapsed = Math.abs(seconds);
+
+            const overdueText = elapsed >= 3600
+                ? Math.floor(elapsed / 3600) + "h overdue"
+                : elapsed >= 60
+                    ? Math.floor(elapsed / 60) + "m overdue"
+                    : "Just overdue";
+
+            timeLabel.textContent = overdueText;
+            stateLabel.textContent = "THE REAPER ARRIVED";
+        } else {
+            timeLabel.textContent = formatCountdown(seconds);
+
+            stateLabel.textContent = seconds <= 60
+                ? "THE REAPER IS CLOSE"
+                : seconds <= 300
+                    ? "TIME IS RUNNING OUT"
+                    : "WORK IN PROGRESS";
+        }
+
+        /*
+         * Animate typing speed and Reaper movement based on urgency.
+         * CSS animation durations are shortened as the deadline nears.
+         */
+        const armSpeed = Math.max(0.08, 0.45 - urgency * 0.37);
+
+        scene.querySelectorAll(".ph-doom-arm").forEach(arm => {
+            arm.style.animationDuration = armSpeed + "s";
+        });
+
+        const robe = scene.querySelector(".ph-doom-robe");
+
+        if (robe) {
+            robe.style.animationDuration =
+                Math.max(0.12, 0.55 - urgency * 0.40) + "s";
+        }
+
+        const reaper = scene.querySelector(".ph-doom-reaper");
+
+        if (reaper) {
+            reaper.style.right = (2 + urgency * 42) + "%";
+        }
+
+        /*
+         * An unknown timer format must not produce a fake countdown.
+         */
+        scene.setAttribute(
+            "aria-label",
+            "Animated deadline scene for order " + key +
+            ". " + timeLabel.textContent + ". " + stateLabel.textContent
+        );
+    }
+
+    /*
+     * One shared ticker updates all visible animation scenes.
+     * Timers continue to count down between the 10-second API refreshes.
+     */
+    window.setInterval(() => {
+        for (const [key, timer] of deadlineTimers.entries()) {
+            if (timer.seconds > 0) {
+                timer.seconds -= 1;
+            } else if (timer.seconds === 0) {
+                timer.seconds = -1;
+            }
+        }
+
+        document.querySelectorAll(
+            ".ph-home .ph-doom[data-deadline-key]"
+        ).forEach(updateDeadlineScene);
+    }, 1000);
+
     function createDesktopRow(order) {
         const row = document.createElement("tr");
 
@@ -992,9 +1716,20 @@
         statusCell.appendChild(createBadge(order));
         row.appendChild(statusCell);
 
-        const timeCell = createElement("td", "", safeText(order.time_left, "Not available"));
-        timeCell.style.fontWeight = "700";
-        timeCell.style.fontVariantNumeric = "tabular-nums";
+        const timeCell = createElement("td");
+        timeCell.style.minWidth = "225px";
+
+        const timeText = createElement(
+            "div",
+            "",
+            safeText(order.time_left, "Not available")
+        );
+
+        timeText.style.fontWeight = "700";
+        timeText.style.fontVariantNumeric = "tabular-nums";
+
+        timeCell.appendChild(timeText);
+        timeCell.appendChild(createDeadlineScene(order));
         row.appendChild(timeCell);
 
         return row;
@@ -1020,17 +1755,35 @@
 
         const copies = Number(order.copies) > 1 ? Number(order.copies) : 1;
         let pageText = numberOrDash(order.page_count);
+
         if (pageText !== "—") {
             pageText += " page" + (Number(order.page_count) === 1 ? "" : "s");
         }
+
         pageText += " · " + copies + " cop" + (copies === 1 ? "y" : "ies");
         if (order.is_color) pageText += " · Colour";
 
         const meta = createElement("div", "ph-mobile-meta");
         meta.appendChild(createMeta("Pages / copies", pageText));
-        meta.appendChild(createMeta("Estimated time", safeText(order.time_left, "Not available")));
+
+        const timeMeta = createElement("div");
+        timeMeta.appendChild(
+            createElement("p", "ph-meta-label", "Estimated time")
+        );
+
+        timeMeta.appendChild(
+            createElement(
+                "p",
+                "ph-meta-value",
+                safeText(order.time_left, "Not available")
+            )
+        );
+
+        timeMeta.appendChild(createDeadlineScene(order));
+        meta.appendChild(timeMeta);
 
         const attention = priorityLabel(order);
+
         if (attention) {
             meta.appendChild(createMeta("Priority", attention));
         }
@@ -1122,17 +1875,26 @@
         }
 
         const fragment = document.createDocumentFragment();
-        filtered.forEach(order => fragment.appendChild(createDesktopRow(order)));
+
+        filtered.forEach(order => {
+            fragment.appendChild(createDesktopRow(order));
+        });
+
         desktopBody.appendChild(fragment);
 
         const mobileFragment = document.createDocumentFragment();
-        filtered.forEach(order => mobileFragment.appendChild(createMobileCard(order)));
+
+        filtered.forEach(order => {
+            mobileFragment.appendChild(createMobileCard(order));
+        });
+
         mobileBody.appendChild(mobileFragment);
     }
 
     function renderPauseState(data) {
         if (data.system_paused) {
             pauseBanner.classList.remove("hidden");
+
             pauseReasonText.textContent = safeText(
                 data.pause_reason,
                 "Printing operations are temporarily unavailable. Please check back shortly."
@@ -1170,6 +1932,12 @@
                 throw new Error("The live-board response was not in the expected format.");
             }
 
+            /*
+             * Update timer state before rendering the desktop and mobile
+             * versions of the same order.
+             */
+            syncDeadlineTimers(data.orders);
+
             latestOrders = data.orders;
             hasLoadedSuccessfully = true;
 
@@ -1178,6 +1946,7 @@
             renderBoard();
 
             const now = new Date();
+
             lastUpdated.textContent = "Updated " + now.toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
@@ -1237,6 +2006,7 @@
     });
 
     const dismissAnnouncement = document.getElementById("dismiss-announcement");
+
     if (dismissAnnouncement) {
         dismissAnnouncement.addEventListener("click", () => {
             const banner = document.getElementById("announcement-banner");
@@ -1244,7 +2014,10 @@
         });
     }
 
-    // Avoid unnecessary background requests while the tab is hidden.
+    /*
+     * Stop scheduled API requests while the browser tab is hidden.
+     * Resume with an immediate refresh when the tab becomes visible.
+     */
     document.addEventListener("visibilitychange", async () => {
         if (document.hidden) {
             if (timerId) window.clearTimeout(timerId);
